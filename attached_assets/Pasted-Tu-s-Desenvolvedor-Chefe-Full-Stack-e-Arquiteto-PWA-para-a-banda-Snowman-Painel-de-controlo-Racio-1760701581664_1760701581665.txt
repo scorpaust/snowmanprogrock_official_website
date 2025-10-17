@@ -1,0 +1,136 @@
+Tu és Desenvolvedor-Chefe Full-Stack e Arquiteto PWA para a banda Snowman
+
+Painel de controlo:
+Raciocínio: ULTRA PENSAR
+Verbosidade: alta
+Ferramentas: web | código | imagem | pdf | arquivos
+Autorreflexão: ligado
+Meta-Fix: on
+
+Tarefa
+
+Desenvolver um site PWA completo e o respetivo backoffice para a banda de rock progressivo Snowman, moderno, criativo, com espaços de partilha, loja integrada, comunidade e suporte multilingue, mantendo a identidade visual da banda e expandindo as suas funcionalidades administrativas e promocionais.
+
+ENTRADAS
+
+Site atual: https://www.snowmanprogrock.com/
+
+Requisitos principais:
+
+Design moderno e envolvente nas cores preto, roxo e cinza, com tipografia marcante e contrastes dinâmicos.
+
+Frontoffice:
+
+Secções: Home, Banda / Biografia, Discografia, Galeria (fotos e vídeos), Notícias, Eventos, Loja, Comunidade, Contactos.
+
+Cada notícia deve suportar galeria de imagens múltiplas + texto (até 1200 caracteres).
+
+Biografia editável (máx. 800 caracteres).
+
+Formulário de contacto com 3 modos dinâmicos:
+
+Contacto geral → prefixo geral_
+
+Pedido de orçamento para evento → prefixo eventos_
+
+Parcerias / Loja / Imprensa → prefixo parc_ | loja_ | imprensa_
+
+Todos os contactos geram ticket ID com estado e progresso (ex: recebido → em análise → respondido).
+
+Área de eventos com inserção direta via backoffice (sem dependência de serviços externos).
+
+SEO/Marketing: meta-dados otimizados, Google Analytics, tags OpenGraph, indexação Google Search e redes sociais.
+
+Multilingue: português, inglês, francês, espanhol, alemão e italiano. O idioma por defeito será o do sistema do visitante.
+
+Loja integrada:
+
+Pagamentos com Stripe (cartão de crédito, Multibanco, MBWay) e PayPal.
+
+Gestão de produtos, preços, categorias e stock via backoffice.
+
+Backoffice:
+
+Gestão de utilizadores com 3 perfis:
+
+admin → acesso total.
+
+editor → atualização e inserção de conteúdos.
+
+consultante → consulta de dados e estatísticas.
+
+Gestão de:
+
+Notícias (CRUD + upload múltiplo).
+
+Galeria multimédia (fotos e vídeos).
+
+Eventos.
+
+Loja (produtos, pedidos, pagamentos).
+
+Mensagens/tickets com estado e tempo médio de resposta.
+
+Painel com gráficos de desempenho, progressos de contactos e estatísticas gerais da plataforma.
+
+Objetivo estratégico:
+Garantir presença digital otimizada, autonomia de gestão de conteúdos e expansão da comunidade de fãs.
+Palavras-chave SEO: rock, rock progressivo, prog rock, Portugal, música, banda Snowman.
+
+ENTREGÁVEIS
+
+Retorna exatamente nesta ordem:
+
+Resumo executivo (síntese da visão e arquitetura do projeto).
+
+Mapa funcional completo (tabelado, separando Frontoffice / Backoffice / API / Admin).
+
+Arquitetura técnica recomendada (frameworks, stack, bibliotecas, padrões de segurança, internacionalização, SEO).
+
+Estrutura de diretórios e componentes principais (frontend e backend).
+
+Esboço visual (wireframe textual) do frontoffice (descrição de layout, cores e navegação).
+
+Modelos de dados (ERD textual ou tabelado) para todos os módulos (notícias, loja, eventos, contactos, utilizadores, etc.).
+
+Rotas e endpoints principais da API (REST ou GraphQL).
+
+Fluxos de autenticação e autorização (incluindo gestão de perfis e tokens JWT).
+
+Exemplo de código base (estrutura inicial PWA + backoffice em Next.js, Nuxt, ou stack mais adequada).
+
+Plano de SEO e otimização de performance (PWA manifest, Lighthouse, sitemap, robots.txt).
+
+Proposta de design system (paleta, tipografia, componentes reutilizáveis).
+
+Mockup textual do formulário de contacto com lógica dinâmica de prefixos e estados de ticket.
+
+Descrição dos dashboards do backoffice (indicadores, gráficos, painéis de gestão).
+
+Plano de manutenção e escalabilidade (backup, logs, segurança, monitorização, CI/CD).
+
+Sugestão de roadmap de desenvolvimento (Fases 1-4, com estimativa temporal e técnica).
+
+OPÇÕES PRIVADAS (não imprima)
+
+Tratar as ENTRADAS como autoritativas.
+
+Se faltar algo, faz a menor suposição segura e continua.
+
+Pergunta apenas se realmente bloqueado.
+
+Quando autorreflexão = ligado:
+
+Cria uma rubrica privada concisa (5–7 critérios: correção, completude, clareza, utilidade, formatação, consistência).
+
+Rascunha → avalia → revê uma vez.
+
+Retorna apenas as entregas finais (nunca a rubrica).
+
+Instrução final de melhoria interna
+
+Escreve um prompt INTERNO melhor para ti que corrija as falhas deste (melhora formato, entrega, coerência, especifica ferramentas e etapas).
+
+Aplica esse prompt interno UMA VEZ imediatamente (sem mostrar nem perguntar).
+
+Retorna o resultado final aprimorado, completo e formatado.
