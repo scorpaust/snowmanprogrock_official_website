@@ -2,8 +2,12 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertNewsSchema, insertEventSchema, insertGallerySchema, insertContactSchema, insertBiographySchema } from "@shared/schema";
+import { registerAuthRoutes, requireAuth, requireRole } from "./auth";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  
+  // ===== AUTH ROUTES =====
+  registerAuthRoutes(app);
   
   // ===== NEWS ROUTES =====
   app.get("/api/news", async (_req, res) => {
@@ -27,7 +31,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/news", async (req, res) => {
+  app.post("/api/news", requireAuth, async (req, res) => {
     try {
       const validated = insertNewsSchema.parse(req.body);
       const news = await storage.createNews(validated);
@@ -37,7 +41,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/news/:id", async (req, res) => {
+  app.patch("/api/news/:id", requireAuth, async (req, res) => {
     try {
       const updates = req.body;
       const news = await storage.updateNews(req.params.id, updates);
@@ -50,7 +54,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/news/:id", async (req, res) => {
+  app.delete("/api/news/:id", requireAuth, async (req, res) => {
     try {
       const deleted = await storage.deleteNews(req.params.id);
       if (!deleted) {
@@ -84,7 +88,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/events", async (req, res) => {
+  app.post("/api/events", requireAuth, async (req, res) => {
     try {
       const validated = insertEventSchema.parse(req.body);
       const event = await storage.createEvent(validated);
@@ -94,7 +98,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/events/:id", async (req, res) => {
+  app.patch("/api/events/:id", requireAuth, async (req, res) => {
     try {
       const updates = req.body;
       const event = await storage.updateEvent(req.params.id, updates);
@@ -107,7 +111,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/events/:id", async (req, res) => {
+  app.delete("/api/events/:id", requireAuth, async (req, res) => {
     try {
       const deleted = await storage.deleteEvent(req.params.id);
       if (!deleted) {
@@ -141,7 +145,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/gallery", async (req, res) => {
+  app.post("/api/gallery", requireAuth, async (req, res) => {
     try {
       const validated = insertGallerySchema.parse(req.body);
       const item = await storage.createGalleryItem(validated);
@@ -151,7 +155,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/gallery/:id", async (req, res) => {
+  app.delete("/api/gallery/:id", requireAuth, async (req, res) => {
     try {
       const deleted = await storage.deleteGalleryItem(req.params.id);
       if (!deleted) {
@@ -164,7 +168,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // ===== CONTACTS ROUTES =====
-  app.get("/api/contacts", async (_req, res) => {
+  app.get("/api/contacts", requireAuth, async (_req, res) => {
     try {
       const contacts = await storage.getAllContacts();
       res.json(contacts);
@@ -173,7 +177,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/contacts/:id", async (req, res) => {
+  app.get("/api/contacts/:id", requireAuth, async (req, res) => {
     try {
       const contact = await storage.getContactById(req.params.id);
       if (!contact) {
@@ -196,7 +200,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/contacts/:id/status", async (req, res) => {
+  app.patch("/api/contacts/:id/status", requireAuth, async (req, res) => {
     try {
       const { status } = req.body;
       if (!status) {
@@ -225,7 +229,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/biography", async (req, res) => {
+  app.put("/api/biography", requireAuth, async (req, res) => {
     try {
       const validated = insertBiographySchema.parse(req.body);
       const biography = await storage.updateBiography(validated);

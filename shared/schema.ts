@@ -8,6 +8,8 @@ export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   username: text("username").notNull().unique(),
   password: text("password").notNull(),
+  role: text("role").notNull().default('editor'), // 'admin', 'editor', 'consultant'
+  createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
 // News/Notícias table
@@ -70,7 +72,7 @@ export const biography = pgTable("biography", {
 });
 
 // Insert Schemas
-export const insertUserSchema = createInsertSchema(users).omit({ id: true });
+export const insertUserSchema = createInsertSchema(users).omit({ id: true, createdAt: true });
 export const insertNewsSchema = createInsertSchema(news).omit({ id: true }).extend({
   content: z.string().max(1200, "Content must be 1200 characters or less"),
   contentEn: z.string().max(1200, "Content must be 1200 characters or less").optional(),
