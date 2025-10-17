@@ -1,0 +1,117 @@
+import { Facebook, Instagram, Youtube, Twitter } from "lucide-react";
+import { SiSpotify, SiApplemusic, SiBandcamp } from "react-icons/si";
+
+interface FooterProps {
+  language: string;
+}
+
+export default function Footer({ language }: FooterProps) {
+  const t = {
+    followUs: { pt: "Siga-nos", en: "Follow Us" },
+    listenOn: { pt: "Ouça em", en: "Listen On" },
+    allRights: { pt: "Todos os direitos reservados", en: "All rights reserved" },
+  };
+
+  const translate = (key: keyof typeof t) => t[key][language as keyof typeof t[keyof typeof t]] || t[key].pt;
+
+  return (
+    <footer className="bg-black border-t border-gray-800 py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {/* Brand */}
+          <div>
+            <h3 className="text-3xl font-bold tracking-tight mb-4">SNOWMAN</h3>
+            <p className="text-gray-400 text-sm">Progressive Rock from Portugal</p>
+          </div>
+
+          {/* Social Media */}
+          <div>
+            <h4 className="text-sm font-semibold tracking-wide uppercase text-gray-300 mb-4">
+              {translate("followUs")}
+            </h4>
+            <div className="flex gap-4">
+              <a
+                href="https://facebook.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-400 hover:text-primary transition-colors"
+                data-testid="link-facebook"
+              >
+                <Facebook className="h-5 w-5" />
+              </a>
+              <a
+                href="https://instagram.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-400 hover:text-primary transition-colors"
+                data-testid="link-instagram"
+              >
+                <Instagram className="h-5 w-5" />
+              </a>
+              <a
+                href="https://youtube.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-400 hover:text-primary transition-colors"
+                data-testid="link-youtube"
+              >
+                <Youtube className="h-5 w-5" />
+              </a>
+              <a
+                href="https://twitter.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-400 hover:text-primary transition-colors"
+                data-testid="link-twitter"
+              >
+                <Twitter className="h-5 w-5" />
+              </a>
+            </div>
+          </div>
+
+          {/* Streaming Platforms */}
+          <div>
+            <h4 className="text-sm font-semibold tracking-wide uppercase text-gray-300 mb-4">
+              {translate("listenOn")}
+            </h4>
+            <div className="flex gap-4">
+              <a
+                href="https://spotify.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-400 hover:text-primary transition-colors"
+                data-testid="link-spotify"
+              >
+                <SiSpotify className="h-5 w-5" />
+              </a>
+              <a
+                href="https://music.apple.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-400 hover:text-primary transition-colors"
+                data-testid="link-apple-music"
+              >
+                <SiApplemusic className="h-5 w-5" />
+              </a>
+              <a
+                href="https://bandcamp.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-400 hover:text-primary transition-colors"
+                data-testid="link-bandcamp"
+              >
+                <SiBandcamp className="h-5 w-5" />
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-12 pt-8 border-t border-gray-800 text-center">
+          <p className="text-gray-500 text-sm">
+            © {new Date().getFullYear()} Snowman. {translate("allRights")}.
+          </p>
+        </div>
+      </div>
+    </footer>
+  );
+}
