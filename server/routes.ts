@@ -467,8 +467,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
+      const amountInCents = Math.round(totalAmount * 100);
+      console.log("Creating Stripe PaymentIntent for order:", order.id, "Amount (EUR):", totalAmount, "Amount (cents):", amountInCents);
+      
       const paymentIntent = await stripe.paymentIntents.create({
-        amount: totalAmount,
+        amount: amountInCents,
         currency: "eur",
         automatic_payment_methods: {
           enabled: true,
@@ -478,6 +481,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
           orderId: order.id,
           orderNumber: order.orderNumber,
         },
+      });
+
+      console.log("PaymentIntent created:", {
+        id: paymentIntent.id,
+        hasClientSecret: !!paymentIntent.client_secret,
+        status: paymentIntent.status
       });
 
       await storage.updateOrder(order.id, {

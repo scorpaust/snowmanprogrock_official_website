@@ -197,11 +197,16 @@ export default function Checkout({ language = 'pt' }: { language?: string }) {
       };
 
       console.log("Creating order with payment intent...");
-      const orderResponse: any = await apiRequest("POST", "/api/orders/create-with-payment", orderData);
-      console.log("Order created successfully:", {
+      const response = await apiRequest("POST", "/api/orders/create-with-payment", orderData);
+      const orderResponse: any = await response.json();
+      console.log("Order response received:", {
         orderId: orderResponse.orderId,
         hasClientSecret: !!orderResponse.clientSecret
       });
+      
+      if (!orderResponse.clientSecret) {
+        throw new Error("No client secret received from server. Please check Stripe configuration.");
+      }
       
       setOrderId(orderResponse.orderId);
       setClientSecret(orderResponse.clientSecret);
