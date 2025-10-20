@@ -479,6 +479,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         },
       });
 
+      await storage.updateOrder(order.id, {
+        paymentIntentId: paymentIntent.id,
+      });
+
       res.status(201).json({
         orderId: order.id,
         orderNumber: order.orderNumber,
