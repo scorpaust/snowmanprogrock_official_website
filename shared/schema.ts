@@ -92,6 +92,67 @@ export const spotifySettings = pgTable("spotify_settings", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
+// E-COMMERCE TABLES
+
+// Categories table
+export const categories = pgTable("categories", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  nameEn: text("name_en"),
+  slug: text("slug").notNull().unique(), // 'discografia', 'merch', etc
+  description: text("description"),
+  descriptionEn: text("description_en"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+// Products table
+export const products = pgTable("products", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  nameEn: text("name_en"),
+  description: text("description").notNull(),
+  descriptionEn: text("description_en"),
+  price: integer("price").notNull(), // price in cents (e.g., 1999 = €19.99)
+  type: text("type").notNull(), // 'physical' or 'digital'
+  categoryId: varchar("category_id").notNull().references(() => categories.id, { onDelete: "restrict" }),
+  images: text("images").array().notNull().default(sql`ARRAY[]::text[]`),
+  stock: integer("stock").notNull().default(0), // for physical products
+  downloadUrl: text("download_url"), // for digital products
+  isActive: integer("is_active").notNull().default(1), // 1 for active, 0 for inactive
+  featured: integer("featured").notNull().default(0), // 1 for featured, 0 for regular
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// Orders table
+export const orders = pgTable("orders", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  orderNumber: text("order_number").notNull().unique(), // e.g., "ORD-20241020-ABC123"
+  customerName: text("customer_name").notNull(),
+  customerEmail: text("customer_email").notNull(),
+  customerPhone: text("customer_phone"),
+  shippingAddress: text("shipping_address"), // JSON string for physical products
+  billingAddress: text("billing_address"), // JSON string
+  totalAmount: integer("total_amount").notNull(), // in cents
+  status: text("status").notNull().default('pending'), // 'pending', 'paid', 'processing', 'shipped', 'completed', 'cancelled'
+  paymentMethod: text("payment_method"), // 'stripe', 'paypal', 'multibanco', 'mbway'
+  paymentIntentId: text("payment_intent_id"), // Stripe payment intent ID
+  notes: text("notes"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// Order Items table
+export const orderItems = pgTable("order_items", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  orderId: varchar("order_id").notNull().references(() => orders.id, { onDelete: "cascade" }),
+  productId: varchar("product_id").notNull().references(() => products.id, { onDelete: "restrict" }),
+  productName: text("product_name").notNull(), // snapshot at purchase time
+  quantity: integer("quantity").notNull(),
+  price: integer("price").notNull(), // price per unit in cents at purchase time
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
 // Insert Schemas
 export const insertUserSchema = createInsertSchema(users).omit({ id: true, createdAt: true });
 export const insertNewsSchema = createInsertSchema(news).omit({ id: true }).extend({
@@ -109,6 +170,23 @@ export const insertSpotifySettingsSchema = createInsertSchema(spotifySettings).o
   embedUrl: z.string().regex(/^https:\/\/open\.spotify\.com\/embed\//, "Must be a Spotify embed URL"),
   displayType: z.enum(['player', 'banner']),
   isActive: z.union([z.literal(0), z.literal(1)]),
+});
+
+export const insertCategorySchema = createInsertSchema(categories).omit({ id: true, createdAt: true });
+export const insertProductSchema = createInsertSchema(products).omit({ id: true, createdAt: true, updatedAt: true }).extend({
+  type: z.enum(['physical', 'digital']),
+  price: z.number().int().positive("Price must be positive"),
+  stock: z.number().int().min(0, "Stock cannot be negative"),
+  isActive: z.union([z.literal(0), z.literal(1)]),
+  featured: z.union([z.literal(0), z.literal(1)]),
+});
+export const insertOrderSchema = createInsertSchema(orders).omit({ id: true, orderNumber: true, createdAt: true, updatedAt: true }).extend({
+  totalAmount: z.number().int().positive("Total amount must be positive"),
+  status: z.enum(['pending', 'paid', 'processing', 'shipped', 'completed', 'cancelled']).default('pending'),
+});
+export const insertOrderItemSchema = createInsertSchema(orderItems).omit({ id: true, createdAt: true }).extend({
+  quantity: z.number().int().positive("Quantity must be positive"),
+  price: z.number().int().positive("Price must be positive"),
 });
 
 // Types
@@ -132,3 +210,15 @@ export type Biography = typeof biography.$inferSelect;
 
 export type InsertSpotifySettings = z.infer<typeof insertSpotifySettingsSchema>;
 export type SpotifySettings = typeof spotifySettings.$inferSelect;
+
+export type InsertCategory = z.infer<typeof insertCategorySchema>;
+export type Category = typeof categories.$inferSelect;
+
+export type InsertProduct = z.infer<typeof insertProductSchema>;
+export type Product = typeof products.$inferSelect;
+
+export type InsertOrder = z.infer<typeof insertOrderSchema>;
+export type Order = typeof orders.$inferSelect;
+
+export type InsertOrderItem = z.infer<typeof insertOrderItemSchema>;
+export type OrderItem = typeof orderItems.$inferSelect;

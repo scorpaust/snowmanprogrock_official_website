@@ -13,6 +13,14 @@ import {
   type InsertBiography,
   type SpotifySettings,
   type InsertSpotifySettings,
+  type Category,
+  type InsertCategory,
+  type Product,
+  type InsertProduct,
+  type Order,
+  type InsertOrder,
+  type OrderItem,
+  type InsertOrderItem,
   users,
   news,
   events,
@@ -20,6 +28,10 @@ import {
   contacts,
   biography,
   spotifySettings,
+  categories,
+  products,
+  orders,
+  orderItems,
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { db } from "./db";
@@ -65,6 +77,36 @@ export interface IStorage {
   // Spotify Settings
   getSpotifySettings(): Promise<SpotifySettings | undefined>;
   updateSpotifySettings(settings: InsertSpotifySettings): Promise<SpotifySettings>;
+
+  // Categories
+  getAllCategories(): Promise<Category[]>;
+  getCategoryById(id: string): Promise<Category | undefined>;
+  getCategoryBySlug(slug: string): Promise<Category | undefined>;
+  createCategory(category: InsertCategory): Promise<Category>;
+  updateCategory(id: string, category: Partial<InsertCategory>): Promise<Category | undefined>;
+  deleteCategory(id: string): Promise<boolean>;
+
+  // Products
+  getAllProducts(): Promise<Product[]>;
+  getProductById(id: string): Promise<Product | undefined>;
+  getProductsByCategory(categoryId: string): Promise<Product[]>;
+  getActiveProducts(): Promise<Product[]>;
+  getFeaturedProducts(): Promise<Product[]>;
+  createProduct(product: InsertProduct): Promise<Product>;
+  updateProduct(id: string, product: Partial<InsertProduct>): Promise<Product | undefined>;
+  deleteProduct(id: string): Promise<boolean>;
+
+  // Orders
+  getAllOrders(): Promise<Order[]>;
+  getOrderById(id: string): Promise<Order | undefined>;
+  getOrderByOrderNumber(orderNumber: string): Promise<Order | undefined>;
+  createOrder(order: InsertOrder): Promise<Order>;
+  updateOrder(id: string, order: Partial<InsertOrder>): Promise<Order | undefined>;
+  updateOrderStatus(id: string, status: string): Promise<Order | undefined>;
+
+  // Order Items
+  getOrderItemsByOrderId(orderId: string): Promise<OrderItem[]>;
+  createOrderItem(item: InsertOrderItem): Promise<OrderItem>;
 }
 
 export class MemStorage implements IStorage {
@@ -75,6 +117,10 @@ export class MemStorage implements IStorage {
   private contacts: Map<string, Contact>;
   private biography: Biography | undefined;
   private spotifySettings: SpotifySettings | undefined;
+  private categories: Map<string, Category>;
+  private products: Map<string, Product>;
+  private orders: Map<string, Order>;
+  private orderItems: Map<string, OrderItem>;
 
   constructor() {
     this.users = new Map();
@@ -84,6 +130,10 @@ export class MemStorage implements IStorage {
     this.contacts = new Map();
     this.biography = undefined;
     this.spotifySettings = undefined;
+    this.categories = new Map();
+    this.products = new Map();
+    this.orders = new Map();
+    this.orderItems = new Map();
 
     this.seedData();
   }
@@ -407,6 +457,127 @@ export class MemStorage implements IStorage {
     this.spotifySettings = settings;
     return settings;
   }
+
+  // Categories
+  async getAllCategories(): Promise<Category[]> {
+    return Array.from(this.categories.values());
+  }
+
+  async getCategoryById(id: string): Promise<Category | undefined> {
+    return this.categories.get(id);
+  }
+
+  async getCategoryBySlug(slug: string): Promise<Category | undefined> {
+    return Array.from(this.categories.values()).find(cat => cat.slug === slug);
+  }
+
+  async createCategory(insertCat: InsertCategory): Promise<Category> {
+    const id = randomUUID();
+    const category: Category = { ...insertCat, id, createdAt: new Date() };
+    this.categories.set(id, category);
+    return category;
+  }
+
+  async updateCategory(id: string, updates: Partial<InsertCategory>): Promise<Category | undefined> {
+    const existing = this.categories.get(id);
+    if (!existing) return undefined;
+    const updated = { ...existing, ...updates };
+    this.categories.set(id, updated);
+    return updated;
+  }
+
+  async deleteCategory(id: string): Promise<boolean> {
+    return this.categories.delete(id);
+  }
+
+  // Products
+  async getAllProducts(): Promise<Product[]> {
+    return Array.from(this.products.values());
+  }
+
+  async getProductById(id: string): Promise<Product | undefined> {
+    return this.products.get(id);
+  }
+
+  async getProductsByCategory(categoryId: string): Promise<Product[]> {
+    return Array.from(this.products.values()).filter(p => p.categoryId === categoryId);
+  }
+
+  async getActiveProducts(): Promise<Product[]> {
+    return Array.from(this.products.values()).filter(p => p.isActive === 1);
+  }
+
+  async getFeaturedProducts(): Promise<Product[]> {
+    return Array.from(this.products.values()).filter(p => p.featured === 1 && p.isActive === 1);
+  }
+
+  async createProduct(insertProd: InsertProduct): Promise<Product> {
+    const id = randomUUID();
+    const product: Product = { ...insertProd, id, createdAt: new Date(), updatedAt: new Date() };
+    this.products.set(id, product);
+    return product;
+  }
+
+  async updateProduct(id: string, updates: Partial<InsertProduct>): Promise<Product | undefined> {
+    const existing = this.products.get(id);
+    if (!existing) return undefined;
+    const updated = { ...existing, ...updates, updatedAt: new Date() };
+    this.products.set(id, updated);
+    return updated;
+  }
+
+  async deleteProduct(id: string): Promise<boolean> {
+    return this.products.delete(id);
+  }
+
+  // Orders
+  async getAllOrders(): Promise<Order[]> {
+    return Array.from(this.orders.values());
+  }
+
+  async getOrderById(id: string): Promise<Order | undefined> {
+    return this.orders.get(id);
+  }
+
+  async getOrderByOrderNumber(orderNumber: string): Promise<Order | undefined> {
+    return Array.from(this.orders.values()).find(o => o.orderNumber === orderNumber);
+  }
+
+  async createOrder(insertOrder: InsertOrder): Promise<Order> {
+    const id = randomUUID();
+    const orderNumber = `ORD-${new Date().toISOString().split('T')[0].replace(/-/g, '')}-${randomUUID().substring(0, 6).toUpperCase()}`;
+    const order: Order = { ...insertOrder, id, orderNumber, createdAt: new Date(), updatedAt: new Date() };
+    this.orders.set(id, order);
+    return order;
+  }
+
+  async updateOrder(id: string, updates: Partial<InsertOrder>): Promise<Order | undefined> {
+    const existing = this.orders.get(id);
+    if (!existing) return undefined;
+    const updated = { ...existing, ...updates, updatedAt: new Date() };
+    this.orders.set(id, updated);
+    return updated;
+  }
+
+  async updateOrderStatus(id: string, status: string): Promise<Order | undefined> {
+    const existing = this.orders.get(id);
+    if (!existing) return undefined;
+    const updated = { ...existing, status, updatedAt: new Date() };
+    this.orders.set(id, updated);
+    return updated;
+  }
+
+  // Order Items
+  async getOrderItemsByOrderId(orderId: string): Promise<OrderItem[]> {
+    return Array.from(this.orderItems.values()).filter(item => item.orderId === orderId);
+  }
+
+  async createOrderItem(insertItem: InsertOrderItem): Promise<OrderItem> {
+    const id = randomUUID();
+    const item: OrderItem = { ...insertItem, id, createdAt: new Date() };
+    this.orderItems.set(id, item);
+    return item;
+  }
 }
 
 export class DbStorage implements IStorage {
@@ -529,6 +700,111 @@ export class DbStorage implements IStorage {
           captionEn: 'On Tour',
         },
       ]);
+    }
+
+    // E-commerce seed data
+    const existingCategories = await db.select().from(categories).limit(1);
+    if (existingCategories.length === 0) {
+      await db.insert(categories).values([
+        {
+          name: "Discografia",
+          nameEn: "Discography",
+          slug: "discografia",
+          description: "Álbuns e singles da banda Snowman",
+          descriptionEn: "Snowman band albums and singles",
+        },
+        {
+          name: "Merchandise",
+          nameEn: "Merchandise",
+          slug: "merch",
+          description: "Produtos oficiais da banda",
+          descriptionEn: "Official band merchandise",
+        },
+      ]);
+    }
+
+    const existingProducts = await db.select().from(products).limit(1);
+    if (existingProducts.length === 0) {
+      const discografiaCategory = await db.select().from(categories).where(eq(categories.slug, 'discografia')).limit(1);
+      const merchCategory = await db.select().from(categories).where(eq(categories.slug, 'merch')).limit(1);
+      
+      const discografiaId = discografiaCategory[0]?.id;
+      const merchId = merchCategory[0]?.id;
+
+      if (discografiaId && merchId) {
+        await db.insert(products).values([
+          {
+            name: "Horizons - Álbum Digital",
+            nameEn: "Horizons - Digital Album",
+            description: "Álbum completo 'Horizons' em formato digital. Inclui 10 faixas originais.",
+            descriptionEn: "Complete 'Horizons' album in digital format. Includes 10 original tracks.",
+            price: 999, // €9.99
+            type: "digital",
+            categoryId: discografiaId,
+            images: ["https://images.unsplash.com/photo-1619983081563-430f63602796?w=800&q=80"],
+            stock: 0,
+            downloadUrl: "https://example.com/download/horizons",
+            isActive: 1,
+            featured: 1,
+          },
+          {
+            name: "Horizons - CD Físico",
+            nameEn: "Horizons - Physical CD",
+            description: "CD físico do álbum 'Horizons' com encarte deluxe de 16 páginas.",
+            descriptionEn: "Physical CD of 'Horizons' album with 16-page deluxe booklet.",
+            price: 1499, // €14.99
+            type: "physical",
+            categoryId: discografiaId,
+            images: ["https://images.unsplash.com/photo-1619983081563-430f63602796?w=800&q=80"],
+            stock: 50,
+            downloadUrl: null,
+            isActive: 1,
+            featured: 1,
+          },
+          {
+            name: "Horizons - Vinil Limitado",
+            nameEn: "Horizons - Limited Vinyl",
+            description: "Edição limitada em vinil de 180g. Apenas 300 cópias numeradas.",
+            descriptionEn: "Limited edition 180g vinyl. Only 300 numbered copies.",
+            price: 2999, // €29.99
+            type: "physical",
+            categoryId: discografiaId,
+            images: ["https://images.unsplash.com/photo-1619983081563-430f63602796?w=800&q=80"],
+            stock: 25,
+            downloadUrl: null,
+            isActive: 1,
+            featured: 1,
+          },
+          {
+            name: "T-Shirt Oficial Snowman",
+            nameEn: "Official Snowman T-Shirt",
+            description: "Camiseta 100% algodão com logo da banda. Disponível em várias cores.",
+            descriptionEn: "100% cotton t-shirt with band logo. Available in multiple colors.",
+            price: 1999, // €19.99
+            type: "physical",
+            categoryId: merchId,
+            images: ["https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800&q=80"],
+            stock: 100,
+            downloadUrl: null,
+            isActive: 1,
+            featured: 0,
+          },
+          {
+            name: "Poster Tour 2024",
+            nameEn: "2024 Tour Poster",
+            description: "Poster oficial da Tour Europeia 2024. Tamanho A2 (42x59cm).",
+            descriptionEn: "Official 2024 European Tour poster. A2 size (42x59cm).",
+            price: 899, // €8.99
+            type: "physical",
+            categoryId: merchId,
+            images: ["https://images.unsplash.com/photo-1611171711912-e0e5a28d1d49?w=800&q=80"],
+            stock: 75,
+            downloadUrl: null,
+            isActive: 1,
+            featured: 0,
+          },
+        ]);
+      }
     }
   }
 
@@ -682,6 +958,123 @@ export class DbStorage implements IStorage {
       const result = await db.insert(spotifySettings).values(insertSettings).returning();
       return result[0];
     }
+  }
+
+  // Categories
+  async getAllCategories(): Promise<Category[]> {
+    return db.select().from(categories).orderBy(categories.name);
+  }
+
+  async getCategoryById(id: string): Promise<Category | undefined> {
+    const result = await db.select().from(categories).where(eq(categories.id, id)).limit(1);
+    return result[0];
+  }
+
+  async getCategoryBySlug(slug: string): Promise<Category | undefined> {
+    const result = await db.select().from(categories).where(eq(categories.slug, slug)).limit(1);
+    return result[0];
+  }
+
+  async createCategory(insertCat: InsertCategory): Promise<Category> {
+    const result = await db.insert(categories).values(insertCat).returning();
+    return result[0];
+  }
+
+  async updateCategory(id: string, updates: Partial<InsertCategory>): Promise<Category | undefined> {
+    const result = await db.update(categories).set(updates).where(eq(categories.id, id)).returning();
+    return result[0];
+  }
+
+  async deleteCategory(id: string): Promise<boolean> {
+    const result = await db.delete(categories).where(eq(categories.id, id)).returning();
+    return result.length > 0;
+  }
+
+  // Products
+  async getAllProducts(): Promise<Product[]> {
+    return db.select().from(products).orderBy(desc(products.createdAt));
+  }
+
+  async getProductById(id: string): Promise<Product | undefined> {
+    const result = await db.select().from(products).where(eq(products.id, id)).limit(1);
+    return result[0];
+  }
+
+  async getProductsByCategory(categoryId: string): Promise<Product[]> {
+    return db.select().from(products).where(eq(products.categoryId, categoryId)).orderBy(products.name);
+  }
+
+  async getActiveProducts(): Promise<Product[]> {
+    return db.select().from(products).where(eq(products.isActive, 1)).orderBy(desc(products.featured), products.name);
+  }
+
+  async getFeaturedProducts(): Promise<Product[]> {
+    return db.select().from(products).where(eq(products.featured, 1)).orderBy(products.name);
+  }
+
+  async createProduct(insertProd: InsertProduct): Promise<Product> {
+    const result = await db.insert(products).values(insertProd).returning();
+    return result[0];
+  }
+
+  async updateProduct(id: string, updates: Partial<InsertProduct>): Promise<Product | undefined> {
+    const result = await db.update(products)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(products.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async deleteProduct(id: string): Promise<boolean> {
+    const result = await db.delete(products).where(eq(products.id, id)).returning();
+    return result.length > 0;
+  }
+
+  // Orders
+  async getAllOrders(): Promise<Order[]> {
+    return db.select().from(orders).orderBy(desc(orders.createdAt));
+  }
+
+  async getOrderById(id: string): Promise<Order | undefined> {
+    const result = await db.select().from(orders).where(eq(orders.id, id)).limit(1);
+    return result[0];
+  }
+
+  async getOrderByOrderNumber(orderNumber: string): Promise<Order | undefined> {
+    const result = await db.select().from(orders).where(eq(orders.orderNumber, orderNumber)).limit(1);
+    return result[0];
+  }
+
+  async createOrder(insertOrder: InsertOrder): Promise<Order> {
+    const orderNumber = `ORD-${new Date().toISOString().split('T')[0].replace(/-/g, '')}-${randomUUID().substring(0, 6).toUpperCase()}`;
+    const result = await db.insert(orders).values({ ...insertOrder, orderNumber }).returning();
+    return result[0];
+  }
+
+  async updateOrder(id: string, updates: Partial<InsertOrder>): Promise<Order | undefined> {
+    const result = await db.update(orders)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(orders.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async updateOrderStatus(id: string, status: string): Promise<Order | undefined> {
+    const result = await db.update(orders)
+      .set({ status, updatedAt: new Date() })
+      .where(eq(orders.id, id))
+      .returning();
+    return result[0];
+  }
+
+  // Order Items
+  async getOrderItemsByOrderId(orderId: string): Promise<OrderItem[]> {
+    return db.select().from(orderItems).where(eq(orderItems.orderId, orderId));
+  }
+
+  async createOrderItem(insertItem: InsertOrderItem): Promise<OrderItem> {
+    const result = await db.insert(orderItems).values(insertItem).returning();
+    return result[0];
   }
 }
 
