@@ -408,11 +408,92 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Orders
+  app.post("/api/orders/create-with-payment", async (req, res) => {
+    try {
+      const { customerName, customerEmail, customerPhone, shippingAddress, items } = req.body;
+
+      if (!customerName || !customerEmail || !items || items.length === 0) {
+        return res.status(400).json({ error: "Missing required fields" });
+      }
+
+      let totalAmount = 0;
+      const orderItems = [];
+
+      for (const item of items) {
+        const product = await storage.getProductById(item.productId);
+        if (!product) {
+          return res.status(400).json({ error: `Product ${item.productId} not found` });
+        }
+        if (!product.isActive) {
+          return res.status(400).json({ error: `Product ${product.name} is not available` });
+        }
+        if (product.type === 'physical' && product.stock < item.quantity) {
+          return res.status(400).json({ error: `Insufficient stock for ${product.name}` });
+        }
+
+        totalAmount += product.price * item.quantity;
+        orderItems.push({
+          productId: product.id,
+          productName: product.name,
+          quantity: item.quantity,
+          price: product.price,
+        });
+      }
+
+      const timestamp = Date.now();
+      const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+      const orderNumber = `ORD-${timestamp}-${random}`;
+
+      const orderToCreate: any = {
+        orderNumber,
+        customerName,
+        customerEmail,
+        customerPhone: customerPhone || null,
+        shippingAddress: shippingAddress || null,
+        billingAddress: null,
+        totalAmount,
+        status: "pending" as const,
+        paymentMethod: "stripe",
+        paymentIntentId: null,
+        notes: null,
+      };
+      
+      const order = await storage.createOrder(orderToCreate);
+
+      for (const item of orderItems) {
+        await storage.createOrderItem({
+          orderId: order.id,
+          ...item,
+        });
+      }
+
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: totalAmount,
+        currency: "eur",
+        automatic_payment_methods: {
+          enabled: true,
+        },
+        metadata: {
+          orderId: order.id,
+          orderNumber: order.orderNumber,
+        },
+      });
+
+      res.status(201).json({
+        orderId: order.id,
+        orderNumber: order.orderNumber,
+        clientSecret: paymentIntent.client_secret,
+      });
+    } catch (error: any) {
+      console.error("Error creating order with payment:", error);
+      res.status(500).json({ error: "Failed to create order: " + error.message });
+    }
+  });
+
   app.post("/api/orders", async (req, res) => {
     try {
       const orderData = req.body;
       
-      // Generate unique order number
       const timestamp = Date.now();
       const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
       const orderNumber = `ORD-${timestamp}-${random}`;
@@ -459,6 +540,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(items);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch order items" });
+    }
+  });
+
+  app.post("/api/orders/:orderId/items", async (req, res) => {
+    try {
+      const itemData = {
+        ...req.body,
+        orderId: req.params.orderId,
+      };
+      const item = await storage.createOrderItem(itemData);
+      res.status(201).json(item);
+    } catch (error: any) {
+      console.error("Error creating order item:", error);
+      res.status(400).json({ error: "Failed to create order item: " + error.message });
     }
   });
 
