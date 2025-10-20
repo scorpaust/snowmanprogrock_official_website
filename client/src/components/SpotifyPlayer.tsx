@@ -6,7 +6,7 @@ export function SpotifyPlayer() {
     queryKey: ["/api/spotify-settings"],
   });
 
-  if (isLoading || !settings || !settings.isActive) {
+  if (isLoading || !settings || settings.isActive === 0) {
     return null;
   }
 
