@@ -153,15 +153,35 @@ Preferred communication style: Simple, everyday language.
 - Connection via DATABASE_URL environment variable
 - WebSocket-based connections for edge compatibility
 
-### Payment Integration (Planned)
+### E-Commerce & Payment Integration
 
-**Stripe:**
-- Credit card, Multibanco, MBWay payment methods
-- Product/inventory management via backoffice
+**Store Features:**
+- Product catalog with categories (Physical Products, Digital Products, Merchandise)
+- Product detail pages with image galleries
+- Shopping cart with localStorage persistence
+- Multi-step checkout flow with customer information collection
+- Order management with status tracking (pending, paid, shipped, cancelled)
 
-**PayPal:**
-- Alternative payment gateway
-- Store checkout integration
+**Stripe Integration (Production-Ready):**
+- Full Payment Element implementation with automatic payment method detection
+- Payment methods for Portugal: Cards (Visa, Mastercard, Amex), Multibanco, MB WAY
+- PayPal support available when enabled in Stripe Dashboard
+- Correct EUR to cents conversion for all payment intents
+- Payment confirmation flow with order status updates
+- Webhook support for payment status changes (requires STRIPE_WEBHOOK_SECRET)
+- Test mode support with test cards (4242 4242 4242 4242)
+
+**Payment Configuration:**
+- Backend: Automatic payment methods enabled with redirect support (allow_redirects: 'always')
+- Frontend: PaymentElement with tabs layout for better UX
+- Environment variables: STRIPE_SECRET_KEY, VITE_STRIPE_PUBLIC_KEY, STRIPE_WEBHOOK_SECRET
+- Documentation: See STRIPE_SETUP.md for detailed setup instructions
+
+**Known Considerations:**
+- Payment methods availability depends on Stripe Dashboard configuration
+- Multibanco and MB WAY must be explicitly enabled in Stripe account settings
+- PayPal integration via Stripe requires business account verification
+- All amounts are stored in EUR and converted to cents (Math.round(amount * 100)) before creating payment intents
 
 ### UI Component Libraries
 
