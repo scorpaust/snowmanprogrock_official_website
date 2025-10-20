@@ -1,13 +1,15 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
-import { Menu, X } from "lucide-react";
+import { Menu, X, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useCart } from "@/hooks/use-cart";
 import logoSnowman from "@assets/logo_snowman_transp_GRANDE_White_1760995391367.png";
 
 interface NavigationProps {
@@ -18,6 +20,7 @@ interface NavigationProps {
 export default function Navigation({ language, setLanguage }: NavigationProps) {
   const [location] = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { itemCount } = useCart();
 
   const menuItems = [
     { path: "/", label: { pt: "Início", en: "Home", fr: "Accueil", es: "Inicio", de: "Startseite" } },
@@ -74,8 +77,28 @@ export default function Navigation({ language, setLanguage }: NavigationProps) {
               ))}
             </div>
 
-            {/* Language Switcher & Mobile Menu */}
+            {/* Cart, Language Switcher & Mobile Menu */}
             <div className="flex items-center gap-4">
+              {/* Cart Button */}
+              <Link href="/loja/checkout" data-testid="link-cart">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="relative text-gray-300 hover:text-white"
+                >
+                  <ShoppingCart className="h-5 w-5" />
+                  {itemCount > 0 && (
+                    <Badge
+                      variant="destructive"
+                      className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
+                      data-testid="badge-cart-count"
+                    >
+                      {itemCount}
+                    </Badge>
+                  )}
+                </Button>
+              </Link>
+
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
