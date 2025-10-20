@@ -11,6 +11,7 @@ export default function Footer({ language }: FooterProps) {
     followUs: { pt: "Siga-nos", en: "Follow Us" },
     listenOn: { pt: "Ouça em", en: "Listen On" },
     allRights: { pt: "Todos os direitos reservados", en: "All rights reserved" },
+    tagline: { pt: "Rock Progressivo de Portugal", en: "Progressive Rock from Portugal" },
   };
 
   const translate = (key: keyof typeof t) => t[key][language as keyof typeof t[keyof typeof t]] || t[key].pt;
@@ -26,7 +27,7 @@ export default function Footer({ language }: FooterProps) {
               alt="Snowman" 
               className="h-16 md:h-20 w-auto mb-4"
             />
-            <p className="text-gray-400 text-sm">Progressive Rock from Portugal</p>
+            <p className="text-gray-400 text-sm">{translate("tagline")}</p>
           </div>
 
           {/* Social Media */}

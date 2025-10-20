@@ -63,12 +63,12 @@ export default function Navigation({ language, setLanguage }: NavigationProps) {
             <div className="flex items-center gap-4">
               <Button
                 variant="ghost"
-                size="icon"
+                size="sm"
                 onClick={() => setLanguage(language === "pt" ? "en" : "pt")}
                 data-testid="button-language-toggle"
-                className="text-gray-300 hover:text-white"
+                className="text-gray-300 hover:text-white font-semibold"
               >
-                <Globe className="h-5 w-5" />
+                {language === "pt" ? "EN" : "PT"}
               </Button>
 
               {/* Mobile Menu Button */}
