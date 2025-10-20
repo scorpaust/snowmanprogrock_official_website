@@ -188,31 +188,35 @@ export default function Store({ language = 'pt' }: StoreProps) {
 
             return (
               <Card key={product.id} className="flex flex-col" data-testid={`card-product-${product.id}`}>
-                <CardHeader className="p-0">
-                  <div className="relative w-full h-64 overflow-hidden rounded-t-md">
-                    <img
-                      src={product.images?.[0] || 'https://images.unsplash.com/photo-1619983081563-430f63602796?w=800&q=80'}
-                      alt={getProductName(product)}
-                      className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                      data-testid={`img-product-${product.id}`}
-                    />
-                    {product.featured === 1 && (
-                      <Badge className="absolute top-2 left-2 bg-purple-600" data-testid={`badge-featured-${product.id}`}>
-                        <Disc className="mr-1 h-3 w-3" />
-                        {t.featured}
-                      </Badge>
-                    )}
-                    {product.type === 'digital' && (
-                      <Badge variant="secondary" className="absolute top-2 right-2" data-testid={`badge-type-${product.id}`}>
-                        {t.digital}
-                      </Badge>
-                    )}
-                  </div>
-                </CardHeader>
+                <Link href={`/loja/produto/${product.id}`} data-testid={`link-product-${product.id}`}>
+                  <CardHeader className="p-0 cursor-pointer">
+                    <div className="relative w-full h-64 overflow-hidden rounded-t-md">
+                      <img
+                        src={product.images?.[0] || 'https://images.unsplash.com/photo-1619983081563-430f63602796?w=800&q=80'}
+                        alt={getProductName(product)}
+                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                        data-testid={`img-product-${product.id}`}
+                      />
+                      {product.featured === 1 && (
+                        <Badge className="absolute top-2 left-2 bg-purple-600" data-testid={`badge-featured-${product.id}`}>
+                          <Disc className="mr-1 h-3 w-3" />
+                          {t.featured}
+                        </Badge>
+                      )}
+                      {product.type === 'digital' && (
+                        <Badge variant="secondary" className="absolute top-2 right-2" data-testid={`badge-type-${product.id}`}>
+                          {t.digital}
+                        </Badge>
+                      )}
+                    </div>
+                  </CardHeader>
+                </Link>
                 <CardContent className="flex-1 pt-6">
-                  <CardTitle className="mb-2" data-testid={`text-product-name-${product.id}`}>
-                    {getProductName(product)}
-                  </CardTitle>
+                  <Link href={`/loja/produto/${product.id}`}>
+                    <CardTitle className="mb-2 cursor-pointer hover:text-primary transition-colors" data-testid={`text-product-name-${product.id}`}>
+                      {getProductName(product)}
+                    </CardTitle>
+                  </Link>
                   <CardDescription className="mb-4" data-testid={`text-product-description-${product.id}`}>
                     {getProductDescription(product)}
                   </CardDescription>
