@@ -8,10 +8,10 @@ interface FooterProps {
 
 export default function Footer({ language }: FooterProps) {
   const t = {
-    followUs: { pt: "Siga-nos", en: "Follow Us" },
-    listenOn: { pt: "Ouça em", en: "Listen On" },
-    allRights: { pt: "Todos os direitos reservados", en: "All rights reserved" },
-    tagline: { pt: "Rock Progressivo de Portugal", en: "Progressive Rock from Portugal" },
+    followUs: { pt: "Siga-nos", en: "Follow Us", fr: "Suivez-nous", es: "Síguenos", de: "Folgen Sie uns" },
+    listenOn: { pt: "Ouça em", en: "Listen On", fr: "Écoutez sur", es: "Escuchar en", de: "Hören Sie auf" },
+    allRights: { pt: "Todos os direitos reservados", en: "All rights reserved", fr: "Tous droits réservés", es: "Todos los derechos reservados", de: "Alle Rechte vorbehalten" },
+    tagline: { pt: "Rock Progressivo de Portugal", en: "Progressive Rock from Portugal", fr: "Rock Progressif du Portugal", es: "Rock Progresivo de Portugal", de: "Progressive Rock aus Portugal" },
   };
 
   const translate = (key: keyof typeof t) => t[key][language as keyof typeof t[keyof typeof t]] || t[key].pt;

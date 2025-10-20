@@ -18,18 +18,17 @@ export default function Home({ language }: HomeProps) {
 
   const t = {
     hero: {
-      title: { pt: "SNOWMAN", en: "SNOWMAN" },
-      subtitle: { pt: "Rock Progressivo de Portugal", en: "Progressive Rock from Portugal" },
-      cta: { pt: "Explorar Música", en: "Explore Music" },
+      subtitle: { pt: "Rock Progressivo de Portugal", en: "Progressive Rock from Portugal", fr: "Rock Progressif du Portugal", es: "Rock Progresivo de Portugal", de: "Progressive Rock aus Portugal" },
+      cta: { pt: "Explorar Música", en: "Explore Music", fr: "Explorer la Musique", es: "Explorar Música", de: "Musik Entdecken" },
     },
-    latestNews: { pt: "ÚLTIMAS NOTÍCIAS", en: "LATEST NEWS" },
-    upcomingShows: { pt: "PRÓXIMOS CONCERTOS", en: "UPCOMING SHOWS" },
-    gallery: { pt: "GALERIA", en: "GALLERY" },
-    viewAll: { pt: "Ver Tudo", en: "View All" },
-    readMore: { pt: "Ler Mais", en: "Read More" },
-    noNews: { pt: "Nenhuma notícia disponível", en: "No news available" },
-    noEvents: { pt: "Nenhum evento agendado", en: "No upcoming events" },
-    tickets: { pt: "Bilhetes", en: "Tickets" },
+    latestNews: { pt: "ÚLTIMAS NOTÍCIAS", en: "LATEST NEWS", fr: "DERNIÈRES NOUVELLES", es: "ÚLTIMAS NOTICIAS", de: "NEUESTE NACHRICHTEN" },
+    upcomingShows: { pt: "PRÓXIMOS CONCERTOS", en: "UPCOMING SHOWS", fr: "PROCHAINS CONCERTS", es: "PRÓXIMOS CONCIERTOS", de: "KOMMENDE KONZERTE" },
+    gallery: { pt: "GALERIA", en: "GALLERY", fr: "GALERIE", es: "GALERÍA", de: "GALERIE" },
+    viewAll: { pt: "Ver Tudo", en: "View All", fr: "Voir Tout", es: "Ver Todo", de: "Alle Anzeigen" },
+    readMore: { pt: "Ler Mais", en: "Read More", fr: "Lire Plus", es: "Leer Más", de: "Mehr Lesen" },
+    noNews: { pt: "Nenhuma notícia disponível", en: "No news available", fr: "Aucune actualité disponible", es: "No hay noticias disponibles", de: "Keine Nachrichten verfügbar" },
+    noEvents: { pt: "Nenhum evento agendado", en: "No upcoming events", fr: "Aucun événement à venir", es: "No hay eventos próximos", de: "Keine bevorstehenden Veranstaltungen" },
+    tickets: { pt: "Bilhetes", en: "Tickets", fr: "Billets", es: "Entradas", de: "Tickets" },
   };
 
   const translate = (key: any) => key[language as keyof typeof key] || key.pt;

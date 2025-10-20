@@ -39,28 +39,28 @@ export default function Contact({ language }: ContactProps) {
   const { toast } = useToast();
 
   const t = {
-    title: { pt: "CONTACTOS", en: "CONTACT" },
+    title: { pt: "CONTACTOS", en: "CONTACT", fr: "CONTACT", es: "CONTACTO", de: "KONTAKT" },
     modes: {
-      geral: { pt: "Contacto Geral", en: "General Contact" },
-      eventos: { pt: "Pedido de Orçamento para Evento", en: "Event Booking Request" },
-      parc: { pt: "Parcerias / Loja / Imprensa", en: "Partnerships / Store / Press" },
+      geral: { pt: "Contacto Geral", en: "General Contact", fr: "Contact Général", es: "Contacto General", de: "Allgemeiner Kontakt" },
+      eventos: { pt: "Pedido de Orçamento para Evento", en: "Event Booking Request", fr: "Demande de Devis pour Événement", es: "Solicitud de Presupuesto para Evento", de: "Veranstaltungsbuchungsanfrage" },
+      parc: { pt: "Parcerias / Loja / Imprensa", en: "Partnerships / Store / Press", fr: "Partenariats / Boutique / Presse", es: "Asociaciones / Tienda / Prensa", de: "Partnerschaften / Geschäft / Presse" },
     },
     form: {
-      name: { pt: "Nome", en: "Name" },
-      email: { pt: "Email", en: "Email" },
-      phone: { pt: "Telefone (opcional)", en: "Phone (optional)" },
-      message: { pt: "Mensagem", en: "Message" },
-      submit: { pt: "Enviar", en: "Submit" },
+      name: { pt: "Nome", en: "Name", fr: "Nom", es: "Nombre", de: "Name" },
+      email: { pt: "Email", en: "Email", fr: "Email", es: "Email", de: "E-Mail" },
+      phone: { pt: "Telefone (opcional)", en: "Phone (optional)", fr: "Téléphone (optionnel)", es: "Teléfono (opcional)", de: "Telefon (optional)" },
+      message: { pt: "Mensagem", en: "Message", fr: "Message", es: "Mensaje", de: "Nachricht" },
+      submit: { pt: "Enviar", en: "Submit", fr: "Envoyer", es: "Enviar", de: "Senden" },
     },
     success: {
-      title: { pt: "Mensagem enviada!", en: "Message sent!" },
-      description: { pt: "Obrigado pelo seu contacto. Receberá uma resposta em breve.", en: "Thank you for your message. You will receive a response soon." },
-      ticketId: { pt: "ID do Ticket", en: "Ticket ID" },
+      title: { pt: "Mensagem enviada!", en: "Message sent!", fr: "Message envoyé!", es: "¡Mensaje enviado!", de: "Nachricht gesendet!" },
+      description: { pt: "Obrigado pelo seu contacto. Receberá uma resposta em breve.", en: "Thank you for your message. You will receive a response soon.", fr: "Merci pour votre message. Vous recevrez une réponse bientôt.", es: "Gracias por su mensaje. Recibirá una respuesta pronto.", de: "Danke für Ihre Nachricht. Sie erhalten bald eine Antwort." },
+      ticketId: { pt: "ID do Ticket", en: "Ticket ID", fr: "ID du Ticket", es: "ID del Ticket", de: "Ticket-ID" },
     },
     info: {
-      email: { pt: "E-mail", en: "Email" },
-      phone: { pt: "Telefone", en: "Phone" },
-      location: { pt: "Localização", en: "Location" },
+      email: { pt: "E-mail", en: "Email", fr: "E-mail", es: "E-mail", de: "E-Mail" },
+      phone: { pt: "Telefone", en: "Phone", fr: "Téléphone", es: "Teléfono", de: "Telefon" },
+      location: { pt: "Localização", en: "Location", fr: "Localisation", es: "Ubicación", de: "Standort" },
     },
   };
 
@@ -80,7 +80,7 @@ export default function Contact({ language }: ContactProps) {
   const contactMutation = useMutation({
     mutationFn: async (data: ContactForm) => {
       const response = await apiRequest("POST", "/api/contacts", data);
-      return response;
+      return response as { ticketId: string };
     },
     onSuccess: (data) => {
       setTicketId(data.ticketId);

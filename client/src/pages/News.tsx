@@ -13,10 +13,22 @@ export default function NewsPage({ language }: NewsProps) {
   const { data: news, isLoading } = useQuery<News[]>({ queryKey: ["/api/news"] });
 
   const t = {
-    title: { pt: "NOTÍCIAS", en: "NEWS" },
-    readMore: { pt: "Ler Mais", en: "Read More" },
-    noNews: { pt: "Nenhuma notícia disponível", en: "No news available" },
-    loading: { pt: "Carregando...", en: "Loading..." },
+    title: { pt: "NOTÍCIAS", en: "NEWS", fr: "ACTUALITÉS", es: "NOTICIAS", de: "NACHRICHTEN" },
+    featured: { pt: "Destaque", en: "Featured", fr: "À la une", es: "Destacado", de: "Hervorgehoben" },
+    readMore: { pt: "Ler Mais", en: "Read More", fr: "Lire Plus", es: "Leer Más", de: "Mehr Lesen" },
+    noNews: { pt: "Nenhuma notícia disponível", en: "No news available", fr: "Aucune actualité disponible", es: "No hay noticias disponibles", de: "Keine Nachrichten verfügbar" },
+    loading: { pt: "Carregando...", en: "Loading...", fr: "Chargement...", es: "Cargando...", de: "Laden..." },
+  };
+
+  const getLocale = (lang: string) => {
+    const localeMap: Record<string, string> = {
+      pt: 'pt-PT',
+      en: 'en-US',
+      fr: 'fr-FR',
+      es: 'es-ES',
+      de: 'de-DE',
+    };
+    return localeMap[lang] || 'pt-PT';
   };
 
   const translate = (key: any) => key[language as keyof typeof key] || key.pt;
@@ -55,9 +67,9 @@ export default function NewsPage({ language }: NewsProps) {
                 )}
                 <div className="p-6 flex flex-col flex-1">
                   <div className="flex items-center gap-2 mb-3">
-                    {item.featured === 1 && <Badge>Featured</Badge>}
+                    {item.featured === 1 && <Badge>{translate(t.featured)}</Badge>}
                     <span className="text-sm text-muted-foreground">
-                      {new Date(item.publishedAt).toLocaleDateString(language === 'pt' ? 'pt-PT' : 'en-US')}
+                      {new Date(item.publishedAt).toLocaleDateString(getLocale(language))}
                     </span>
                   </div>
                   <h3 className="text-2xl font-bold mb-4">

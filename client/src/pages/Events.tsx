@@ -12,13 +12,24 @@ export default function Events({ language }: EventsProps) {
   const { data: events, isLoading } = useQuery<Event[]>({ queryKey: ["/api/events"] });
 
   const t = {
-    title: { pt: "EVENTOS", en: "EVENTS" },
-    upcoming: { pt: "Próximos Eventos", en: "Upcoming Events" },
-    past: { pt: "Eventos Passados", en: "Past Events" },
-    tickets: { pt: "Bilhetes", en: "Tickets" },
-    noUpcoming: { pt: "Nenhum evento agendado", en: "No upcoming events" },
-    noPast: { pt: "Nenhum evento passado", en: "No past events" },
-    loading: { pt: "Carregando...", en: "Loading..." },
+    title: { pt: "EVENTOS", en: "EVENTS", fr: "ÉVÉNEMENTS", es: "EVENTOS", de: "VERANSTALTUNGEN" },
+    upcoming: { pt: "Próximos Eventos", en: "Upcoming Events", fr: "Événements à Venir", es: "Próximos Eventos", de: "Kommende Veranstaltungen" },
+    past: { pt: "Eventos Passados", en: "Past Events", fr: "Événements Passés", es: "Eventos Pasados", de: "Vergangene Veranstaltungen" },
+    tickets: { pt: "Bilhetes", en: "Tickets", fr: "Billets", es: "Entradas", de: "Tickets" },
+    noUpcoming: { pt: "Nenhum evento agendado", en: "No upcoming events", fr: "Aucun événement à venir", es: "No hay eventos próximos", de: "Keine bevorstehenden Veranstaltungen" },
+    noPast: { pt: "Nenhum evento passado", en: "No past events", fr: "Aucun événement passé", es: "No hay eventos pasados", de: "Keine vergangenen Veranstaltungen" },
+    loading: { pt: "Carregando...", en: "Loading...", fr: "Chargement...", es: "Cargando...", de: "Laden..." },
+  };
+
+  const getLocale = (lang: string) => {
+    const localeMap: Record<string, string> = {
+      pt: 'pt-PT',
+      en: 'en-US',
+      fr: 'fr-FR',
+      es: 'es-ES',
+      de: 'de-DE',
+    };
+    return localeMap[lang] || 'pt-PT';
   };
 
   const translate = (key: any) => key[language as keyof typeof key] || key.pt;
@@ -60,7 +71,7 @@ export default function Events({ language }: EventsProps) {
                           {new Date(event.eventDate).getDate()}
                         </div>
                         <div className="text-sm text-muted-foreground uppercase">
-                          {new Date(event.eventDate).toLocaleString(language === 'pt' ? 'pt-PT' : 'en-US', { month: 'short' })}
+                          {new Date(event.eventDate).toLocaleString(getLocale(language), { month: 'short' })}
                         </div>
                         <div className="text-xs text-muted-foreground">
                           {new Date(event.eventDate).getFullYear()}
@@ -77,7 +88,7 @@ export default function Events({ language }: EventsProps) {
                         <div className="flex items-center gap-2 text-muted-foreground mb-4">
                           <Calendar className="h-4 w-4" />
                           <span>
-                            {new Date(event.eventDate).toLocaleString(language === 'pt' ? 'pt-PT' : 'en-US', {
+                            {new Date(event.eventDate).toLocaleString(getLocale(language), {
                               hour: '2-digit',
                               minute: '2-digit'
                             })}
@@ -124,7 +135,7 @@ export default function Events({ language }: EventsProps) {
                           {new Date(event.eventDate).getDate()}
                         </div>
                         <div className="text-sm text-muted-foreground uppercase">
-                          {new Date(event.eventDate).toLocaleString(language === 'pt' ? 'pt-PT' : 'en-US', { month: 'short' })}
+                          {new Date(event.eventDate).toLocaleString(getLocale(language), { month: 'short' })}
                         </div>
                         <div className="text-xs text-muted-foreground">
                           {new Date(event.eventDate).getFullYear()}

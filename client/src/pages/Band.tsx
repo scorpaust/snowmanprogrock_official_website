@@ -9,9 +9,12 @@ export default function Band({ language }: BandProps) {
   const { data: biography } = useQuery<Biography>({ queryKey: ["/api/biography"] });
 
   const t = {
-    title: { pt: "A BANDA", en: "THE BAND" },
-    bioTitle: { pt: "Biografia", en: "Biography" },
-    noBio: { pt: "Biografia em breve...", en: "Biography coming soon..." },
+    title: { pt: "A BANDA", en: "THE BAND", fr: "LE GROUPE", es: "LA BANDA", de: "DIE BAND" },
+    bioTitle: { pt: "Biografia", en: "Biography", fr: "Biographie", es: "Biografía", de: "Biografie" },
+    membersTitle: { pt: "MEMBROS", en: "MEMBERS", fr: "MEMBRES", es: "MIEMBROS", de: "MITGLIEDER" },
+    member: { pt: "Membro", en: "Member", fr: "Membre", es: "Miembro", de: "Mitglied" },
+    role: { pt: "Função", en: "Role", fr: "Rôle", es: "Rol", de: "Rolle" },
+    noBio: { pt: "Biografia em breve...", en: "Biography coming soon...", fr: "Biographie à venir...", es: "Biografía próximamente...", de: "Biografie demnächst..." },
   };
 
   const translate = (key: any) => key[language as keyof typeof key] || key.pt;
@@ -58,7 +61,7 @@ export default function Band({ language }: BandProps) {
         {/* Member Profiles Section */}
         <div className="mt-24">
           <h2 className="text-3xl font-bold mb-12 tracking-tight text-center" data-testid="text-members-title">
-            MEMBERS
+            {translate(t.membersTitle)}
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {[1, 2, 3, 4].map((member) => (
@@ -66,12 +69,12 @@ export default function Band({ language }: BandProps) {
                 <div className="aspect-square bg-gray-900 rounded-full overflow-hidden mb-4 hover-elevate">
                   <img
                     src={`https://images.unsplash.com/photo-${1500000000000 + member * 100000}?w=400&q=80`}
-                    alt={`Member ${member}`}
+                    alt={`${translate(t.member)} ${member}`}
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <h3 className="font-semibold text-lg">Member {member}</h3>
-                <p className="text-sm text-muted-foreground">Role</p>
+                <h3 className="font-semibold text-lg">{translate(t.member)} {member}</h3>
+                <p className="text-sm text-muted-foreground">{translate(t.role)}</p>
               </div>
             ))}
           </div>

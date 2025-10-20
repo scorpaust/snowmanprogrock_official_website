@@ -15,12 +15,12 @@ export default function GalleryPage({ language }: GalleryProps) {
   const [selectedMedia, setSelectedMedia] = useState<Gallery | null>(null);
 
   const t = {
-    title: { pt: "GALERIA", en: "GALLERY" },
-    photos: { pt: "Fotos", en: "Photos" },
-    videos: { pt: "Vídeos", en: "Videos" },
-    noPhotos: { pt: "Nenhuma foto disponível", en: "No photos available" },
-    noVideos: { pt: "Nenhum vídeo disponível", en: "No videos available" },
-    loading: { pt: "Carregando...", en: "Loading..." },
+    title: { pt: "GALERIA", en: "GALLERY", fr: "GALERIE", es: "GALERÍA", de: "GALERIE" },
+    photos: { pt: "Fotos", en: "Photos", fr: "Photos", es: "Fotos", de: "Fotos" },
+    videos: { pt: "Vídeos", en: "Videos", fr: "Vidéos", es: "Vídeos", de: "Videos" },
+    noPhotos: { pt: "Nenhuma foto disponível", en: "No photos available", fr: "Aucune photo disponible", es: "No hay fotos disponibles", de: "Keine Fotos verfügbar" },
+    noVideos: { pt: "Nenhum vídeo disponível", en: "No videos available", fr: "Aucune vidéo disponible", es: "No hay vídeos disponibles", de: "Keine Videos verfügbar" },
+    loading: { pt: "Carregando...", en: "Loading...", fr: "Chargement...", es: "Cargando...", de: "Laden..." },
   };
 
   const translate = (key: any) => key[language as keyof typeof key] || key.pt;

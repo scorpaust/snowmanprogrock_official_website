@@ -41,6 +41,12 @@ function App() {
       setLanguage('en');
     } else if (browserLang.startsWith('pt')) {
       setLanguage('pt');
+    } else if (browserLang.startsWith('fr')) {
+      setLanguage('fr');
+    } else if (browserLang.startsWith('es')) {
+      setLanguage('es');
+    } else if (browserLang.startsWith('de')) {
+      setLanguage('de');
     }
   }, []);
 

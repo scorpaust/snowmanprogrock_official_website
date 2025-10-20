@@ -1,7 +1,13 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
-import { Menu, X, Globe } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import logoSnowman from "@assets/logo_snowman_transp_GRANDE_White_1760995391367.png";
 
 interface NavigationProps {
@@ -14,15 +20,23 @@ export default function Navigation({ language, setLanguage }: NavigationProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const menuItems = [
-    { path: "/", label: { pt: "Início", en: "Home" } },
-    { path: "/banda", label: { pt: "Banda", en: "Band" } },
-    { path: "/noticias", label: { pt: "Notícias", en: "News" } },
-    { path: "/eventos", label: { pt: "Eventos", en: "Events" } },
-    { path: "/galeria", label: { pt: "Galeria", en: "Gallery" } },
-    { path: "/contactos", label: { pt: "Contactos", en: "Contact" } },
+    { path: "/", label: { pt: "Início", en: "Home", fr: "Accueil", es: "Inicio", de: "Startseite" } },
+    { path: "/banda", label: { pt: "Banda", en: "Band", fr: "Groupe", es: "Banda", de: "Band" } },
+    { path: "/noticias", label: { pt: "Notícias", en: "News", fr: "Actualités", es: "Noticias", de: "Nachrichten" } },
+    { path: "/eventos", label: { pt: "Eventos", en: "Events", fr: "Événements", es: "Eventos", de: "Veranstaltungen" } },
+    { path: "/galeria", label: { pt: "Galeria", en: "Gallery", fr: "Galerie", es: "Galería", de: "Galerie" } },
+    { path: "/contactos", label: { pt: "Contactos", en: "Contact", fr: "Contact", es: "Contacto", de: "Kontakt" } },
   ];
 
-  const t = (key: { pt: string; en: string }) => key[language as keyof typeof key] || key.pt;
+  const languages = [
+    { code: "pt", label: "PT", fullName: "Português" },
+    { code: "en", label: "EN", fullName: "English" },
+    { code: "fr", label: "FR", fullName: "Français" },
+    { code: "es", label: "ES", fullName: "Español" },
+    { code: "de", label: "DE", fullName: "Deutsch" },
+  ];
+
+  const t = (key: any) => key[language as keyof typeof key] || key.pt;
 
   return (
     <>
@@ -61,15 +75,32 @@ export default function Navigation({ language, setLanguage }: NavigationProps) {
 
             {/* Language Switcher & Mobile Menu */}
             <div className="flex items-center gap-4">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setLanguage(language === "pt" ? "en" : "pt")}
-                data-testid="button-language-toggle"
-                className="text-gray-300 hover:text-white font-semibold"
-              >
-                {language === "pt" ? "EN" : "PT"}
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    data-testid="button-language-toggle"
+                    className="text-gray-300 hover:text-white font-semibold uppercase"
+                  >
+                    {language.toUpperCase()}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="bg-black/95 border-gray-800">
+                  {languages.map((lang) => (
+                    <DropdownMenuItem
+                      key={lang.code}
+                      onClick={() => setLanguage(lang.code)}
+                      className={`cursor-pointer ${
+                        language === lang.code ? "text-primary" : "text-gray-300"
+                      }`}
+                      data-testid={`menu-item-${lang.code}`}
+                    >
+                      {lang.label} - {lang.fullName}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
 
               {/* Mobile Menu Button */}
               <Button
