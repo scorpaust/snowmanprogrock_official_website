@@ -43,13 +43,21 @@ export default function Home({ language }: HomeProps) {
     <div className="min-h-screen">
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-        {/* Background Image with Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black z-0">
-          <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1501612780327-45045538702b?w=1920&q=80')] bg-cover bg-center opacity-40"></div>
+        {/* Background Video with Gradient Overlay */}
+        <div className="absolute inset-0 z-0">
+          <iframe
+            className="absolute inset-0 w-full h-full pointer-events-none"
+            style={{ width: '100vw', height: '100vh', transform: 'scale(1.5)' }}
+            src="https://www.youtube.com/embed/KFLrODgIx4k?autoplay=1&mute=1&loop=1&playlist=KFLrODgIx4k&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1"
+            title="Snowman Background Video"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black z-10"></div>
         </div>
 
         {/* Hero Content */}
-        <div className="relative z-10 text-center px-4 max-w-5xl mx-auto">
+        <div className="relative z-20 text-center px-4 max-w-5xl mx-auto">
           <img 
             src={logoSnowman} 
             alt="Snowman" 
