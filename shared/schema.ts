@@ -58,6 +58,18 @@ export const contacts = pgTable("contacts", {
   email: text("email").notNull(),
   phone: text("phone"),
   message: text("message").notNull(),
+  // Event-specific fields
+  eventDate: text("event_date"), // for eventos
+  eventLocation: text("event_location"), // for eventos
+  expectedAttendees: text("expected_attendees"), // for eventos
+  // Partnership-specific fields
+  partnershipType: text("partnership_type"), // for parc
+  companyName: text("company_name"), // for parc
+  // Store-specific fields
+  storeInquiryType: text("store_inquiry_type"), // for loja
+  // Press-specific fields
+  outletName: text("outlet_name"), // for imprensa
+  deadline: text("deadline"), // for imprensa
   status: text("status").notNull().default('received'), // received -> pending -> resolved
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),

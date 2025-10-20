@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import type { Contact } from "@shared/schema";
 import {
   Form,
   FormControl,
@@ -19,22 +20,30 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 
-const contactSchema = z.object({
+const baseContactSchema = z.object({
   type: z.enum(['geral', 'eventos', 'parc', 'loja', 'imprensa']),
   name: z.string().min(2, "Name is required"),
   email: z.string().email("Invalid email address"),
   phone: z.string().optional(),
   message: z.string().min(10, "Message must be at least 10 characters"),
+  eventDate: z.string().optional(),
+  eventLocation: z.string().optional(),
+  expectedAttendees: z.string().optional(),
+  partnershipType: z.string().optional(),
+  companyName: z.string().optional(),
+  storeInquiryType: z.string().optional(),
+  outletName: z.string().optional(),
+  deadline: z.string().optional(),
 });
 
-type ContactForm = z.infer<typeof contactSchema>;
+type ContactForm = z.infer<typeof baseContactSchema>;
 
 interface ContactProps {
   language: string;
 }
 
 export default function Contact({ language }: ContactProps) {
-  const [contactMode, setContactMode] = useState<'geral' | 'eventos' | 'parc'>('geral');
+  const [contactMode, setContactMode] = useState<'geral' | 'eventos' | 'parc' | 'loja' | 'imprensa'>('geral');
   const [ticketId, setTicketId] = useState<string | null>(null);
   const { toast } = useToast();
 
@@ -42,8 +51,10 @@ export default function Contact({ language }: ContactProps) {
     title: { pt: "CONTACTOS", en: "CONTACT", fr: "CONTACT", es: "CONTACTO", de: "KONTAKT" },
     modes: {
       geral: { pt: "Contacto Geral", en: "General Contact", fr: "Contact Général", es: "Contacto General", de: "Allgemeiner Kontakt" },
-      eventos: { pt: "Pedido de Orçamento para Evento", en: "Event Booking Request", fr: "Demande de Devis pour Événement", es: "Solicitud de Presupuesto para Evento", de: "Veranstaltungsbuchungsanfrage" },
-      parc: { pt: "Parcerias / Loja / Imprensa", en: "Partnerships / Store / Press", fr: "Partenariats / Boutique / Presse", es: "Asociaciones / Tienda / Prensa", de: "Partnerschaften / Geschäft / Presse" },
+      eventos: { pt: "Orçamento para Evento", en: "Event Booking", fr: "Réservation d'Événement", es: "Reserva de Evento", de: "Veranstaltungsbuchung" },
+      parc: { pt: "Parcerias", en: "Partnerships", fr: "Partenariats", es: "Asociaciones", de: "Partnerschaften" },
+      loja: { pt: "Loja", en: "Store", fr: "Boutique", es: "Tienda", de: "Geschäft" },
+      imprensa: { pt: "Imprensa", en: "Press", fr: "Presse", es: "Prensa", de: "Presse" },
     },
     form: {
       name: { pt: "Nome", en: "Name", fr: "Nom", es: "Nombre", de: "Name" },
@@ -51,6 +62,14 @@ export default function Contact({ language }: ContactProps) {
       phone: { pt: "Telefone (opcional)", en: "Phone (optional)", fr: "Téléphone (optionnel)", es: "Teléfono (opcional)", de: "Telefon (optional)" },
       message: { pt: "Mensagem", en: "Message", fr: "Message", es: "Mensaje", de: "Nachricht" },
       submit: { pt: "Enviar", en: "Submit", fr: "Envoyer", es: "Enviar", de: "Senden" },
+      eventDate: { pt: "Data do Evento", en: "Event Date", fr: "Date de l'Événement", es: "Fecha del Evento", de: "Veranstaltungsdatum" },
+      eventLocation: { pt: "Local do Evento", en: "Event Location", fr: "Lieu de l'Événement", es: "Ubicación del Evento", de: "Veranstaltungsort" },
+      expectedAttendees: { pt: "Número Estimado de Participantes", en: "Expected Number of Attendees", fr: "Nombre Estimé de Participants", es: "Número Estimado de Asistentes", de: "Erwartete Teilnehmerzahl" },
+      partnershipType: { pt: "Tipo de Parceria", en: "Partnership Type", fr: "Type de Partenariat", es: "Tipo de Asociación", de: "Art der Partnerschaft" },
+      companyName: { pt: "Nome da Empresa", en: "Company Name", fr: "Nom de l'Entreprise", es: "Nombre de la Empresa", de: "Firmenname" },
+      storeInquiryType: { pt: "Tipo de Consulta", en: "Inquiry Type", fr: "Type de Demande", es: "Tipo de Consulta", de: "Art der Anfrage" },
+      outletName: { pt: "Nome da Publicação/Outlet", en: "Publication/Outlet Name", fr: "Nom de la Publication/Média", es: "Nombre de la Publicación/Medio", de: "Name der Publikation/Medien" },
+      deadline: { pt: "Prazo", en: "Deadline", fr: "Date Limite", es: "Fecha Límite", de: "Frist" },
     },
     success: {
       title: { pt: "Mensagem enviada!", en: "Message sent!", fr: "Message envoyé!", es: "¡Mensaje enviado!", de: "Nachricht gesendet!" },
@@ -62,12 +81,15 @@ export default function Contact({ language }: ContactProps) {
       phone: { pt: "Telefone", en: "Phone", fr: "Téléphone", es: "Teléfono", de: "Telefon" },
       location: { pt: "Localização", en: "Location", fr: "Localisation", es: "Ubicación", de: "Standort" },
     },
+    social: {
+      followUs: { pt: "Siga-nos", en: "Follow Us", fr: "Suivez-nous", es: "Síguenos", de: "Folgen Sie uns" },
+    },
   };
 
   const translate = (key: any) => key[language as keyof typeof key] || key.pt;
 
   const form = useForm<ContactForm>({
-    resolver: zodResolver(contactSchema),
+    resolver: zodResolver(baseContactSchema),
     defaultValues: {
       type: 'geral',
       name: "",
@@ -80,7 +102,8 @@ export default function Contact({ language }: ContactProps) {
   const contactMutation = useMutation({
     mutationFn: async (data: ContactForm) => {
       const response = await apiRequest("POST", "/api/contacts", data);
-      return response as { ticketId: string };
+      const jsonData = await response.json();
+      return jsonData as Contact;
     },
     onSuccess: (data) => {
       setTicketId(data.ticketId);
@@ -143,6 +166,20 @@ export default function Contact({ language }: ContactProps) {
                   data-testid="button-mode-parc"
                 >
                   {translate(t.modes.parc)}
+                </Button>
+                <Button
+                  variant={contactMode === 'loja' ? 'default' : 'outline'}
+                  onClick={() => handleModeChange('loja')}
+                  data-testid="button-mode-loja"
+                >
+                  {translate(t.modes.loja)}
+                </Button>
+                <Button
+                  variant={contactMode === 'imprensa' ? 'default' : 'outline'}
+                  onClick={() => handleModeChange('imprensa')}
+                  data-testid="button-mode-imprensa"
+                >
+                  {translate(t.modes.imprensa)}
                 </Button>
               </div>
 
@@ -209,6 +246,132 @@ export default function Contact({ language }: ContactProps) {
                       </FormItem>
                     )}
                   />
+
+                  {/* Event-specific fields */}
+                  {contactMode === 'eventos' && (
+                    <>
+                      <FormField
+                        control={form.control}
+                        name="eventDate"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>{translate(t.form.eventDate)}</FormLabel>
+                            <FormControl>
+                              <Input type="date" {...field} data-testid="input-event-date" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="eventLocation"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>{translate(t.form.eventLocation)}</FormLabel>
+                            <FormControl>
+                              <Input {...field} data-testid="input-event-location" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="expectedAttendees"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>{translate(t.form.expectedAttendees)}</FormLabel>
+                            <FormControl>
+                              <Input type="number" {...field} data-testid="input-expected-attendees" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </>
+                  )}
+
+                  {/* Partnership-specific fields */}
+                  {contactMode === 'parc' && (
+                    <>
+                      <FormField
+                        control={form.control}
+                        name="companyName"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>{translate(t.form.companyName)}</FormLabel>
+                            <FormControl>
+                              <Input {...field} data-testid="input-company-name" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="partnershipType"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>{translate(t.form.partnershipType)}</FormLabel>
+                            <FormControl>
+                              <Input {...field} placeholder="Ex: Sponsorship, Collaboration, etc." data-testid="input-partnership-type" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </>
+                  )}
+
+                  {/* Store-specific fields */}
+                  {contactMode === 'loja' && (
+                    <FormField
+                      control={form.control}
+                      name="storeInquiryType"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{translate(t.form.storeInquiryType)}</FormLabel>
+                          <FormControl>
+                            <Input {...field} placeholder="Ex: Product, Distribution, etc." data-testid="input-store-inquiry-type" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
+
+                  {/* Press-specific fields */}
+                  {contactMode === 'imprensa' && (
+                    <>
+                      <FormField
+                        control={form.control}
+                        name="outletName"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>{translate(t.form.outletName)}</FormLabel>
+                            <FormControl>
+                              <Input {...field} data-testid="input-outlet-name" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="deadline"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>{translate(t.form.deadline)}</FormLabel>
+                            <FormControl>
+                              <Input type="date" {...field} data-testid="input-deadline" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </>
+                  )}
 
                   <FormField
                     control={form.control}
@@ -282,7 +445,7 @@ export default function Contact({ language }: ContactProps) {
 
             {/* Social Media Links */}
             <Card className="p-6">
-              <h3 className="font-semibold mb-4">Follow Us</h3>
+              <h3 className="font-semibold mb-4">{translate(t.social.followUs)}</h3>
               <div className="space-y-3">
                 <a
                   href="https://facebook.com"
