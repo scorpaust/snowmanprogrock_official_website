@@ -25,6 +25,7 @@ export default function Navigation({ language, setLanguage }: NavigationProps) {
     { path: "/noticias", label: { pt: "Notícias", en: "News", fr: "Actualités", es: "Noticias", de: "Nachrichten" } },
     { path: "/eventos", label: { pt: "Eventos", en: "Events", fr: "Événements", es: "Eventos", de: "Veranstaltungen" } },
     { path: "/galeria", label: { pt: "Galeria", en: "Gallery", fr: "Galerie", es: "Galería", de: "Galerie" } },
+    { path: "/loja", label: { pt: "Loja", en: "Store", fr: "Boutique", es: "Tienda", de: "Shop" } },
     { path: "/contactos", label: { pt: "Contactos", en: "Contact", fr: "Contact", es: "Contacto", de: "Kontakt" } },
   ];
 
