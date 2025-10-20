@@ -472,6 +472,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         currency: "eur",
         automatic_payment_methods: {
           enabled: true,
+          allow_redirects: 'always',
         },
         metadata: {
           orderId: order.id,

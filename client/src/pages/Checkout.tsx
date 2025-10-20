@@ -69,8 +69,20 @@ function CheckoutForm({ orderId, onSuccess }: CheckoutFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="bg-muted/50 p-6 rounded-md">
-        <PaymentElement />
+      <div className="space-y-4">
+        <p className="text-sm text-muted-foreground">
+          Métodos de pagamento disponíveis: Cartão de Crédito/Débito, Multibanco, MB WAY
+        </p>
+        <div className="bg-muted/50 p-6 rounded-md">
+          <PaymentElement 
+            options={{
+              layout: {
+                type: 'tabs',
+                defaultCollapsed: false,
+              },
+            }}
+          />
+        </div>
       </div>
 
       <Button
@@ -184,15 +196,26 @@ export default function Checkout({ language = 'pt' }: { language?: string }) {
         })),
       };
 
+      console.log("Creating order with payment intent...");
       const orderResponse: any = await apiRequest("POST", "/api/orders/create-with-payment", orderData);
+      console.log("Order created successfully:", {
+        orderId: orderResponse.orderId,
+        hasClientSecret: !!orderResponse.clientSecret
+      });
+      
       setOrderId(orderResponse.orderId);
       setClientSecret(orderResponse.clientSecret);
+      
+      toast({
+        title: "Pedido criado",
+        description: "Por favor, selecione o seu método de pagamento preferido abaixo.",
+      });
     } catch (error: any) {
       console.error("Error creating order:", error);
       hasCreatedOrder.current = false;
       toast({
         title: "Erro",
-        description: "Não foi possível criar o pedido. Por favor, tente novamente.",
+        description: error.message || "Não foi possível criar o pedido. Por favor, tente novamente.",
         variant: "destructive",
       });
     } finally {
