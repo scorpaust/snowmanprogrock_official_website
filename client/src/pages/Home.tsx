@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import type { News, Event, Gallery } from "@shared/schema";
+import logoSnowman from "@assets/logo_snowman_transp_GRANDE_White_1760995391367.png";
 
 interface HomeProps {
   language: string;
@@ -49,9 +50,12 @@ export default function Home({ language }: HomeProps) {
 
         {/* Hero Content */}
         <div className="relative z-10 text-center px-4 max-w-5xl mx-auto">
-          <h1 className="text-7xl md:text-9xl font-bold tracking-tighter mb-6 text-white" data-testid="text-hero-title">
-            {translate(t.hero.title)}
-          </h1>
+          <img 
+            src={logoSnowman} 
+            alt="Snowman" 
+            className="h-32 md:h-48 w-auto mx-auto mb-6"
+            data-testid="img-hero-logo"
+          />
           <p className="text-xl md:text-2xl text-gray-300 tracking-wide uppercase mb-12" data-testid="text-hero-subtitle">
             {translate(t.hero.subtitle)}
           </p>

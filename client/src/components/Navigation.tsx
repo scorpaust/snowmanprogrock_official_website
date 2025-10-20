@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { Menu, X, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import logoSnowman from "@assets/logo_snowman_transp_GRANDE_White_1760995391367.png";
 
 interface NavigationProps {
   language: string;
@@ -31,9 +32,11 @@ export default function Navigation({ language, setLanguage }: NavigationProps) {
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
             <Link href="/" data-testid="link-logo">
-              <span className="text-2xl font-bold tracking-tight text-white hover-elevate active-elevate-2 px-2 py-1 rounded-sm transition-colors">
-                SNOWMAN
-              </span>
+              <img 
+                src={logoSnowman} 
+                alt="Snowman" 
+                className="h-10 w-auto hover-elevate active-elevate-2 transition-all"
+              />
             </Link>
 
             {/* Desktop Menu */}

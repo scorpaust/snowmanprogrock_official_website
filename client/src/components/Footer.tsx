@@ -1,5 +1,6 @@
 import { Facebook, Instagram, Youtube, Twitter } from "lucide-react";
 import { SiSpotify, SiApplemusic, SiBandcamp } from "react-icons/si";
+import logoSnowman from "@assets/logo_snowman_transp_GRANDE_White_1760995391367.png";
 
 interface FooterProps {
   language: string;
@@ -20,7 +21,11 @@ export default function Footer({ language }: FooterProps) {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Brand */}
           <div>
-            <h3 className="text-3xl font-bold tracking-tight mb-4">SNOWMAN</h3>
+            <img 
+              src={logoSnowman} 
+              alt="Snowman" 
+              className="h-12 w-auto mb-4"
+            />
             <p className="text-gray-400 text-sm">Progressive Rock from Portugal</p>
           </div>
 
