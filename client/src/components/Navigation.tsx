@@ -35,7 +35,7 @@ export default function Navigation({ language, setLanguage }: NavigationProps) {
               <img 
                 src={logoSnowman} 
                 alt="Snowman" 
-                className="h-10 w-auto hover-elevate active-elevate-2 transition-all"
+                className="h-12 md:h-14 w-auto hover-elevate active-elevate-2 transition-all"
               />
             </Link>
 

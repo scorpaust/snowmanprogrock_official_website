@@ -53,7 +53,7 @@ export default function Home({ language }: HomeProps) {
           <img 
             src={logoSnowman} 
             alt="Snowman" 
-            className="h-32 md:h-48 w-auto mx-auto mb-6"
+            className="h-48 md:h-80 lg:h-96 w-auto mx-auto mb-8"
             data-testid="img-hero-logo"
           />
           <p className="text-xl md:text-2xl text-gray-300 tracking-wide uppercase mb-12" data-testid="text-hero-subtitle">

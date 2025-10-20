@@ -24,7 +24,7 @@ export default function Footer({ language }: FooterProps) {
             <img 
               src={logoSnowman} 
               alt="Snowman" 
-              className="h-12 w-auto mb-4"
+              className="h-16 md:h-20 w-auto mb-4"
             />
             <p className="text-gray-400 text-sm">Progressive Rock from Portugal</p>
           </div>
