@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertNewsSchema, insertEventSchema, insertGallerySchema, insertContactSchema, insertBiographySchema } from "@shared/schema";
+import { insertNewsSchema, insertEventSchema, insertGallerySchema, insertContactSchema, insertBiographySchema, insertSpotifySettingsSchema } from "@shared/schema";
 import { registerAuthRoutes, requireAuth, requireRole } from "./auth";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -236,6 +236,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(biography);
     } catch (error) {
       res.status(400).json({ error: "Invalid biography data" });
+    }
+  });
+
+  // ===== SPOTIFY SETTINGS ROUTES =====
+  app.get("/api/spotify-settings", async (_req, res) => {
+    try {
+      const settings = await storage.getSpotifySettings();
+      res.json(settings || null);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch Spotify settings" });
+    }
+  });
+
+  app.put("/api/spotify-settings", requireAuth, async (req, res) => {
+    try {
+      const validated = insertSpotifySettingsSchema.parse(req.body);
+      const settings = await storage.updateSpotifySettings(validated);
+      res.json(settings);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid Spotify settings data" });
     }
   });
 

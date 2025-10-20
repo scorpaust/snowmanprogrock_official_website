@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import type { News, Event, Gallery } from "@shared/schema";
 import logoSnowman from "@assets/logo_snowman_transp_GRANDE_White_1760995391367.png";
+import { SpotifyPlayer } from "@/components/SpotifyPlayer";
 
 interface HomeProps {
   language: string;
@@ -79,6 +80,13 @@ export default function Home({ language }: HomeProps) {
         {/* Scroll Indicator */}
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
           <ChevronDown className="h-8 w-8 text-gray-400" />
+        </div>
+      </section>
+
+      {/* Spotify Player Section */}
+      <section className="py-12 px-4 bg-background/50">
+        <div className="max-w-3xl mx-auto">
+          <SpotifyPlayer />
         </div>
       </section>
 

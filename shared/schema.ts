@@ -83,6 +83,15 @@ export const biography = pgTable("biography", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
+// Spotify Settings table (single row)
+export const spotifySettings = pgTable("spotify_settings", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  embedUrl: text("embed_url").notNull(), // Spotify embed URL (album, playlist, track, etc.)
+  displayType: text("display_type").notNull().default('player'), // 'player' or 'banner'
+  isActive: integer("is_active").notNull().default(1), // 1 for active, 0 for inactive
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
 // Insert Schemas
 export const insertUserSchema = createInsertSchema(users).omit({ id: true, createdAt: true });
 export const insertNewsSchema = createInsertSchema(news).omit({ id: true }).extend({
@@ -95,6 +104,11 @@ export const insertContactSchema = createInsertSchema(contacts).omit({ id: true,
 export const insertBiographySchema = createInsertSchema(biography).omit({ id: true }).extend({
   content: z.string().max(800, "Biography must be 800 characters or less"),
   contentEn: z.string().max(800, "Biography must be 800 characters or less").optional(),
+});
+export const insertSpotifySettingsSchema = createInsertSchema(spotifySettings).omit({ id: true }).extend({
+  embedUrl: z.string().regex(/^https:\/\/open\.spotify\.com\/embed\//, "Must be a Spotify embed URL"),
+  displayType: z.enum(['player', 'banner']),
+  isActive: z.union([z.literal(0), z.literal(1)]),
 });
 
 // Types
@@ -115,3 +129,6 @@ export type Contact = typeof contacts.$inferSelect;
 
 export type InsertBiography = z.infer<typeof insertBiographySchema>;
 export type Biography = typeof biography.$inferSelect;
+
+export type InsertSpotifySettings = z.infer<typeof insertSpotifySettingsSchema>;
+export type SpotifySettings = typeof spotifySettings.$inferSelect;

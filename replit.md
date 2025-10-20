@@ -15,11 +15,11 @@ A full-stack Progressive Web Application (PWA) for the Portuguese progressive ro
 **Core Purpose:**
 Provide an engaging digital presence for the band with content management, multilingual support (Portuguese + English), and modern progressive rock aesthetic.
 
-**Current Status: MVP COMPLETE ✅**
+**Current Status: Enhanced Features ✅**
 - All 6 pages implemented and functional (Home, Banda, Notícias, Eventos, Galeria, Contactos)
 - Dark immersive design with purple accents (black/purple/gray palette)
-- Multilingual support (PT/EN) with browser language detection
-- Contact form with ticket ID generation (geral_/eventos_/parc_ prefixes)
+- **Full multilingual support (PT, EN, FR, ES, DE)** with automatic browser language detection and dropdown selector
+- **5-category contact form** (Geral, Eventos, Parcerias, Loja, Imprensa) with conditional fields and ticket ID generation
 - Google Analytics integration configured
 - PWA manifest + service worker (production-ready)
 - Sample data seeded for news, events, and gallery
@@ -52,8 +52,11 @@ Preferred communication style: Simple, everyday language.
 
 **Internationalization:**
 - Manual i18n implementation with language detection from browser settings
-- Default language determined by navigator.language
-- Support for 6 languages: PT (default), EN, FR, ES, DE, IT
+- **Support for 5 languages: Portuguese (PT), English (EN), French (FR), Spanish (ES), German (DE)**
+- Language selector dropdown in navigation
+- Default language determined by navigator.language with PT fallback
+- Complete UI translations including contact form categories and fields
+- Date localization using proper locale strings (pt-PT, en-US, fr-FR, es-ES, de-DE)
 - Translation objects embedded in components with fallback to Portuguese
 
 ### Backend Architecture

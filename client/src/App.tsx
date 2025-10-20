@@ -14,6 +14,8 @@ import News from "./pages/News";
 import Events from "./pages/Events";
 import Gallery from "./pages/Gallery";
 import Contact from "./pages/Contact";
+import Login from "./pages/admin/Login";
+import SpotifySettings from "./pages/admin/SpotifySettings";
 import NotFound from "@/pages/not-found";
 
 function Router({ language }: { language: string }) {
@@ -27,6 +29,8 @@ function Router({ language }: { language: string }) {
       <Route path="/eventos" component={() => <Events language={language} />} />
       <Route path="/galeria" component={() => <Gallery language={language} />} />
       <Route path="/contactos" component={() => <Contact language={language} />} />
+      <Route path="/admin/login" component={Login} />
+      <Route path="/admin/spotify" component={SpotifySettings} />
       <Route component={NotFound} />
     </Switch>
   );

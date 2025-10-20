@@ -11,12 +11,15 @@ import {
   type InsertContact,
   type Biography,
   type InsertBiography,
+  type SpotifySettings,
+  type InsertSpotifySettings,
   users,
   news,
   events,
   gallery,
   contacts,
   biography,
+  spotifySettings,
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { db } from "./db";
@@ -58,6 +61,10 @@ export interface IStorage {
   // Biography
   getBiography(): Promise<Biography | undefined>;
   updateBiography(bio: InsertBiography): Promise<Biography>;
+
+  // Spotify Settings
+  getSpotifySettings(): Promise<SpotifySettings | undefined>;
+  updateSpotifySettings(settings: InsertSpotifySettings): Promise<SpotifySettings>;
 }
 
 export class MemStorage implements IStorage {
@@ -67,6 +74,7 @@ export class MemStorage implements IStorage {
   private gallery: Map<string, Gallery>;
   private contacts: Map<string, Contact>;
   private biography: Biography | undefined;
+  private spotifySettings: SpotifySettings | undefined;
 
   constructor() {
     this.users = new Map();
@@ -75,6 +83,7 @@ export class MemStorage implements IStorage {
     this.gallery = new Map();
     this.contacts = new Map();
     this.biography = undefined;
+    this.spotifySettings = undefined;
 
     this.seedData();
   }
@@ -87,6 +96,15 @@ export class MemStorage implements IStorage {
       updatedAt: new Date(),
     };
     this.biography = bio;
+
+    const spotify: SpotifySettings = {
+      id: randomUUID(),
+      embedUrl: "https://open.spotify.com/embed/album/7MXVkk9YMctZqd1Srtv4MB",
+      displayType: "player",
+      isActive: 1,
+      updatedAt: new Date(),
+    };
+    this.spotifySettings = spotify;
 
     const sampleNews: News[] = [
       {
@@ -368,6 +386,21 @@ export class MemStorage implements IStorage {
     this.biography = bio;
     return bio;
   }
+
+  // Spotify Settings
+  async getSpotifySettings(): Promise<SpotifySettings | undefined> {
+    return this.spotifySettings;
+  }
+
+  async updateSpotifySettings(insertSettings: InsertSpotifySettings): Promise<SpotifySettings> {
+    const settings: SpotifySettings = {
+      ...insertSettings,
+      id: this.spotifySettings?.id || randomUUID(),
+      updatedAt: new Date(),
+    };
+    this.spotifySettings = settings;
+    return settings;
+  }
 }
 
 export class DbStorage implements IStorage {
@@ -377,6 +410,15 @@ export class DbStorage implements IStorage {
       await db.insert(biography).values({
         content: "Snowman é uma banda de rock progressivo portuguesa formada em Lisboa. Com uma abordagem única que combina complexidade rítmica, atmosferas envolventes e uma energia vibrante, a banda tem conquistado palcos e corações por todo o país.",
         contentEn: "Snowman is a Portuguese progressive rock band formed in Lisbon. With a unique approach that combines rhythmic complexity, immersive atmospheres and vibrant energy, the band has been conquering stages and hearts across the country.",
+      });
+    }
+
+    const existingSpotify = await db.select().from(spotifySettings).limit(1);
+    if (existingSpotify.length === 0) {
+      await db.insert(spotifySettings).values({
+        embedUrl: "https://open.spotify.com/embed/album/7MXVkk9YMctZqd1Srtv4MB",
+        displayType: "player",
+        isActive: 1,
       });
     }
 
@@ -613,6 +655,25 @@ export class DbStorage implements IStorage {
       return result[0];
     } else {
       const result = await db.insert(biography).values(insertBio).returning();
+      return result[0];
+    }
+  }
+
+  async getSpotifySettings(): Promise<SpotifySettings | undefined> {
+    const result = await db.select().from(spotifySettings).limit(1);
+    return result[0];
+  }
+
+  async updateSpotifySettings(insertSettings: InsertSpotifySettings): Promise<SpotifySettings> {
+    const existing = await this.getSpotifySettings();
+    if (existing) {
+      const result = await db.update(spotifySettings)
+        .set({ ...insertSettings, updatedAt: new Date() })
+        .where(eq(spotifySettings.id, existing.id))
+        .returning();
+      return result[0];
+    } else {
+      const result = await db.insert(spotifySettings).values(insertSettings).returning();
       return result[0];
     }
   }
