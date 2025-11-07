@@ -190,6 +190,13 @@ export const insertUserSchema = createInsertSchema(users).omit({ id: true, creat
   role: z.enum(['admin', 'editor']).default('editor'),
   isActive: z.union([z.literal(0), z.literal(1)]).default(1),
 });
+export const updateUserSchema = z.object({
+  username: z.string().min(3, "Username must be at least 3 characters").optional(),
+  email: z.string().email("Invalid email address").optional(),
+  password: z.string().min(8, "Password must be at least 8 characters").optional(),
+  role: z.enum(['admin', 'editor']).optional(),
+  isActive: z.union([z.literal(0), z.literal(1)]).optional(),
+}).strict(); // Reject unknown fields
 export const insertUserProfileSchema = createInsertSchema(userProfiles).omit({ id: true, createdAt: true, updatedAt: true }).extend({
   email: z.string().email("Invalid email address"),
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -201,12 +208,25 @@ export const insertCommentSchema = createInsertSchema(comments).omit({ id: true,
   comment: z.string().min(10, "Comment must be at least 10 characters").max(1000, "Comment must be at most 1000 characters"),
   isApproved: z.union([z.literal(0), z.literal(1)]).default(0),
 });
-export const insertNewsSchema = createInsertSchema(news).omit({ id: true }).extend({
+export const insertNewsSchema = createInsertSchema(news).omit({ id: true, publishedAt: true }).extend({
   content: z.string().max(1200, "Content must be 1200 characters or less"),
   contentEn: z.string().max(1200, "Content must be 1200 characters or less").optional(),
+  titleEn: z.string().optional(),
 });
-export const insertEventSchema = createInsertSchema(events).omit({ id: true });
-export const insertGallerySchema = createInsertSchema(gallery).omit({ id: true });
+export const updateNewsSchema = insertNewsSchema.partial().strict();
+export const insertEventSchema = createInsertSchema(events).omit({ id: true }).extend({
+  titleEn: z.string().optional(),
+  description: z.string().optional(),
+  descriptionEn: z.string().optional(),
+  ticketLink: z.string().url("Must be a valid URL").optional().or(z.literal("")),
+});
+export const updateEventSchema = insertEventSchema.partial().strict();
+export const insertGallerySchema = createInsertSchema(gallery).omit({ id: true, uploadedAt: true }).extend({
+  type: z.enum(['photo', 'video']),
+  caption: z.string().optional(),
+  captionEn: z.string().optional(),
+  thumbnail: z.string().optional(),
+});
 export const insertContactSchema = createInsertSchema(contacts).omit({ id: true, ticketId: true, status: true, createdAt: true, updatedAt: true });
 export const insertBiographySchema = createInsertSchema(biography).omit({ id: true }).extend({
   content: z.string().max(800, "Biography must be 800 characters or less"),

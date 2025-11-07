@@ -17,6 +17,11 @@ import Contact from "./pages/Contact";
 import Login from "./pages/admin/Login";
 import Dashboard from "./pages/admin/Dashboard";
 import SpotifySettings from "./pages/admin/SpotifySettings";
+import NewsManagement from "./pages/admin/NewsManagement";
+import EventsManagement from "./pages/admin/EventsManagement";
+import GalleryManagement from "./pages/admin/GalleryManagement";
+import BiographyEditor from "./pages/admin/BiographyEditor";
+import UsersManagement from "./pages/admin/UsersManagement";
 import Checkout from "./pages/Checkout";
 import OrderConfirmation from "./pages/OrderConfirmation";
 import Store from "./pages/Store";
@@ -41,6 +46,11 @@ function Router({ language }: { language: string }) {
       <Route path="/admin/login" component={Login} />
       <Route path="/admin" component={Dashboard} />
       <Route path="/admin/spotify" component={SpotifySettings} />
+      <Route path="/admin/noticias" component={NewsManagement} />
+      <Route path="/admin/eventos" component={EventsManagement} />
+      <Route path="/admin/galeria" component={GalleryManagement} />
+      <Route path="/admin/biografia" component={BiographyEditor} />
+      <Route path="/admin/utilizadores" component={UsersManagement} />
       <Route component={NotFound} />
     </Switch>
   );

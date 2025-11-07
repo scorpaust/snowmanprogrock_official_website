@@ -1,9 +1,10 @@
-import type { Express } from "express";
+import type { Express, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertNewsSchema, insertEventSchema, insertGallerySchema, insertContactSchema, insertBiographySchema, insertSpotifySettingsSchema } from "@shared/schema";
+import { insertNewsSchema, insertEventSchema, insertGallerySchema, insertContactSchema, insertBiographySchema, insertSpotifySettingsSchema, insertUserSchema, updateUserSchema, updateNewsSchema, updateEventSchema } from "@shared/schema";
 import { registerAuthRoutes, requireAuth, requireRole } from "./auth";
 import Stripe from "stripe";
+import bcrypt from "bcrypt";
 
 if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
@@ -74,13 +75,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch("/api/news/:id", requireAuth, async (req, res) => {
     try {
-      const updates = req.body;
-      const news = await storage.updateNews(req.params.id, updates);
+      const validated = updateNewsSchema.parse(req.body);
+      const news = await storage.updateNews(req.params.id, validated);
       if (!news) {
         return res.status(404).json({ error: "News not found" });
       }
       res.json(news);
-    } catch (error) {
+    } catch (error: any) {
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ error: "Invalid news data", details: error.errors });
+      }
       res.status(500).json({ error: "Failed to update news" });
     }
   });
@@ -131,13 +135,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch("/api/events/:id", requireAuth, async (req, res) => {
     try {
-      const updates = req.body;
-      const event = await storage.updateEvent(req.params.id, updates);
+      const validated = updateEventSchema.parse(req.body);
+      const event = await storage.updateEvent(req.params.id, validated);
       if (!event) {
         return res.status(404).json({ error: "Event not found" });
       }
       res.json(event);
-    } catch (error) {
+    } catch (error: any) {
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ error: "Invalid event data", details: error.errors });
+      }
       res.status(500).json({ error: "Failed to update event" });
     }
   });
@@ -287,6 +294,85 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(settings);
     } catch (error) {
       res.status(400).json({ error: "Invalid Spotify settings data" });
+    }
+  });
+
+  // ===== USERS MANAGEMENT ROUTES (Admin only) =====
+  const requireAdmin = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      if (!req.session.userId) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+      
+      const user = await storage.getUser(req.session.userId);
+      if (!user || user.role !== 'admin' || user.isActive !== 1) {
+        return res.status(403).json({ error: "Admin access required" });
+      }
+      
+      next();
+    } catch (error) {
+      return res.status(500).json({ error: "Authorization check failed" });
+    }
+  };
+
+  app.get("/api/admin/users", requireAuth, requireAdmin, async (_req, res) => {
+    try {
+      const users = await storage.getAllUsers();
+      res.json(users);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch users" });
+    }
+  });
+
+  app.post("/api/admin/users", requireAuth, requireAdmin, async (req, res) => {
+    try {
+      const validated = insertUserSchema.parse(req.body);
+      const hashedPassword = await bcrypt.hash(validated.password, 10);
+      const user = await storage.createUser({ ...validated, password: hashedPassword });
+      res.status(201).json(user);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid user data" });
+    }
+  });
+
+  app.patch("/api/admin/users/:id", requireAuth, requireAdmin, async (req, res) => {
+    try {
+      const validated = updateUserSchema.parse(req.body);
+      
+      if (validated.password) {
+        validated.password = await bcrypt.hash(validated.password, 10);
+      }
+      
+      if (req.session.userId === req.params.id && validated.role && validated.role !== req.session.role) {
+        return res.status(400).json({ error: "Cannot change your own role" });
+      }
+      
+      const user = await storage.updateUser(req.params.id, validated);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      res.json(user);
+    } catch (error: any) {
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ error: "Invalid user data", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to update user" });
+    }
+  });
+
+  app.delete("/api/admin/users/:id", requireAuth, requireAdmin, async (req, res) => {
+    try {
+      // Prevent self-deletion
+      if (req.session.userId === req.params.id) {
+        return res.status(400).json({ error: "Cannot delete your own account" });
+      }
+      const deleted = await storage.deleteUser(req.params.id);
+      if (!deleted) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete user" });
     }
   });
 
