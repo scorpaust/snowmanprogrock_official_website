@@ -39,9 +39,9 @@ export default function Login() {
     onSuccess: () => {
       toast({
         title: "Login successful",
-        description: "Redirecting to admin panel...",
+        description: "Redirecting to dashboard...",
       });
-      setLocation("/admin/spotify");
+      setLocation("/admin");
     },
     onError: (error: Error) => {
       toast({
