@@ -7,9 +7,27 @@ import { z } from "zod";
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   username: text("username").notNull().unique(),
+  email: text("email").notNull().unique(), // For notifications and admin identification
   password: text("password").notNull(),
-  role: text("role").notNull().default('editor'), // 'admin', 'editor', 'consultant'
+  role: text("role").notNull().default('editor'), // 'admin', 'editor'
+  isActive: integer("is_active").notNull().default(1), // 1 for active, 0 for inactive
   createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+// User Profiles table (for frontoffice/customer accounts)
+export const userProfiles = pgTable("user_profiles", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  email: text("email").notNull().unique(),
+  password: text("password").notNull(),
+  name: text("name").notNull(),
+  phone: text("phone"),
+  address: text("address"),
+  city: text("city"),
+  postalCode: text("postal_code"),
+  country: text("country").default('Portugal'),
+  isActive: integer("is_active").notNull().default(1),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
 // News/Notícias table
@@ -128,6 +146,7 @@ export const products = pgTable("products", {
 export const orders = pgTable("orders", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   orderNumber: text("order_number").notNull().unique(), // e.g., "ORD-20241020-ABC123"
+  userId: varchar("user_id").references(() => userProfiles.id, { onDelete: "set null" }), // Link to user profile if logged in
   customerName: text("customer_name").notNull(),
   customerEmail: text("customer_email").notNull(),
   customerPhone: text("customer_phone"),
@@ -153,8 +172,35 @@ export const orderItems = pgTable("order_items", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
+// Comments table (for news and products)
+export const comments = pgTable("comments", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => userProfiles.id, { onDelete: "cascade" }),
+  contentType: text("content_type").notNull(), // 'news' or 'product'
+  contentId: varchar("content_id").notNull(), // ID of the news or product
+  comment: text("comment").notNull(),
+  isApproved: integer("is_approved").notNull().default(0), // 0 pending, 1 approved by admin
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
 // Insert Schemas
-export const insertUserSchema = createInsertSchema(users).omit({ id: true, createdAt: true });
+export const insertUserSchema = createInsertSchema(users).omit({ id: true, createdAt: true }).extend({
+  email: z.string().email("Invalid email address"),
+  role: z.enum(['admin', 'editor']).default('editor'),
+  isActive: z.union([z.literal(0), z.literal(1)]).default(1),
+});
+export const insertUserProfileSchema = createInsertSchema(userProfiles).omit({ id: true, createdAt: true, updatedAt: true }).extend({
+  email: z.string().email("Invalid email address"),
+  name: z.string().min(2, "Name must be at least 2 characters"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+  isActive: z.union([z.literal(0), z.literal(1)]).default(1),
+});
+export const insertCommentSchema = createInsertSchema(comments).omit({ id: true, createdAt: true, updatedAt: true }).extend({
+  contentType: z.enum(['news', 'product']),
+  comment: z.string().min(10, "Comment must be at least 10 characters").max(1000, "Comment must be at most 1000 characters"),
+  isApproved: z.union([z.literal(0), z.literal(1)]).default(0),
+});
 export const insertNewsSchema = createInsertSchema(news).omit({ id: true }).extend({
   content: z.string().max(1200, "Content must be 1200 characters or less"),
   contentEn: z.string().max(1200, "Content must be 1200 characters or less").optional(),
@@ -192,6 +238,12 @@ export const insertOrderItemSchema = createInsertSchema(orderItems).omit({ id: t
 // Types
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
+
+export type InsertUserProfile = z.infer<typeof insertUserProfileSchema>;
+export type UserProfile = typeof userProfiles.$inferSelect;
+
+export type InsertComment = z.infer<typeof insertCommentSchema>;
+export type Comment = typeof comments.$inferSelect;
 
 export type InsertNews = z.infer<typeof insertNewsSchema>;
 export type News = typeof news.$inferSelect;

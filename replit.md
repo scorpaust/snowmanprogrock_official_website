@@ -86,12 +86,18 @@ Preferred communication style: Simple, everyday language.
 
 **Database Schema:**
 ```
-- users: Authentication (username, password)
+- users: Backoffice authentication (username, email, password, role: admin/editor, isActive)
+- user_profiles: Frontoffice customer accounts (email, password, name, address, phone, etc.)
 - news: Articles with multilingual support (title/content in PT/EN), image galleries, featured flag
 - events: Concerts/shows with location, dates, ticket links, multilingual descriptions
 - gallery: Photos and videos with captions (photo/video type, thumbnails for videos)
 - contacts: Ticket system with prefixes (geral_, eventos_, parc_, loja_, imprensa_) and status tracking
 - biography: Band biography with multilingual content
+- categories: Product categories (name PT/EN, slug, description)
+- products: Store products (name, description, price in cents, type, stock, images)
+- orders: Customer orders (linked to user_profile if authenticated, order details, payment info)
+- order_items: Items in each order
+- comments: User comments on news and products (pending approval by admin)
 ```
 
 **Data Validation:**

@@ -66,6 +66,7 @@ export default function Contact({ language }: ContactProps) {
       eventLocation: { pt: "Local do Evento", en: "Event Location", fr: "Lieu de l'Événement", es: "Ubicación del Evento", de: "Veranstaltungsort" },
       expectedAttendees: { pt: "Número Estimado de Participantes", en: "Expected Number of Attendees", fr: "Nombre Estimé de Participants", es: "Número Estimado de Asistentes", de: "Erwartete Teilnehmerzahl" },
       partnershipType: { pt: "Tipo de Parceria", en: "Partnership Type", fr: "Type de Partenariat", es: "Tipo de Asociación", de: "Art der Partnerschaft" },
+      partnershipPlaceholder: { pt: "Ex: Patrocínio, Colaboração, etc.", en: "Ex: Sponsorship, Collaboration, etc.", fr: "Ex: Parrainage, Collaboration, etc.", es: "Ej: Patrocinio, Colaboración, etc.", de: "Z.B.: Sponsoring, Zusammenarbeit, usw." },
       companyName: { pt: "Nome da Empresa", en: "Company Name", fr: "Nom de l'Entreprise", es: "Nombre de la Empresa", de: "Firmenname" },
       storeInquiryType: { pt: "Tipo de Consulta", en: "Inquiry Type", fr: "Type de Demande", es: "Tipo de Consulta", de: "Art der Anfrage" },
       outletName: { pt: "Nome da Publicação/Outlet", en: "Publication/Outlet Name", fr: "Nom de la Publication/Média", es: "Nombre de la Publicación/Medio", de: "Name der Publikation/Medien" },
@@ -315,7 +316,7 @@ export default function Contact({ language }: ContactProps) {
                           <FormItem>
                             <FormLabel>{translate(t.form.partnershipType)}</FormLabel>
                             <FormControl>
-                              <Input {...field} placeholder="Ex: Sponsorship, Collaboration, etc." data-testid="input-partnership-type" />
+                              <Input {...field} placeholder={translate(t.form.partnershipPlaceholder)} data-testid="input-partnership-type" />
                             </FormControl>
                             <FormMessage />
                           </FormItem>

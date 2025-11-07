@@ -149,7 +149,7 @@ export default function Store({ language = 'pt' }: StoreProps) {
   }
 
   return (
-    <div className="min-h-screen bg-background py-12">
+    <div className="min-h-screen bg-background pt-24 pb-12">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-purple-600 to-purple-400 bg-clip-text text-transparent" data-testid="text-store-title">
@@ -229,13 +229,14 @@ export default function Store({ language = 'pt' }: StoreProps) {
                   </div>
                 </CardContent>
                 <Separator />
-                <CardFooter className="flex justify-between items-center pt-6">
+                <CardFooter className="flex flex-wrap justify-between items-center gap-3 pt-6">
                   <div className="text-2xl font-bold" data-testid={`text-product-price-${product.id}`}>
                     €{(product.price / 100).toFixed(2)}
                   </div>
                   <Button
                     onClick={() => handleAddToCart(product)}
                     disabled={isOutOfStock}
+                    className="flex-shrink-0"
                     data-testid={`button-add-to-cart-${product.id}`}
                   >
                     {isOutOfStock ? (
