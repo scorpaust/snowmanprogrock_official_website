@@ -81,20 +81,23 @@ export function registerAuthRoutes(app: Express) {
         return res.status(403).json({ error: "Admin user already exists. Setup is disabled." });
       }
 
-      if (!req.body.username || !req.body.password) {
-        return res.status(400).json({ error: "Username and password required" });
+      if (!req.body.username || !req.body.password || !req.body.email) {
+        return res.status(400).json({ error: "Username, email, and password required" });
       }
 
       const hashedPassword = await bcrypt.hash(req.body.password, 10);
       const adminUser = await storage.createUser({
         username: req.body.username,
+        email: req.body.email,
         password: hashedPassword,
         role: 'admin',
+        isActive: 1,
       });
 
       res.status(201).json({
         message: "Admin user created successfully",
         username: adminUser.username,
+        email: adminUser.email,
       });
     } catch (error) {
       console.error("Setup error:", error);

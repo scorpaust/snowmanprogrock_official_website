@@ -15,6 +15,7 @@ import Events from "./pages/Events";
 import Gallery from "./pages/Gallery";
 import Contact from "./pages/Contact";
 import Login from "./pages/admin/Login";
+import Dashboard from "./pages/admin/Dashboard";
 import SpotifySettings from "./pages/admin/SpotifySettings";
 import Checkout from "./pages/Checkout";
 import OrderConfirmation from "./pages/OrderConfirmation";
@@ -38,6 +39,7 @@ function Router({ language }: { language: string }) {
       <Route path="/loja/checkout" component={() => <Checkout language={language} />} />
       <Route path="/loja/pedido/:orderId" component={OrderConfirmation} />
       <Route path="/admin/login" component={Login} />
+      <Route path="/admin" component={Dashboard} />
       <Route path="/admin/spotify" component={SpotifySettings} />
       <Route component={NotFound} />
     </Switch>

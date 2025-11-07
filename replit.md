@@ -15,15 +15,17 @@ A full-stack Progressive Web Application (PWA) for the Portuguese progressive ro
 **Core Purpose:**
 Provide an engaging digital presence for the band with content management, multilingual support (Portuguese + English), and modern progressive rock aesthetic.
 
-**Current Status: Enhanced Features ✅**
-- All 6 pages implemented and functional (Home, Banda, Notícias, Eventos, Galeria, Contactos)
+**Current Status: Backoffice System + Enhanced Features ✅**
+- All 6 frontoffice pages implemented (Home, Banda, Notícias, Eventos, Galeria, Contactos)
+- **Complete backoffice authentication system** with secure login/logout, session management
+- **Admin dashboard** with statistics cards and sidebar navigation (Notícias, Eventos, Galeria, Produtos, Biografia, Utilizadores)
 - Dark immersive design with purple accents (black/purple/gray palette)
 - **Full multilingual support (PT, EN, FR, ES, DE)** with automatic browser language detection and dropdown selector
 - **5-category contact form** (Geral, Eventos, Parcerias, Loja, Imprensa) with conditional fields and ticket ID generation
+- E-commerce with Stripe integration (cards, Multibanco, MB WAY, PayPal)
 - Google Analytics integration configured
 - PWA manifest + service worker (production-ready)
-- Sample data seeded for news, events, and gallery
-- Responsive navigation with mobile menu
+- Admin credentials: admin / snowman2024 (email: snowmanprogrock@gmail.com)
 - All interactive elements include data-testid attributes for testing
 
 ## User Preferences

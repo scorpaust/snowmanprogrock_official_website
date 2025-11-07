@@ -16,6 +16,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ===== AUTH ROUTES =====
   registerAuthRoutes(app);
   
+  // ===== ADMIN STATS ROUTE =====
+  app.get("/api/admin/stats", requireAuth, async (_req, res) => {
+    try {
+      const [news, events, gallery, products, users] = await Promise.all([
+        storage.getAllNews(),
+        storage.getAllEvents(),
+        storage.getAllGallery(),
+        storage.getAllProducts(),
+        storage.getAllUsers(),
+      ]);
+
+      res.json({
+        news: news.length,
+        events: events.length,
+        gallery: gallery.length,
+        products: products.length,
+        comments: 0, // Will be implemented when comment system is ready
+        users: users.length,
+      });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch stats" });
+    }
+  });
+  
   // ===== NEWS ROUTES =====
   app.get("/api/news", async (_req, res) => {
     try {
