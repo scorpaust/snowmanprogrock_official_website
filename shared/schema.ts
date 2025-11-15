@@ -208,6 +208,7 @@ export const insertCommentSchema = createInsertSchema(comments).omit({ id: true,
   comment: z.string().min(10, "Comment must be at least 10 characters").max(1000, "Comment must be at most 1000 characters"),
   isApproved: z.union([z.literal(0), z.literal(1)]).default(0),
 });
+export const updateCommentSchema = insertCommentSchema.partial().strict();
 export const insertNewsSchema = createInsertSchema(news).omit({ id: true, publishedAt: true }).extend({
   content: z.string().max(1200, "Content must be 1200 characters or less"),
   contentEn: z.string().max(1200, "Content must be 1200 characters or less").optional(),
