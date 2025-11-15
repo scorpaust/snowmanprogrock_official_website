@@ -1,7 +1,7 @@
 import type { Express, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertNewsSchema, insertEventSchema, insertGallerySchema, insertContactSchema, insertBiographySchema, insertSpotifySettingsSchema, insertUserSchema, updateUserSchema, updateNewsSchema, updateEventSchema, insertProductSchema, updateProductSchema } from "@shared/schema";
+import { insertNewsSchema, insertEventSchema, insertGallerySchema, insertContactSchema, insertBiographySchema, insertSpotifySettingsSchema, insertUserSchema, updateUserSchema, updateNewsSchema, updateEventSchema, insertProductSchema, updateProductSchema, insertCommentSchema, updateCommentSchema } from "@shared/schema";
 import { registerAuthRoutes, requireAuth, requireRole } from "./auth";
 import Stripe from "stripe";
 import bcrypt from "bcrypt";
@@ -472,6 +472,70 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ error: "Failed to delete product" });
+    }
+  });
+
+  // ===== COMMENTS ROUTES =====
+
+  app.get("/api/comments", async (_req, res) => {
+    try {
+      const comments = await storage.getAllComments();
+      res.json(comments);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch comments" });
+    }
+  });
+
+  app.get("/api/comments/:id", async (req, res) => {
+    try {
+      const comment = await storage.getCommentById(req.params.id);
+      if (!comment) {
+        return res.status(404).json({ error: "Comment not found" });
+      }
+      res.json(comment);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch comment" });
+    }
+  });
+
+  app.post("/api/comments", async (req, res) => {
+    try {
+      const validated = insertCommentSchema.parse(req.body);
+      const comment = await storage.createComment(validated);
+      res.status(201).json(comment);
+    } catch (error: any) {
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ error: "Invalid comment data", details: error.errors });
+      }
+      res.status(400).json({ error: "Invalid comment data" });
+    }
+  });
+
+  app.patch("/api/comments/:id", requireAuth, requireAdmin, async (req, res) => {
+    try {
+      const validated = updateCommentSchema.parse(req.body);
+      const comment = await storage.updateComment(req.params.id, validated);
+      if (!comment) {
+        return res.status(404).json({ error: "Comment not found" });
+      }
+      res.json(comment);
+    } catch (error: any) {
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ error: "Invalid comment data", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to update comment" });
+    }
+  });
+
+  app.delete("/api/comments/:id", requireAuth, requireAdmin, async (req, res) => {
+    try {
+      const deleted = await storage.deleteComment(req.params.id);
+      if (!deleted) {
+        return res.status(404).json({ error: "Comment not found" });
+      }
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete comment" });
     }
   });
 

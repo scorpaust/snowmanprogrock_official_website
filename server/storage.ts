@@ -21,6 +21,8 @@ import {
   type InsertOrder,
   type OrderItem,
   type InsertOrderItem,
+  type Comment,
+  type InsertComment,
   users,
   news,
   events,
@@ -32,6 +34,7 @@ import {
   products,
   orders,
   orderItems,
+  comments,
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { db } from "./db";
@@ -109,6 +112,13 @@ export interface IStorage {
   // Order Items
   getOrderItemsByOrderId(orderId: string): Promise<OrderItem[]>;
   createOrderItem(item: InsertOrderItem): Promise<OrderItem>;
+
+  // Comments
+  getAllComments(): Promise<Comment[]>;
+  getCommentById(id: string): Promise<Comment | undefined>;
+  createComment(comment: InsertComment): Promise<Comment>;
+  updateComment(id: string, comment: Partial<InsertComment>): Promise<Comment | undefined>;
+  deleteComment(id: string): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
@@ -123,6 +133,7 @@ export class MemStorage implements IStorage {
   private products: Map<string, Product>;
   private orders: Map<string, Order>;
   private orderItems: Map<string, OrderItem>;
+  private comments: Map<string, Comment>;
 
   constructor() {
     this.users = new Map();
@@ -136,6 +147,7 @@ export class MemStorage implements IStorage {
     this.products = new Map();
     this.orders = new Map();
     this.orderItems = new Map();
+    this.comments = new Map();
 
     this.seedData();
   }
@@ -591,6 +603,44 @@ export class MemStorage implements IStorage {
     const item: OrderItem = { ...insertItem, id, createdAt: new Date() };
     this.orderItems.set(id, item);
     return item;
+  }
+
+  async getAllComments(): Promise<Comment[]> {
+    return Array.from(this.comments.values()).sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+  }
+
+  async getCommentById(id: string): Promise<Comment | undefined> {
+    return this.comments.get(id);
+  }
+
+  async createComment(comment: InsertComment): Promise<Comment> {
+    const newComment: Comment = {
+      id: randomUUID(),
+      ...comment,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    this.comments.set(newComment.id, newComment);
+    return newComment;
+  }
+
+  async updateComment(id: string, updates: Partial<InsertComment>): Promise<Comment | undefined> {
+    const comment = this.comments.get(id);
+    if (!comment) return undefined;
+
+    const updated: Comment = {
+      ...comment,
+      ...updates,
+      updatedAt: new Date(),
+    };
+    this.comments.set(id, updated);
+    return updated;
+  }
+
+  async deleteComment(id: string): Promise<boolean> {
+    return this.comments.delete(id);
   }
 }
 
@@ -1099,6 +1149,34 @@ export class DbStorage implements IStorage {
   async createOrderItem(insertItem: InsertOrderItem): Promise<OrderItem> {
     const result = await db.insert(orderItems).values(insertItem).returning();
     return result[0];
+  }
+
+  // Comments
+  async getAllComments(): Promise<Comment[]> {
+    return db.select().from(comments).orderBy(desc(comments.createdAt));
+  }
+
+  async getCommentById(id: string): Promise<Comment | undefined> {
+    const result = await db.select().from(comments).where(eq(comments.id, id)).limit(1);
+    return result[0];
+  }
+
+  async createComment(insertComment: InsertComment): Promise<Comment> {
+    const result = await db.insert(comments).values(insertComment).returning();
+    return result[0];
+  }
+
+  async updateComment(id: string, updates: Partial<InsertComment>): Promise<Comment | undefined> {
+    const result = await db.update(comments)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(comments.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async deleteComment(id: string): Promise<boolean> {
+    const result = await db.delete(comments).where(eq(comments.id, id)).returning();
+    return result.length > 0;
   }
 }
 
