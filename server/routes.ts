@@ -1,7 +1,7 @@
 import type { Express, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertNewsSchema, insertEventSchema, insertGallerySchema, insertContactSchema, insertBiographySchema, insertSpotifySettingsSchema, insertUserSchema, updateUserSchema, updateNewsSchema, updateEventSchema } from "@shared/schema";
+import { insertNewsSchema, insertEventSchema, insertGallerySchema, insertContactSchema, insertBiographySchema, insertSpotifySettingsSchema, insertUserSchema, updateUserSchema, updateNewsSchema, updateEventSchema, insertProductSchema, updateProductSchema } from "@shared/schema";
 import { registerAuthRoutes, requireAuth, requireRole } from "./auth";
 import Stripe from "stripe";
 import bcrypt from "bcrypt";
@@ -431,6 +431,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(product);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch product" });
+    }
+  });
+
+  app.post("/api/products", requireAuth, requireAdmin, async (req, res) => {
+    try {
+      const validated = insertProductSchema.parse(req.body);
+      const product = await storage.createProduct(validated);
+      res.status(201).json(product);
+    } catch (error: any) {
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ error: "Invalid product data", details: error.errors });
+      }
+      res.status(400).json({ error: "Invalid product data" });
+    }
+  });
+
+  app.patch("/api/products/:id", requireAuth, requireAdmin, async (req, res) => {
+    try {
+      const validated = updateProductSchema.parse(req.body);
+      const product = await storage.updateProduct(req.params.id, validated);
+      if (!product) {
+        return res.status(404).json({ error: "Product not found" });
+      }
+      res.json(product);
+    } catch (error: any) {
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ error: "Invalid product data", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to update product" });
+    }
+  });
+
+  app.delete("/api/products/:id", requireAuth, requireAdmin, async (req, res) => {
+    try {
+      const deleted = await storage.deleteProduct(req.params.id);
+      if (!deleted) {
+        return res.status(404).json({ error: "Product not found" });
+      }
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete product" });
     }
   });
 

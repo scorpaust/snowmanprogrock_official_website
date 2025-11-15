@@ -41,7 +41,9 @@ export default function Login() {
         title: "Login successful",
         description: "Redirecting to dashboard...",
       });
-      setLocation("/admin");
+      setTimeout(() => {
+        window.location.href = "/admin";
+      }, 100);
     },
     onError: (error: Error) => {
       toast({

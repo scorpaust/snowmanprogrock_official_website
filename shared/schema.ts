@@ -246,6 +246,7 @@ export const insertProductSchema = createInsertSchema(products).omit({ id: true,
   isActive: z.union([z.literal(0), z.literal(1)]),
   featured: z.union([z.literal(0), z.literal(1)]),
 });
+export const updateProductSchema = insertProductSchema.partial().strict();
 export const insertOrderSchema = createInsertSchema(orders).omit({ id: true, orderNumber: true, createdAt: true, updatedAt: true }).extend({
   totalAmount: z.number().int().positive("Total amount must be positive"),
   status: z.enum(['pending', 'paid', 'processing', 'shipped', 'completed', 'cancelled']).default('pending'),
