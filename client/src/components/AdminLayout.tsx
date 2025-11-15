@@ -26,6 +26,7 @@ import {
   Settings,
   LogOut,
   Music,
+  MessageSquare,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -59,6 +60,11 @@ const menuItems = [
     title: "Biografia",
     url: "/admin/biografia",
     icon: FileText,
+  },
+  {
+    title: "Comentários",
+    url: "/admin/comentarios",
+    icon: MessageSquare,
   },
   {
     title: "Utilizadores",

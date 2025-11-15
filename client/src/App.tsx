@@ -23,6 +23,7 @@ import GalleryManagement from "./pages/admin/GalleryManagement";
 import BiographyEditor from "./pages/admin/BiographyEditor";
 import UsersManagement from "./pages/admin/UsersManagement";
 import ProductsManagement from "./pages/admin/ProductsManagement";
+import CommentsModeration from "./pages/admin/CommentsModeration";
 import Checkout from "./pages/Checkout";
 import OrderConfirmation from "./pages/OrderConfirmation";
 import Store from "./pages/Store";
@@ -52,6 +53,7 @@ function Router({ language }: { language: string }) {
       <Route path="/admin/galeria" component={GalleryManagement} />
       <Route path="/admin/biografia" component={BiographyEditor} />
       <Route path="/admin/produtos" component={ProductsManagement} />
+      <Route path="/admin/comentarios" component={CommentsModeration} />
       <Route path="/admin/utilizadores" component={UsersManagement} />
       <Route component={NotFound} />
     </Switch>
