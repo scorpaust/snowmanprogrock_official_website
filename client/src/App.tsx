@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Switch, Route } from "wouter";
+import { Switch, Route, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -32,31 +32,37 @@ import NotFound from "@/pages/not-found";
 
 function Router({ language }: { language: string }) {
   useAnalytics();
+  const [location] = useLocation();
+  const isAdminRoute = location.startsWith('/admin');
   
   return (
-    <Switch>
-      <Route path="/" component={() => <Home language={language} />} />
-      <Route path="/banda" component={() => <Band language={language} />} />
-      <Route path="/noticias" component={() => <News language={language} />} />
-      <Route path="/eventos" component={() => <Events language={language} />} />
-      <Route path="/galeria" component={() => <Gallery language={language} />} />
-      <Route path="/contactos" component={() => <Contact language={language} />} />
-      <Route path="/loja" component={() => <Store language={language} />} />
-      <Route path="/loja/produto/:id" component={() => <ProductDetail language={language} />} />
-      <Route path="/loja/checkout" component={() => <Checkout language={language} />} />
-      <Route path="/loja/pedido/:orderId" component={OrderConfirmation} />
-      <Route path="/admin/login" component={Login} />
-      <Route path="/admin" component={Dashboard} />
-      <Route path="/admin/spotify" component={SpotifySettings} />
-      <Route path="/admin/noticias" component={NewsManagement} />
-      <Route path="/admin/eventos" component={EventsManagement} />
-      <Route path="/admin/galeria" component={GalleryManagement} />
-      <Route path="/admin/biografia" component={BiographyEditor} />
-      <Route path="/admin/produtos" component={ProductsManagement} />
-      <Route path="/admin/comentarios" component={CommentsModeration} />
-      <Route path="/admin/utilizadores" component={UsersManagement} />
-      <Route component={NotFound} />
-    </Switch>
+    <>
+      {!isAdminRoute && <Navigation language={language} setLanguage={setLanguage} />}
+      <Switch>
+        <Route path="/" component={() => <Home language={language} />} />
+        <Route path="/banda" component={() => <Band language={language} />} />
+        <Route path="/noticias" component={() => <News language={language} />} />
+        <Route path="/eventos" component={() => <Events language={language} />} />
+        <Route path="/galeria" component={() => <Gallery language={language} />} />
+        <Route path="/contactos" component={() => <Contact language={language} />} />
+        <Route path="/loja" component={() => <Store language={language} />} />
+        <Route path="/loja/produto/:id" component={() => <ProductDetail language={language} />} />
+        <Route path="/loja/checkout" component={() => <Checkout language={language} />} />
+        <Route path="/loja/pedido/:orderId" component={OrderConfirmation} />
+        <Route path="/admin/login" component={Login} />
+        <Route path="/admin" component={Dashboard} />
+        <Route path="/admin/spotify" component={SpotifySettings} />
+        <Route path="/admin/noticias" component={NewsManagement} />
+        <Route path="/admin/eventos" component={EventsManagement} />
+        <Route path="/admin/galeria" component={GalleryManagement} />
+        <Route path="/admin/biografia" component={BiographyEditor} />
+        <Route path="/admin/produtos" component={ProductsManagement} />
+        <Route path="/admin/comentarios" component={CommentsModeration} />
+        <Route path="/admin/utilizadores" component={UsersManagement} />
+        <Route component={NotFound} />
+      </Switch>
+      {!isAdminRoute && <Footer language={language} />}
+    </>
   );
 }
 
@@ -86,11 +92,9 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <div className="min-h-screen flex flex-col">
-          <Navigation language={language} setLanguage={setLanguage} />
           <main className="flex-1">
             <Router language={language} />
           </main>
-          <Footer language={language} />
         </div>
         <Toaster />
       </TooltipProvider>
