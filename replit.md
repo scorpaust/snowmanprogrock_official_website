@@ -127,6 +127,37 @@ Preferred communication style: Simple, everyday language.
 - Scope set to root (/)
 - Error handling for development environment
 
+### Object Storage & File Upload System
+
+**Replit Object Storage Integration:**
+- Google Cloud Storage bucket (replit-objstore-27e035e7-69a4-4c39-ba1e-7660c7ae7352)
+- Environment variables: DEFAULT_OBJECT_STORAGE_BUCKET_ID, PUBLIC_OBJECT_SEARCH_PATHS, PRIVATE_OBJECT_DIR
+- Bucket configured with private directory (.private/) for user uploads
+- Public directory for static assets served directly
+
+**File Upload Architecture:**
+- **Frontend:** ObjectUploader component using Uppy v4 Dashboard (@uppy/core, @uppy/dashboard, @uppy/react)
+- **Backend:** ObjectStorageService class (server/objectStorage.ts) with presigned URL generation
+- **Flow:** Client requests presigned URL → uploads directly to GCS → normalizes path via API → stores /objects/uploads/{uuid} in database
+- **Security:** All upload endpoints protected with requireAuth middleware
+- **Path Normalization:** Automatic conversion of GCS signed URLs to /objects/{entityId} format for database storage
+
+**Upload Features:**
+- Drag-and-drop file selection with preview
+- Progress tracking and error handling
+- Support for images (JPEG, PNG, WebP, GIF) and videos (MP4, WebM, OGG)
+- Automatic thumbnail generation for videos
+- Direct PC upload capability (no URL-only limitation)
+
+**API Endpoints:**
+- POST /api/objects/upload - Generate presigned URL for file upload (requireAuth)
+- POST /api/objects/normalize-path - Convert GCS URL to /objects/{id} format (requireAuth)
+- GET /objects/:id - Serve uploaded files with proper content-type headers
+
+**Current Integration:**
+- Gallery Management: Full upload support for main images and video thumbnails
+- Next: Extend to Products, News, Events, Biography admin forms
+
 ### Design System
 
 **Color Palette:**
