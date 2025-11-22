@@ -188,7 +188,7 @@ export default function EventsManagement() {
       venue: event.venue,
       city: event.city,
       country: event.country,
-      eventDate: event.eventDate,
+      eventDate: new Date(event.eventDate),
       description: event.description || "",
       descriptionEn: event.descriptionEn || "",
       ticketLink: event.ticketLink || "",
