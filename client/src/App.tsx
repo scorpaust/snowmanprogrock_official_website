@@ -30,7 +30,7 @@ import Store from "./pages/Store";
 import ProductDetail from "./pages/ProductDetail";
 import NotFound from "@/pages/not-found";
 
-function Router({ language }: { language: string }) {
+function Router({ language, setLanguage }: { language: string; setLanguage: (lang: string) => void }) {
   useAnalytics();
   const [location] = useLocation();
   const isAdminRoute = location.startsWith('/admin');
@@ -93,7 +93,7 @@ function App() {
       <TooltipProvider>
         <div className="min-h-screen flex flex-col">
           <main className="flex-1">
-            <Router language={language} />
+            <Router language={language} setLanguage={setLanguage} />
           </main>
         </div>
         <Toaster />

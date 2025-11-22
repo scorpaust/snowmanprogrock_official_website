@@ -35,8 +35,14 @@ export const news = pgTable("news", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   title: text("title").notNull(),
   titleEn: text("title_en"),
+  titleFr: text("title_fr"),
+  titleEs: text("title_es"),
+  titleDe: text("title_de"),
   content: text("content").notNull(), // max 1200 chars enforced in validation
   contentEn: text("content_en"),
+  contentFr: text("content_fr"),
+  contentEs: text("content_es"),
+  contentDe: text("content_de"),
   images: text("images").array().notNull().default(sql`ARRAY[]::text[]`),
   publishedAt: timestamp("published_at").notNull().defaultNow(),
   featured: integer("featured").notNull().default(0), // 1 for featured, 0 for regular
@@ -47,12 +53,18 @@ export const events = pgTable("events", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   title: text("title").notNull(),
   titleEn: text("title_en"),
+  titleFr: text("title_fr"),
+  titleEs: text("title_es"),
+  titleDe: text("title_de"),
   venue: text("venue").notNull(),
   city: text("city").notNull(),
   country: text("country").notNull(),
   eventDate: timestamp("event_date").notNull(),
   description: text("description"),
   descriptionEn: text("description_en"),
+  descriptionFr: text("description_fr"),
+  descriptionEs: text("description_es"),
+  descriptionDe: text("description_de"),
   ticketLink: text("ticket_link"),
 });
 
@@ -64,6 +76,9 @@ export const gallery = pgTable("gallery", {
   thumbnail: text("thumbnail"), // for videos
   caption: text("caption"),
   captionEn: text("caption_en"),
+  captionFr: text("caption_fr"),
+  captionEs: text("caption_es"),
+  captionDe: text("caption_de"),
   uploadedAt: timestamp("uploaded_at").notNull().defaultNow(),
 });
 
@@ -98,6 +113,9 @@ export const biography = pgTable("biography", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   content: text("content").notNull(), // max 800 chars
   contentEn: text("content_en"),
+  contentFr: text("content_fr"),
+  contentEs: text("content_es"),
+  contentDe: text("content_de"),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
