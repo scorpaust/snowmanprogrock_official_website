@@ -53,9 +53,11 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { Image as ImageIcon, Plus, Pencil, Trash2, Video } from "lucide-react";
+import { Image as ImageIcon, Plus, Pencil, Trash2, Video, Upload } from "lucide-react";
 import type { Gallery } from "@shared/schema";
 import { insertGallerySchema } from "@shared/schema";
+import { ObjectUploader } from "@/components/ObjectUploader";
+import type { UploadResult } from "@uppy/core";
 
 type GalleryForm = z.infer<typeof insertGallerySchema>;
 
@@ -202,6 +204,72 @@ export default function GalleryManagement() {
     }
   };
 
+  const handleGetUploadURL = async () => {
+    const response = await apiRequest("POST", "/api/objects/upload", {});
+    if (!response.ok) {
+      throw new Error("Failed to get upload URL");
+    }
+    const data = await response.json();
+    return {
+      method: "PUT" as const,
+      url: data.uploadURL,
+    };
+  };
+
+  const handleMainUploadComplete = async (result: UploadResult<Record<string, unknown>, Record<string, unknown>>) => {
+    if (result.successful && result.successful.length > 0) {
+      const uploadURL = result.successful[0].uploadURL;
+      if (uploadURL) {
+        try {
+          const response = await apiRequest("POST", "/api/objects/normalize-path", { uploadURL });
+          if (!response.ok) {
+            throw new Error("Failed to normalize path");
+          }
+          const data = await response.json();
+          form.setValue("url", data.objectPath);
+          toast({
+            title: "Upload concluído",
+            description: "Ficheiro carregado com sucesso.",
+          });
+        } catch (error) {
+          console.error("Error normalizing path:", error);
+          toast({
+            title: "Erro",
+            description: "Falha ao processar upload.",
+            variant: "destructive",
+          });
+        }
+      }
+    }
+  };
+
+  const handleThumbnailUploadComplete = async (result: UploadResult<Record<string, unknown>, Record<string, unknown>>) => {
+    if (result.successful && result.successful.length > 0) {
+      const uploadURL = result.successful[0].uploadURL;
+      if (uploadURL) {
+        try {
+          const response = await apiRequest("POST", "/api/objects/normalize-path", { uploadURL });
+          if (!response.ok) {
+            throw new Error("Failed to normalize path");
+          }
+          const data = await response.json();
+          form.setValue("thumbnail", data.objectPath);
+          toast({
+            title: "Upload concluído",
+            description: "Thumbnail carregado com sucesso.",
+          });
+        } catch (error) {
+          console.error("Error normalizing path:", error);
+          toast({
+            title: "Erro",
+            description: "Falha ao processar upload.",
+            variant: "destructive",
+          });
+        }
+      }
+    }
+  };
+
   if (isLoading) {
     return (
       <AdminLayout>
@@ -340,15 +408,27 @@ export default function GalleryManagement() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>URL *</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          placeholder="https://..."
-                          data-testid="input-url"
-                        />
-                      </FormControl>
+                      <div className="flex gap-2">
+                        <FormControl>
+                          <Input
+                            {...field}
+                            placeholder="https://... ou faça upload"
+                            data-testid="input-url"
+                          />
+                        </FormControl>
+                        <ObjectUploader
+                          maxNumberOfFiles={1}
+                          maxFileSize={52428800}
+                          onGetUploadParameters={handleGetUploadURL}
+                          onComplete={handleMainUploadComplete}
+                          variant="outline"
+                        >
+                          <Upload className="h-4 w-4 mr-2" />
+                          Upload
+                        </ObjectUploader>
+                      </div>
                       <FormDescription>
-                        URL da imagem ou vídeo (YouTube, Vimeo, etc.)
+                        Cole um URL (YouTube, Vimeo, etc.) ou faça upload do ficheiro do PC
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -362,16 +442,28 @@ export default function GalleryManagement() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Thumbnail (URL)</FormLabel>
-                        <FormControl>
-                          <Input
-                            {...field}
-                            value={field.value || ""}
-                            placeholder="https://..."
-                            data-testid="input-thumbnail"
-                          />
-                        </FormControl>
+                        <div className="flex gap-2">
+                          <FormControl>
+                            <Input
+                              {...field}
+                              value={field.value || ""}
+                              placeholder="https://... ou faça upload"
+                              data-testid="input-thumbnail"
+                            />
+                          </FormControl>
+                          <ObjectUploader
+                            maxNumberOfFiles={1}
+                            maxFileSize={10485760}
+                            onGetUploadParameters={handleGetUploadURL}
+                            onComplete={handleThumbnailUploadComplete}
+                            variant="outline"
+                          >
+                            <Upload className="h-4 w-4 mr-2" />
+                            Upload
+                          </ObjectUploader>
+                        </div>
                         <FormDescription>
-                          URL da imagem de pré-visualização do vídeo
+                          Cole um URL ou faça upload da imagem de pré-visualização
                         </FormDescription>
                         <FormMessage />
                       </FormItem>

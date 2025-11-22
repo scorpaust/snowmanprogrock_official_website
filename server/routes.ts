@@ -5,6 +5,7 @@ import { insertNewsSchema, insertEventSchema, insertGallerySchema, insertContact
 import { registerAuthRoutes, requireAuth, requireRole } from "./auth";
 import Stripe from "stripe";
 import bcrypt from "bcrypt";
+import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
 
 if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
@@ -16,6 +17,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // ===== AUTH ROUTES =====
   registerAuthRoutes(app);
+  
+  // ===== OBJECT STORAGE ROUTES =====
+  // Get presigned URL for file upload (protected - admin only)
+  app.post("/api/objects/upload", requireAuth, async (_req, res) => {
+    try {
+      const objectStorageService = new ObjectStorageService();
+      const uploadURL = await objectStorageService.getObjectEntityUploadURL();
+      res.json({ uploadURL });
+    } catch (error) {
+      console.error("Error generating upload URL:", error);
+      res.status(500).json({ error: "Failed to generate upload URL" });
+    }
+  });
+
+  // Normalize upload URL to object path (for frontend use after upload)
+  app.post("/api/objects/normalize-path", requireAuth, async (req, res) => {
+    try {
+      const { uploadURL } = req.body;
+      if (!uploadURL) {
+        return res.status(400).json({ error: "uploadURL is required" });
+      }
+      const objectStorageService = new ObjectStorageService();
+      const normalizedPath = objectStorageService.normalizeObjectEntityPath(uploadURL);
+      res.json({ objectPath: normalizedPath });
+    } catch (error) {
+      console.error("Error normalizing path:", error);
+      res.status(500).json({ error: "Failed to normalize path" });
+    }
+  });
+
+  // Serve uploaded objects (public access)
+  app.get("/objects/:objectPath(*)", async (req, res) => {
+    const objectStorageService = new ObjectStorageService();
+    try {
+      const objectFile = await objectStorageService.getObjectEntityFile(req.path);
+      objectStorageService.downloadObject(objectFile, res);
+    } catch (error) {
+      console.error("Error serving object:", error);
+      if (error instanceof ObjectNotFoundError) {
+        return res.sendStatus(404);
+      }
+      return res.sendStatus(500);
+    }
+  });
   
   // ===== ADMIN STATS ROUTE =====
   app.get("/api/admin/stats", requireAuth, async (_req, res) => {
