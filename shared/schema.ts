@@ -146,8 +146,14 @@ export const products = pgTable("products", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   name: text("name").notNull(),
   nameEn: text("name_en"),
+  nameFr: text("name_fr"),
+  nameEs: text("name_es"),
+  nameDe: text("name_de"),
   description: text("description").notNull(),
   descriptionEn: text("description_en"),
+  descriptionFr: text("description_fr"),
+  descriptionEs: text("description_es"),
+  descriptionDe: text("description_de"),
   price: integer("price").notNull(), // price in cents (e.g., 1999 = €19.99)
   type: text("type").notNull(), // 'physical' or 'digital'
   categoryId: varchar("category_id").notNull().references(() => categories.id, { onDelete: "restrict" }),

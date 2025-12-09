@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Plus, Pencil, Trash2, Package, Image as ImageIcon } from "lucide-react";
@@ -20,8 +21,14 @@ import { Badge } from "@/components/ui/badge";
 const productFormSchema = z.object({
   name: z.string().min(1, "Name is required"),
   nameEn: z.string().optional(),
+  nameFr: z.string().optional(),
+  nameEs: z.string().optional(),
+  nameDe: z.string().optional(),
   description: z.string().min(1, "Description is required"),
   descriptionEn: z.string().optional(),
+  descriptionFr: z.string().optional(),
+  descriptionEs: z.string().optional(),
+  descriptionDe: z.string().optional(),
   price: z.number().int().positive("Price must be positive"),
   type: z.enum(['physical', 'digital']),
   categoryId: z.string().min(1, "Category is required"),
@@ -38,8 +45,14 @@ type Product = {
   id: string;
   name: string;
   nameEn: string | null;
+  nameFr: string | null;
+  nameEs: string | null;
+  nameDe: string | null;
   description: string;
   descriptionEn: string | null;
+  descriptionFr: string | null;
+  descriptionEs: string | null;
+  descriptionDe: string | null;
   price: number;
   type: string;
   categoryId: string;
@@ -78,8 +91,14 @@ export default function ProductsManagement() {
     defaultValues: {
       name: "",
       nameEn: "",
+      nameFr: "",
+      nameEs: "",
+      nameDe: "",
       description: "",
       descriptionEn: "",
+      descriptionFr: "",
+      descriptionEs: "",
+      descriptionDe: "",
       price: 0,
       type: 'physical',
       categoryId: "",
@@ -93,7 +112,19 @@ export default function ProductsManagement() {
 
   const createMutation = useMutation({
     mutationFn: async (data: ProductForm) => {
-      const response = await apiRequest("POST", "/api/products", data);
+      const payload = {
+        ...data,
+        nameEn: data.nameEn || null,
+        nameFr: data.nameFr || null,
+        nameEs: data.nameEs || null,
+        nameDe: data.nameDe || null,
+        descriptionEn: data.descriptionEn || null,
+        descriptionFr: data.descriptionFr || null,
+        descriptionEs: data.descriptionEs || null,
+        descriptionDe: data.descriptionDe || null,
+        downloadUrl: data.downloadUrl || null,
+      };
+      const response = await apiRequest("POST", "/api/products", payload);
       return response.json();
     },
     onSuccess: () => {
@@ -109,7 +140,19 @@ export default function ProductsManagement() {
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<ProductForm> }) => {
-      const response = await apiRequest("PATCH", `/api/products/${id}`, data);
+      const payload = {
+        ...data,
+        nameEn: data.nameEn || null,
+        nameFr: data.nameFr || null,
+        nameEs: data.nameEs || null,
+        nameDe: data.nameDe || null,
+        descriptionEn: data.descriptionEn || null,
+        descriptionFr: data.descriptionFr || null,
+        descriptionEs: data.descriptionEs || null,
+        descriptionDe: data.descriptionDe || null,
+        downloadUrl: data.downloadUrl || null,
+      };
+      const response = await apiRequest("PATCH", `/api/products/${id}`, payload);
       return response.json();
     },
     onSuccess: () => {
@@ -149,8 +192,14 @@ export default function ProductsManagement() {
     form.reset({
       name: product.name,
       nameEn: product.nameEn || "",
+      nameFr: product.nameFr || "",
+      nameEs: product.nameEs || "",
+      nameDe: product.nameDe || "",
       description: product.description,
       descriptionEn: product.descriptionEn || "",
+      descriptionFr: product.descriptionFr || "",
+      descriptionEs: product.descriptionEs || "",
+      descriptionDe: product.descriptionDe || "",
       price: product.price,
       type: product.type as 'physical' | 'digital',
       categoryId: product.categoryId,
@@ -221,62 +270,100 @@ export default function ProductsManagement() {
               </DialogHeader>
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="name"
-                      render={({ field }) => (
+                  <Tabs defaultValue="pt" className="w-full">
+                    <TabsList className="grid w-full grid-cols-5">
+                      <TabsTrigger value="pt" data-testid="tab-create-pt">PT *</TabsTrigger>
+                      <TabsTrigger value="en" data-testid="tab-create-en">EN</TabsTrigger>
+                      <TabsTrigger value="fr" data-testid="tab-create-fr">FR</TabsTrigger>
+                      <TabsTrigger value="es" data-testid="tab-create-es">ES</TabsTrigger>
+                      <TabsTrigger value="de" data-testid="tab-create-de">DE</TabsTrigger>
+                    </TabsList>
+
+                    <TabsContent value="pt" className="space-y-4 mt-4">
+                      <FormField control={form.control} name="name" render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Name (PT)*</FormLabel>
-                          <FormControl>
-                            <Input {...field} data-testid="input-product-name" />
-                          </FormControl>
+                          <FormLabel>Nome (PT)*</FormLabel>
+                          <FormControl><Input {...field} data-testid="input-product-name" /></FormControl>
                           <FormMessage />
                         </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="nameEn"
-                      render={({ field }) => (
+                      )} />
+                      <FormField control={form.control} name="description" render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Descrição (PT)*</FormLabel>
+                          <FormControl><Textarea {...field} rows={3} data-testid="textarea-description" /></FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+                    </TabsContent>
+
+                    <TabsContent value="en" className="space-y-4 mt-4">
+                      <FormField control={form.control} name="nameEn" render={({ field: { value, onChange, ...rest } }) => (
                         <FormItem>
                           <FormLabel>Name (EN)</FormLabel>
-                          <FormControl>
-                            <Input {...field} data-testid="input-product-name-en" />
-                          </FormControl>
+                          <FormControl><Input {...rest} value={value ?? ""} onChange={onChange} data-testid="input-product-name-en" /></FormControl>
                           <FormMessage />
                         </FormItem>
-                      )}
-                    />
-                  </div>
+                      )} />
+                      <FormField control={form.control} name="descriptionEn" render={({ field: { value, onChange, ...rest } }) => (
+                        <FormItem>
+                          <FormLabel>Description (EN)</FormLabel>
+                          <FormControl><Textarea {...rest} value={value ?? ""} onChange={onChange} rows={3} data-testid="textarea-description-en" /></FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+                    </TabsContent>
 
-                  <FormField
-                    control={form.control}
-                    name="description"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Description (PT)*</FormLabel>
-                        <FormControl>
-                          <Textarea {...field} rows={3} data-testid="textarea-description" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                    <TabsContent value="fr" className="space-y-4 mt-4">
+                      <FormField control={form.control} name="nameFr" render={({ field: { value, onChange, ...rest } }) => (
+                        <FormItem>
+                          <FormLabel>Nom (FR)</FormLabel>
+                          <FormControl><Input {...rest} value={value ?? ""} onChange={onChange} data-testid="input-product-name-fr" /></FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+                      <FormField control={form.control} name="descriptionFr" render={({ field: { value, onChange, ...rest } }) => (
+                        <FormItem>
+                          <FormLabel>Description (FR)</FormLabel>
+                          <FormControl><Textarea {...rest} value={value ?? ""} onChange={onChange} rows={3} data-testid="textarea-description-fr" /></FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+                    </TabsContent>
 
-                  <FormField
-                    control={form.control}
-                    name="descriptionEn"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Description (EN)</FormLabel>
-                        <FormControl>
-                          <Textarea {...field} rows={3} data-testid="textarea-description-en" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                    <TabsContent value="es" className="space-y-4 mt-4">
+                      <FormField control={form.control} name="nameEs" render={({ field: { value, onChange, ...rest } }) => (
+                        <FormItem>
+                          <FormLabel>Nombre (ES)</FormLabel>
+                          <FormControl><Input {...rest} value={value ?? ""} onChange={onChange} data-testid="input-product-name-es" /></FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+                      <FormField control={form.control} name="descriptionEs" render={({ field: { value, onChange, ...rest } }) => (
+                        <FormItem>
+                          <FormLabel>Descripción (ES)</FormLabel>
+                          <FormControl><Textarea {...rest} value={value ?? ""} onChange={onChange} rows={3} data-testid="textarea-description-es" /></FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+                    </TabsContent>
+
+                    <TabsContent value="de" className="space-y-4 mt-4">
+                      <FormField control={form.control} name="nameDe" render={({ field: { value, onChange, ...rest } }) => (
+                        <FormItem>
+                          <FormLabel>Name (DE)</FormLabel>
+                          <FormControl><Input {...rest} value={value ?? ""} onChange={onChange} data-testid="input-product-name-de" /></FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+                      <FormField control={form.control} name="descriptionDe" render={({ field: { value, onChange, ...rest } }) => (
+                        <FormItem>
+                          <FormLabel>Beschreibung (DE)</FormLabel>
+                          <FormControl><Textarea {...rest} value={value ?? ""} onChange={onChange} rows={3} data-testid="textarea-description-de" /></FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+                    </TabsContent>
+                  </Tabs>
 
                   <div className="grid grid-cols-3 gap-4">
                     <FormField
@@ -519,62 +606,100 @@ export default function ProductsManagement() {
                         </DialogHeader>
                         <Form {...form}>
                           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                            <div className="grid grid-cols-2 gap-4">
-                              <FormField
-                                control={form.control}
-                                name="name"
-                                render={({ field }) => (
+                            <Tabs defaultValue="pt" className="w-full">
+                              <TabsList className="grid w-full grid-cols-5">
+                                <TabsTrigger value="pt" data-testid="tab-edit-pt">PT *</TabsTrigger>
+                                <TabsTrigger value="en" data-testid="tab-edit-en">EN</TabsTrigger>
+                                <TabsTrigger value="fr" data-testid="tab-edit-fr">FR</TabsTrigger>
+                                <TabsTrigger value="es" data-testid="tab-edit-es">ES</TabsTrigger>
+                                <TabsTrigger value="de" data-testid="tab-edit-de">DE</TabsTrigger>
+                              </TabsList>
+
+                              <TabsContent value="pt" className="space-y-4 mt-4">
+                                <FormField control={form.control} name="name" render={({ field }) => (
                                   <FormItem>
-                                    <FormLabel>Name (PT)*</FormLabel>
-                                    <FormControl>
-                                      <Input {...field} />
-                                    </FormControl>
+                                    <FormLabel>Nome (PT)*</FormLabel>
+                                    <FormControl><Input {...field} /></FormControl>
                                     <FormMessage />
                                   </FormItem>
-                                )}
-                              />
-                              <FormField
-                                control={form.control}
-                                name="nameEn"
-                                render={({ field }) => (
+                                )} />
+                                <FormField control={form.control} name="description" render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Descrição (PT)*</FormLabel>
+                                    <FormControl><Textarea {...field} rows={3} /></FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )} />
+                              </TabsContent>
+
+                              <TabsContent value="en" className="space-y-4 mt-4">
+                                <FormField control={form.control} name="nameEn" render={({ field: { value, onChange, ...rest } }) => (
                                   <FormItem>
                                     <FormLabel>Name (EN)</FormLabel>
-                                    <FormControl>
-                                      <Input {...field} />
-                                    </FormControl>
+                                    <FormControl><Input {...rest} value={value ?? ""} onChange={onChange} /></FormControl>
                                     <FormMessage />
                                   </FormItem>
-                                )}
-                              />
-                            </div>
+                                )} />
+                                <FormField control={form.control} name="descriptionEn" render={({ field: { value, onChange, ...rest } }) => (
+                                  <FormItem>
+                                    <FormLabel>Description (EN)</FormLabel>
+                                    <FormControl><Textarea {...rest} value={value ?? ""} onChange={onChange} rows={3} /></FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )} />
+                              </TabsContent>
 
-                            <FormField
-                              control={form.control}
-                              name="description"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Description (PT)*</FormLabel>
-                                  <FormControl>
-                                    <Textarea {...field} rows={3} />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
+                              <TabsContent value="fr" className="space-y-4 mt-4">
+                                <FormField control={form.control} name="nameFr" render={({ field: { value, onChange, ...rest } }) => (
+                                  <FormItem>
+                                    <FormLabel>Nom (FR)</FormLabel>
+                                    <FormControl><Input {...rest} value={value ?? ""} onChange={onChange} /></FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )} />
+                                <FormField control={form.control} name="descriptionFr" render={({ field: { value, onChange, ...rest } }) => (
+                                  <FormItem>
+                                    <FormLabel>Description (FR)</FormLabel>
+                                    <FormControl><Textarea {...rest} value={value ?? ""} onChange={onChange} rows={3} /></FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )} />
+                              </TabsContent>
 
-                            <FormField
-                              control={form.control}
-                              name="descriptionEn"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Description (EN)</FormLabel>
-                                  <FormControl>
-                                    <Textarea {...field} rows={3} />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
+                              <TabsContent value="es" className="space-y-4 mt-4">
+                                <FormField control={form.control} name="nameEs" render={({ field: { value, onChange, ...rest } }) => (
+                                  <FormItem>
+                                    <FormLabel>Nombre (ES)</FormLabel>
+                                    <FormControl><Input {...rest} value={value ?? ""} onChange={onChange} /></FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )} />
+                                <FormField control={form.control} name="descriptionEs" render={({ field: { value, onChange, ...rest } }) => (
+                                  <FormItem>
+                                    <FormLabel>Descripción (ES)</FormLabel>
+                                    <FormControl><Textarea {...rest} value={value ?? ""} onChange={onChange} rows={3} /></FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )} />
+                              </TabsContent>
+
+                              <TabsContent value="de" className="space-y-4 mt-4">
+                                <FormField control={form.control} name="nameDe" render={({ field: { value, onChange, ...rest } }) => (
+                                  <FormItem>
+                                    <FormLabel>Name (DE)</FormLabel>
+                                    <FormControl><Input {...rest} value={value ?? ""} onChange={onChange} /></FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )} />
+                                <FormField control={form.control} name="descriptionDe" render={({ field: { value, onChange, ...rest } }) => (
+                                  <FormItem>
+                                    <FormLabel>Beschreibung (DE)</FormLabel>
+                                    <FormControl><Textarea {...rest} value={value ?? ""} onChange={onChange} rows={3} /></FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )} />
+                              </TabsContent>
+                            </Tabs>
 
                             <div className="grid grid-cols-3 gap-4">
                               <FormField
