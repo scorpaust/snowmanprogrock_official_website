@@ -46,6 +46,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Calendar, Plus, Pencil, Trash2, MapPin } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Event } from "@shared/schema";
 import { insertEventSchema } from "@shared/schema";
 import { format } from "date-fns";
@@ -68,12 +69,18 @@ export default function EventsManagement() {
     defaultValues: {
       title: "",
       titleEn: "",
+      titleFr: "",
+      titleEs: "",
+      titleDe: "",
       venue: "",
       city: "",
       country: "Portugal",
       eventDate: new Date(),
       description: "",
       descriptionEn: "",
+      descriptionFr: "",
+      descriptionEs: "",
+      descriptionDe: "",
       ticketLink: "",
     },
   });
@@ -83,8 +90,14 @@ export default function EventsManagement() {
       const payload = {
         ...data,
         titleEn: data.titleEn || undefined,
+        titleFr: data.titleFr || undefined,
+        titleEs: data.titleEs || undefined,
+        titleDe: data.titleDe || undefined,
         description: data.description || undefined,
         descriptionEn: data.descriptionEn || undefined,
+        descriptionFr: data.descriptionFr || undefined,
+        descriptionEs: data.descriptionEs || undefined,
+        descriptionDe: data.descriptionDe || undefined,
         ticketLink: data.ticketLink || undefined,
       };
       const response = await apiRequest("POST", "/api/events", payload);
@@ -114,8 +127,14 @@ export default function EventsManagement() {
       const payload = {
         ...data,
         titleEn: data.titleEn || undefined,
+        titleFr: data.titleFr || undefined,
+        titleEs: data.titleEs || undefined,
+        titleDe: data.titleDe || undefined,
         description: data.description || undefined,
         descriptionEn: data.descriptionEn || undefined,
+        descriptionFr: data.descriptionFr || undefined,
+        descriptionEs: data.descriptionEs || undefined,
+        descriptionDe: data.descriptionDe || undefined,
         ticketLink: data.ticketLink || undefined,
       };
       const response = await apiRequest("PATCH", `/api/events/${id}`, payload);
@@ -169,12 +188,18 @@ export default function EventsManagement() {
     form.reset({
       title: "",
       titleEn: "",
+      titleFr: "",
+      titleEs: "",
+      titleDe: "",
       venue: "",
       city: "",
       country: "Portugal",
       eventDate: new Date(),
       description: "",
       descriptionEn: "",
+      descriptionFr: "",
+      descriptionEs: "",
+      descriptionDe: "",
       ticketLink: "",
     });
     setIsDialogOpen(true);
@@ -185,12 +210,18 @@ export default function EventsManagement() {
     form.reset({
       title: event.title,
       titleEn: event.titleEn || "",
+      titleFr: event.titleFr || "",
+      titleEs: event.titleEs || "",
+      titleDe: event.titleDe || "",
       venue: event.venue,
       city: event.city,
       country: event.country,
       eventDate: new Date(event.eventDate),
       description: event.description || "",
       descriptionEn: event.descriptionEn || "",
+      descriptionFr: event.descriptionFr || "",
+      descriptionEs: event.descriptionEs || "",
+      descriptionDe: event.descriptionDe || "",
       ticketLink: event.ticketLink || "",
     });
     setIsDialogOpen(true);
@@ -322,45 +353,6 @@ export default function EventsManagement() {
 
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="title"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Título (PT) *</FormLabel>
-                        <FormControl>
-                          <Input
-                            {...field}
-                            placeholder="Nome do evento"
-                            data-testid="input-title"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="titleEn"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Título (EN)</FormLabel>
-                        <FormControl>
-                          <Input
-                            {...field}
-                            value={field.value || ""}
-                            placeholder="Event title"
-                            data-testid="input-title-en"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
                 <div className="grid grid-cols-3 gap-4">
                   <FormField
                     control={form.control}
@@ -369,17 +361,12 @@ export default function EventsManagement() {
                       <FormItem>
                         <FormLabel>Local *</FormLabel>
                         <FormControl>
-                          <Input
-                            {...field}
-                            placeholder="Ex: Casa da Música"
-                            data-testid="input-venue"
-                          />
+                          <Input {...field} placeholder="Ex: Casa da Música" data-testid="input-venue" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-
                   <FormField
                     control={form.control}
                     name="city"
@@ -387,17 +374,12 @@ export default function EventsManagement() {
                       <FormItem>
                         <FormLabel>Cidade *</FormLabel>
                         <FormControl>
-                          <Input
-                            {...field}
-                            placeholder="Ex: Porto"
-                            data-testid="input-city"
-                          />
+                          <Input {...field} placeholder="Ex: Porto" data-testid="input-city" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-
                   <FormField
                     control={form.control}
                     name="country"
@@ -405,11 +387,7 @@ export default function EventsManagement() {
                       <FormItem>
                         <FormLabel>País *</FormLabel>
                         <FormControl>
-                          <Input
-                            {...field}
-                            placeholder="Ex: Portugal"
-                            data-testid="input-country"
-                          />
+                          <Input {...field} placeholder="Ex: Portugal" data-testid="input-country" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -417,92 +395,195 @@ export default function EventsManagement() {
                   />
                 </div>
 
-                <FormField
-                  control={form.control}
-                  name="eventDate"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Data e Hora do Evento *</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="datetime-local"
-                          {...field}
-                          value={
-                            field.value instanceof Date
-                              ? field.value.toISOString().slice(0, 16)
-                              : field.value
-                          }
-                          onChange={(e) => field.onChange(new Date(e.target.value))}
-                          data-testid="input-event-date"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="eventDate"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Data e Hora *</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="datetime-local"
+                            {...field}
+                            value={field.value instanceof Date ? field.value.toISOString().slice(0, 16) : field.value}
+                            onChange={(e) => field.onChange(new Date(e.target.value))}
+                            data-testid="input-event-date"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="ticketLink"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Link para Bilhetes</FormLabel>
+                        <FormControl>
+                          <Input {...field} value={field.value || ""} type="url" placeholder="https://..." data-testid="input-ticket-link" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
 
-                <FormField
-                  control={form.control}
-                  name="description"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Descrição (PT)</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          {...field}
-                          value={field.value || ""}
-                          placeholder="Descrição do evento em português"
-                          rows={3}
-                          data-testid="input-description"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <Tabs defaultValue="pt" className="w-full">
+                  <TabsList className="grid w-full grid-cols-5">
+                    <TabsTrigger value="pt" data-testid="tab-pt">PT *</TabsTrigger>
+                    <TabsTrigger value="en" data-testid="tab-en">EN</TabsTrigger>
+                    <TabsTrigger value="fr" data-testid="tab-fr">FR</TabsTrigger>
+                    <TabsTrigger value="es" data-testid="tab-es">ES</TabsTrigger>
+                    <TabsTrigger value="de" data-testid="tab-de">DE</TabsTrigger>
+                  </TabsList>
 
-                <FormField
-                  control={form.control}
-                  name="descriptionEn"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Descrição (EN)</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          {...field}
-                          value={field.value || ""}
-                          placeholder="Event description in English"
-                          rows={3}
-                          data-testid="input-description-en"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                  <TabsContent value="pt" className="space-y-4 mt-4">
+                    <FormField
+                      control={form.control}
+                      name="title"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Título (PT) *</FormLabel>
+                          <FormControl>
+                            <Input {...field} placeholder="Nome do evento" data-testid="input-title" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="description"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Descrição (PT)</FormLabel>
+                          <FormControl>
+                            <Textarea {...field} value={field.value || ""} placeholder="Descrição do evento" rows={3} data-testid="input-description" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </TabsContent>
 
-                <FormField
-                  control={form.control}
-                  name="ticketLink"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Link para Bilhetes</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          value={field.value || ""}
-                          type="url"
-                          placeholder="https://..."
-                          data-testid="input-ticket-link"
-                        />
-                      </FormControl>
-                      <FormDescription>
-                        URL completo para compra de bilhetes (opcional)
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                  <TabsContent value="en" className="space-y-4 mt-4">
+                    <FormField
+                      control={form.control}
+                      name="titleEn"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Título (EN)</FormLabel>
+                          <FormControl>
+                            <Input {...field} value={field.value || ""} placeholder="Event title" data-testid="input-title-en" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="descriptionEn"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Descrição (EN)</FormLabel>
+                          <FormControl>
+                            <Textarea {...field} value={field.value || ""} placeholder="Event description" rows={3} data-testid="input-description-en" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </TabsContent>
+
+                  <TabsContent value="fr" className="space-y-4 mt-4">
+                    <FormField
+                      control={form.control}
+                      name="titleFr"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Título (FR)</FormLabel>
+                          <FormControl>
+                            <Input {...field} value={field.value || ""} placeholder="Titre de l'événement" data-testid="input-title-fr" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="descriptionFr"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Descrição (FR)</FormLabel>
+                          <FormControl>
+                            <Textarea {...field} value={field.value || ""} placeholder="Description de l'événement" rows={3} data-testid="input-description-fr" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </TabsContent>
+
+                  <TabsContent value="es" className="space-y-4 mt-4">
+                    <FormField
+                      control={form.control}
+                      name="titleEs"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Título (ES)</FormLabel>
+                          <FormControl>
+                            <Input {...field} value={field.value || ""} placeholder="Título del evento" data-testid="input-title-es" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="descriptionEs"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Descrição (ES)</FormLabel>
+                          <FormControl>
+                            <Textarea {...field} value={field.value || ""} placeholder="Descripción del evento" rows={3} data-testid="input-description-es" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </TabsContent>
+
+                  <TabsContent value="de" className="space-y-4 mt-4">
+                    <FormField
+                      control={form.control}
+                      name="titleDe"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Título (DE)</FormLabel>
+                          <FormControl>
+                            <Input {...field} value={field.value || ""} placeholder="Veranstaltungstitel" data-testid="input-title-de" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="descriptionDe"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Descrição (DE)</FormLabel>
+                          <FormControl>
+                            <Textarea {...field} value={field.value || ""} placeholder="Veranstaltungsbeschreibung" rows={3} data-testid="input-description-de" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </TabsContent>
+                </Tabs>
 
                 <DialogFooter>
                   <Button

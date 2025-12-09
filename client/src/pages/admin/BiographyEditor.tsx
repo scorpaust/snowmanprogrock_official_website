@@ -19,6 +19,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { FileText, Save } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Biography } from "@shared/schema";
 import { insertBiographySchema } from "@shared/schema";
 
@@ -44,6 +45,9 @@ export default function BiographyEditor() {
     defaultValues: {
       content: "",
       contentEn: "",
+      contentFr: "",
+      contentEs: "",
+      contentDe: "",
     },
   });
 
@@ -52,6 +56,9 @@ export default function BiographyEditor() {
       form.reset({
         content: biography.content,
         contentEn: biography.contentEn || "",
+        contentFr: biography.contentFr || "",
+        contentEs: biography.contentEs || "",
+        contentDe: biography.contentDe || "",
       });
     }
   }, [biography, form]);
@@ -61,6 +68,9 @@ export default function BiographyEditor() {
       const payload = {
         ...data,
         contentEn: data.contentEn || undefined,
+        contentFr: data.contentFr || undefined,
+        contentEs: data.contentEs || undefined,
+        contentDe: data.contentDe || undefined,
       };
       const response = await apiRequest("PUT", "/api/biography", payload);
       if (!response.ok) throw new Error("Failed to save biography");
@@ -121,50 +131,100 @@ export default function BiographyEditor() {
           <CardContent>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="content"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Conteúdo (PT) *</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          {...field}
-                          placeholder="Biografia em português"
-                          rows={8}
-                          data-testid="input-content"
-                        />
-                      </FormControl>
-                      <FormDescription>
-                        {field.value?.length || 0}/800 caracteres
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <Tabs defaultValue="pt" className="w-full">
+                  <TabsList className="grid w-full grid-cols-5">
+                    <TabsTrigger value="pt" data-testid="tab-pt">PT *</TabsTrigger>
+                    <TabsTrigger value="en" data-testid="tab-en">EN</TabsTrigger>
+                    <TabsTrigger value="fr" data-testid="tab-fr">FR</TabsTrigger>
+                    <TabsTrigger value="es" data-testid="tab-es">ES</TabsTrigger>
+                    <TabsTrigger value="de" data-testid="tab-de">DE</TabsTrigger>
+                  </TabsList>
 
-                <FormField
-                  control={form.control}
-                  name="contentEn"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Conteúdo (EN)</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          {...field}
-                          value={field.value || ""}
-                          placeholder="Biography in English"
-                          rows={8}
-                          data-testid="input-content-en"
-                        />
-                      </FormControl>
-                      <FormDescription>
-                        {field.value?.length || 0}/800 caracteres
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                  <TabsContent value="pt" className="mt-4">
+                    <FormField
+                      control={form.control}
+                      name="content"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Conteúdo (PT) *</FormLabel>
+                          <FormControl>
+                            <Textarea {...field} placeholder="Biografia em português" rows={8} data-testid="input-content" />
+                          </FormControl>
+                          <FormDescription>{field.value?.length || 0}/800 caracteres</FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </TabsContent>
+
+                  <TabsContent value="en" className="mt-4">
+                    <FormField
+                      control={form.control}
+                      name="contentEn"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Conteúdo (EN)</FormLabel>
+                          <FormControl>
+                            <Textarea {...field} value={field.value || ""} placeholder="Biography in English" rows={8} data-testid="input-content-en" />
+                          </FormControl>
+                          <FormDescription>{field.value?.length || 0}/800 caracteres</FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </TabsContent>
+
+                  <TabsContent value="fr" className="mt-4">
+                    <FormField
+                      control={form.control}
+                      name="contentFr"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Conteúdo (FR)</FormLabel>
+                          <FormControl>
+                            <Textarea {...field} value={field.value || ""} placeholder="Biographie en français" rows={8} data-testid="input-content-fr" />
+                          </FormControl>
+                          <FormDescription>{field.value?.length || 0}/800 caracteres</FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </TabsContent>
+
+                  <TabsContent value="es" className="mt-4">
+                    <FormField
+                      control={form.control}
+                      name="contentEs"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Conteúdo (ES)</FormLabel>
+                          <FormControl>
+                            <Textarea {...field} value={field.value || ""} placeholder="Biografía en español" rows={8} data-testid="input-content-es" />
+                          </FormControl>
+                          <FormDescription>{field.value?.length || 0}/800 caracteres</FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </TabsContent>
+
+                  <TabsContent value="de" className="mt-4">
+                    <FormField
+                      control={form.control}
+                      name="contentDe"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Conteúdo (DE)</FormLabel>
+                          <FormControl>
+                            <Textarea {...field} value={field.value || ""} placeholder="Biographie auf Deutsch" rows={8} data-testid="input-content-de" />
+                          </FormControl>
+                          <FormDescription>{field.value?.length || 0}/800 caracteres</FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </TabsContent>
+                </Tabs>
 
                 <div className="flex justify-end">
                   <Button

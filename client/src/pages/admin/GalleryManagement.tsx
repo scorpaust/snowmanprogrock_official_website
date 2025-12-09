@@ -54,6 +54,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Image as ImageIcon, Plus, Pencil, Trash2, Video, Upload } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Gallery } from "@shared/schema";
 import { insertGallerySchema } from "@shared/schema";
 import { ObjectUploader } from "@/components/ObjectUploader";
@@ -80,6 +81,9 @@ export default function GalleryManagement() {
       thumbnail: "",
       caption: "",
       captionEn: "",
+      captionFr: "",
+      captionEs: "",
+      captionDe: "",
     },
   });
 
@@ -89,6 +93,9 @@ export default function GalleryManagement() {
         ...data,
         caption: data.caption || undefined,
         captionEn: data.captionEn || undefined,
+        captionFr: data.captionFr || undefined,
+        captionEs: data.captionEs || undefined,
+        captionDe: data.captionDe || undefined,
         thumbnail: data.thumbnail || undefined,
       };
       const response = await apiRequest("POST", "/api/gallery", payload);
@@ -119,6 +126,9 @@ export default function GalleryManagement() {
         ...data,
         caption: data.caption || undefined,
         captionEn: data.captionEn || undefined,
+        captionFr: data.captionFr || undefined,
+        captionEs: data.captionEs || undefined,
+        captionDe: data.captionDe || undefined,
         thumbnail: data.thumbnail || undefined,
       };
       const response = await apiRequest("PATCH", `/api/gallery/${id}`, payload);
@@ -175,6 +185,9 @@ export default function GalleryManagement() {
       thumbnail: "",
       caption: "",
       captionEn: "",
+      captionFr: "",
+      captionEs: "",
+      captionDe: "",
     });
     setIsDialogOpen(true);
   };
@@ -187,6 +200,9 @@ export default function GalleryManagement() {
       thumbnail: item.thumbnail || "",
       caption: item.caption || "",
       captionEn: item.captionEn || "",
+      captionFr: item.captionFr || "",
+      captionEs: item.captionEs || "",
+      captionDe: item.captionDe || "",
     });
     setIsDialogOpen(true);
   };
@@ -471,47 +487,95 @@ export default function GalleryManagement() {
                   />
                 )}
 
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="caption"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Legenda (PT)</FormLabel>
-                        <FormControl>
-                          <Textarea
-                            {...field}
-                            value={field.value || ""}
-                            placeholder="Descrição em português"
-                            rows={2}
-                            data-testid="input-caption"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                <Tabs defaultValue="pt" className="w-full">
+                  <TabsList className="grid w-full grid-cols-5">
+                    <TabsTrigger value="pt" data-testid="tab-pt">PT</TabsTrigger>
+                    <TabsTrigger value="en" data-testid="tab-en">EN</TabsTrigger>
+                    <TabsTrigger value="fr" data-testid="tab-fr">FR</TabsTrigger>
+                    <TabsTrigger value="es" data-testid="tab-es">ES</TabsTrigger>
+                    <TabsTrigger value="de" data-testid="tab-de">DE</TabsTrigger>
+                  </TabsList>
 
-                  <FormField
-                    control={form.control}
-                    name="captionEn"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Legenda (EN)</FormLabel>
-                        <FormControl>
-                          <Textarea
-                            {...field}
-                            value={field.value || ""}
-                            placeholder="Description in English"
-                            rows={2}
-                            data-testid="input-caption-en"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+                  <TabsContent value="pt" className="mt-4">
+                    <FormField
+                      control={form.control}
+                      name="caption"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Legenda (PT)</FormLabel>
+                          <FormControl>
+                            <Textarea {...field} value={field.value || ""} placeholder="Descrição em português" rows={2} data-testid="input-caption" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </TabsContent>
+
+                  <TabsContent value="en" className="mt-4">
+                    <FormField
+                      control={form.control}
+                      name="captionEn"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Legenda (EN)</FormLabel>
+                          <FormControl>
+                            <Textarea {...field} value={field.value || ""} placeholder="Description in English" rows={2} data-testid="input-caption-en" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </TabsContent>
+
+                  <TabsContent value="fr" className="mt-4">
+                    <FormField
+                      control={form.control}
+                      name="captionFr"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Legenda (FR)</FormLabel>
+                          <FormControl>
+                            <Textarea {...field} value={field.value || ""} placeholder="Description en français" rows={2} data-testid="input-caption-fr" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </TabsContent>
+
+                  <TabsContent value="es" className="mt-4">
+                    <FormField
+                      control={form.control}
+                      name="captionEs"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Legenda (ES)</FormLabel>
+                          <FormControl>
+                            <Textarea {...field} value={field.value || ""} placeholder="Descripción en español" rows={2} data-testid="input-caption-es" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </TabsContent>
+
+                  <TabsContent value="de" className="mt-4">
+                    <FormField
+                      control={form.control}
+                      name="captionDe"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Legenda (DE)</FormLabel>
+                          <FormControl>
+                            <Textarea {...field} value={field.value || ""} placeholder="Beschreibung auf Deutsch" rows={2} data-testid="input-caption-de" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </TabsContent>
+                </Tabs>
 
                 <DialogFooter>
                   <Button

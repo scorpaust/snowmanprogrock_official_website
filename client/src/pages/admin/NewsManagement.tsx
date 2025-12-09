@@ -47,6 +47,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Newspaper, Plus, Pencil, Trash2, Star } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { News, InsertNews } from "@shared/schema";
 import { insertNewsSchema } from "@shared/schema";
 import { format } from "date-fns";
@@ -73,8 +74,14 @@ export default function NewsManagement() {
     defaultValues: {
       title: "",
       titleEn: "",
+      titleFr: "",
+      titleEs: "",
+      titleDe: "",
       content: "",
       contentEn: "",
+      contentFr: "",
+      contentEs: "",
+      contentDe: "",
       images: [],
       featured: 0,
     },
@@ -85,7 +92,13 @@ export default function NewsManagement() {
       const payload = {
         ...data,
         titleEn: data.titleEn || undefined,
+        titleFr: data.titleFr || undefined,
+        titleEs: data.titleEs || undefined,
+        titleDe: data.titleDe || undefined,
         contentEn: data.contentEn || undefined,
+        contentFr: data.contentFr || undefined,
+        contentEs: data.contentEs || undefined,
+        contentDe: data.contentDe || undefined,
       };
       const response = await apiRequest("POST", "/api/news", payload);
       if (!response.ok) throw new Error("Failed to create news");
@@ -114,7 +127,13 @@ export default function NewsManagement() {
       const payload = {
         ...data,
         titleEn: data.titleEn || undefined,
+        titleFr: data.titleFr || undefined,
+        titleEs: data.titleEs || undefined,
+        titleDe: data.titleDe || undefined,
         contentEn: data.contentEn || undefined,
+        contentFr: data.contentFr || undefined,
+        contentEs: data.contentEs || undefined,
+        contentDe: data.contentDe || undefined,
       };
       const response = await apiRequest("PATCH", `/api/news/${id}`, payload);
       if (!response.ok) throw new Error("Failed to update news");
@@ -167,8 +186,14 @@ export default function NewsManagement() {
     form.reset({
       title: "",
       titleEn: "",
+      titleFr: "",
+      titleEs: "",
+      titleDe: "",
       content: "",
       contentEn: "",
+      contentFr: "",
+      contentEs: "",
+      contentDe: "",
       images: [],
       featured: 0,
     });
@@ -180,8 +205,14 @@ export default function NewsManagement() {
     form.reset({
       title: news.title,
       titleEn: news.titleEn || "",
+      titleFr: news.titleFr || "",
+      titleEs: news.titleEs || "",
+      titleDe: news.titleDe || "",
       content: news.content,
       contentEn: news.contentEn || "",
+      contentFr: news.contentFr || "",
+      contentEs: news.contentEs || "",
+      contentDe: news.contentDe || "",
       images: news.images || [],
       featured: news.featured,
     });
@@ -313,89 +344,165 @@ export default function NewsManagement() {
 
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="title"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Título (PT) *</FormLabel>
-                        <FormControl>
-                          <Input
-                            {...field}
-                            placeholder="Título em português"
-                            data-testid="input-title"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                <Tabs defaultValue="pt" className="w-full">
+                  <TabsList className="grid w-full grid-cols-5">
+                    <TabsTrigger value="pt" data-testid="tab-pt">PT *</TabsTrigger>
+                    <TabsTrigger value="en" data-testid="tab-en">EN</TabsTrigger>
+                    <TabsTrigger value="fr" data-testid="tab-fr">FR</TabsTrigger>
+                    <TabsTrigger value="es" data-testid="tab-es">ES</TabsTrigger>
+                    <TabsTrigger value="de" data-testid="tab-de">DE</TabsTrigger>
+                  </TabsList>
 
-                  <FormField
-                    control={form.control}
-                    name="titleEn"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Título (EN)</FormLabel>
-                        <FormControl>
-                          <Input
-                            {...field}
-                            value={field.value || ""}
-                            placeholder="Title in English"
-                            data-testid="input-title-en"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+                  <TabsContent value="pt" className="space-y-4 mt-4">
+                    <FormField
+                      control={form.control}
+                      name="title"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Título (PT) *</FormLabel>
+                          <FormControl>
+                            <Input {...field} placeholder="Título em português" data-testid="input-title" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="content"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Conteúdo (PT) *</FormLabel>
+                          <FormControl>
+                            <Textarea {...field} placeholder="Conteúdo em português" rows={4} data-testid="input-content" />
+                          </FormControl>
+                          <FormDescription>{field.value?.length || 0}/1200 caracteres</FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </TabsContent>
 
-                <FormField
-                  control={form.control}
-                  name="content"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Conteúdo (PT) *</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          {...field}
-                          placeholder="Conteúdo em português (max 1200 caracteres)"
-                          rows={4}
-                          data-testid="input-content"
-                        />
-                      </FormControl>
-                      <FormDescription>
-                        {field.value?.length || 0}/1200 caracteres
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                  <TabsContent value="en" className="space-y-4 mt-4">
+                    <FormField
+                      control={form.control}
+                      name="titleEn"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Título (EN)</FormLabel>
+                          <FormControl>
+                            <Input {...field} value={field.value || ""} placeholder="Title in English" data-testid="input-title-en" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="contentEn"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Conteúdo (EN)</FormLabel>
+                          <FormControl>
+                            <Textarea {...field} value={field.value || ""} placeholder="Content in English" rows={4} data-testid="input-content-en" />
+                          </FormControl>
+                          <FormDescription>{field.value?.length || 0}/1200 caracteres</FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </TabsContent>
 
-                <FormField
-                  control={form.control}
-                  name="contentEn"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Conteúdo (EN)</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          {...field}
-                          value={field.value || ""}
-                          placeholder="Content in English (max 1200 characters)"
-                          rows={4}
-                          data-testid="input-content-en"
-                        />
-                      </FormControl>
-                      <FormDescription>
-                        {field.value?.length || 0}/1200 caracteres
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                  <TabsContent value="fr" className="space-y-4 mt-4">
+                    <FormField
+                      control={form.control}
+                      name="titleFr"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Título (FR)</FormLabel>
+                          <FormControl>
+                            <Input {...field} value={field.value || ""} placeholder="Titre en français" data-testid="input-title-fr" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="contentFr"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Conteúdo (FR)</FormLabel>
+                          <FormControl>
+                            <Textarea {...field} value={field.value || ""} placeholder="Contenu en français" rows={4} data-testid="input-content-fr" />
+                          </FormControl>
+                          <FormDescription>{field.value?.length || 0}/1200 caracteres</FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </TabsContent>
+
+                  <TabsContent value="es" className="space-y-4 mt-4">
+                    <FormField
+                      control={form.control}
+                      name="titleEs"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Título (ES)</FormLabel>
+                          <FormControl>
+                            <Input {...field} value={field.value || ""} placeholder="Título en español" data-testid="input-title-es" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="contentEs"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Conteúdo (ES)</FormLabel>
+                          <FormControl>
+                            <Textarea {...field} value={field.value || ""} placeholder="Contenido en español" rows={4} data-testid="input-content-es" />
+                          </FormControl>
+                          <FormDescription>{field.value?.length || 0}/1200 caracteres</FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </TabsContent>
+
+                  <TabsContent value="de" className="space-y-4 mt-4">
+                    <FormField
+                      control={form.control}
+                      name="titleDe"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Título (DE)</FormLabel>
+                          <FormControl>
+                            <Input {...field} value={field.value || ""} placeholder="Titel auf Deutsch" data-testid="input-title-de" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="contentDe"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Conteúdo (DE)</FormLabel>
+                          <FormControl>
+                            <Textarea {...field} value={field.value || ""} placeholder="Inhalt auf Deutsch" rows={4} data-testid="input-content-de" />
+                          </FormControl>
+                          <FormDescription>{field.value?.length || 0}/1200 caracteres</FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </TabsContent>
+                </Tabs>
 
                 <FormField
                   control={form.control}
