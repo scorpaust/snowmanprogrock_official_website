@@ -19,21 +19,21 @@ import { Plus, Pencil, Trash2, Package, Image as ImageIcon } from "lucide-react"
 import { Badge } from "@/components/ui/badge";
 
 const productFormSchema = z.object({
-  name: z.string().min(1, "Name is required"),
+  name: z.string().min(1, "Nome é obrigatório"),
   nameEn: z.string().optional(),
   nameFr: z.string().optional(),
   nameEs: z.string().optional(),
   nameDe: z.string().optional(),
-  description: z.string().min(1, "Description is required"),
+  description: z.string().min(1, "Descrição é obrigatória"),
   descriptionEn: z.string().optional(),
   descriptionFr: z.string().optional(),
   descriptionEs: z.string().optional(),
   descriptionDe: z.string().optional(),
-  price: z.number().int().positive("Price must be positive"),
+  price: z.number().int().positive("Preço deve ser positivo"),
   type: z.enum(['physical', 'digital']),
-  categoryId: z.string().min(1, "Category is required"),
+  categoryId: z.string().min(1, "Categoria é obrigatória"),
   images: z.array(z.string()).default([]),
-  stock: z.number().int().min(0, "Stock cannot be negative").default(0),
+  stock: z.number().int().min(0, "Stock não pode ser negativo").default(0),
   downloadUrl: z.string().optional(),
   isActive: z.number().int().min(0).max(1).default(1),
   featured: z.number().int().min(0).max(1).default(0),
@@ -129,12 +129,12 @@ export default function ProductsManagement() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/products'] });
-      toast({ title: "Product created successfully" });
+      toast({ title: "Produto criado com sucesso" });
       setIsCreateOpen(false);
       form.reset();
     },
     onError: () => {
-      toast({ title: "Failed to create product", variant: "destructive" });
+      toast({ title: "Erro ao criar produto", variant: "destructive" });
     },
   });
 
@@ -157,12 +157,12 @@ export default function ProductsManagement() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/products'] });
-      toast({ title: "Product updated successfully" });
+      toast({ title: "Produto atualizado com sucesso" });
       setEditingProduct(null);
       form.reset();
     },
     onError: () => {
-      toast({ title: "Failed to update product", variant: "destructive" });
+      toast({ title: "Erro ao atualizar produto", variant: "destructive" });
     },
   });
 
@@ -172,10 +172,10 @@ export default function ProductsManagement() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/products'] });
-      toast({ title: "Product deleted successfully" });
+      toast({ title: "Produto eliminado com sucesso" });
     },
     onError: () => {
-      toast({ title: "Failed to delete product", variant: "destructive" });
+      toast({ title: "Erro ao eliminar produto", variant: "destructive" });
     },
   });
 
@@ -212,7 +212,7 @@ export default function ProductsManagement() {
   };
 
   const handleDelete = (id: string) => {
-    if (confirm("Are you sure you want to delete this product?")) {
+    if (confirm("Tem a certeza que pretende eliminar este produto?")) {
       deleteMutation.mutate(id);
     }
   };
@@ -236,14 +236,14 @@ export default function ProductsManagement() {
 
   const getCategoryName = (categoryId: string) => {
     const category = categories.find(c => c.id === categoryId);
-    return category?.name || "Unknown";
+    return category?.name || "Desconhecida";
   };
 
   if (productsLoading || categoriesLoading) {
     return (
       <AdminLayout>
         <div className="flex items-center justify-center h-64">
-          <p className="text-muted-foreground">Loading products...</p>
+          <p className="text-muted-foreground">A carregar produtos...</p>
         </div>
       </AdminLayout>
     );
@@ -254,19 +254,19 @@ export default function ProductsManagement() {
       <div className="p-6 space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold">Products Management</h1>
-            <p className="text-muted-foreground">Manage store products and inventory</p>
+            <h1 className="text-3xl font-bold">Gestão de Produtos</h1>
+            <p className="text-muted-foreground">Gerir produtos e inventário da loja</p>
           </div>
           <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
             <DialogTrigger asChild>
               <Button data-testid="button-create-product">
                 <Plus className="h-4 w-4 mr-2" />
-                New Product
+                Novo Produto
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
-                <DialogTitle>Create New Product</DialogTitle>
+                <DialogTitle>Criar Novo Produto</DialogTitle>
               </DialogHeader>
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -371,7 +371,7 @@ export default function ProductsManagement() {
                       name="price"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Price (cents)*</FormLabel>
+                          <FormLabel>Preço (cêntimos)*</FormLabel>
                           <FormControl>
                             <Input
                               type="number"
@@ -389,15 +389,15 @@ export default function ProductsManagement() {
                       name="type"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Type*</FormLabel>
+                          <FormLabel>Tipo*</FormLabel>
                           <Select onValueChange={field.onChange} value={field.value}>
                             <FormControl>
                               <SelectTrigger data-testid="select-type">
-                                <SelectValue placeholder="Select type" />
+                                <SelectValue placeholder="Selecionar tipo" />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              <SelectItem value="physical">Physical</SelectItem>
+                              <SelectItem value="physical">Físico</SelectItem>
                               <SelectItem value="digital">Digital</SelectItem>
                             </SelectContent>
                           </Select>
@@ -430,11 +430,11 @@ export default function ProductsManagement() {
                     name="categoryId"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Category*</FormLabel>
+                        <FormLabel>Categoria*</FormLabel>
                         <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
                             <SelectTrigger data-testid="select-category">
-                              <SelectValue placeholder="Select category" />
+                              <SelectValue placeholder="Selecionar categoria" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
@@ -455,7 +455,7 @@ export default function ProductsManagement() {
                     name="downloadUrl"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Download URL (for digital products)</FormLabel>
+                        <FormLabel>URL de Download (produtos digitais)</FormLabel>
                         <FormControl>
                           <Input {...field} data-testid="input-download-url" />
                         </FormControl>
@@ -465,10 +465,10 @@ export default function ProductsManagement() {
                   />
 
                   <div className="space-y-2">
-                    <FormLabel>Product Images</FormLabel>
+                    <FormLabel>Imagens do Produto</FormLabel>
                     <div className="flex gap-2">
                       <Input
-                        placeholder="Image URL"
+                        placeholder="URL da imagem"
                         value={imageInput}
                         onChange={(e) => setImageInput(e.target.value)}
                         data-testid="input-image-url"
@@ -506,7 +506,7 @@ export default function ProductsManagement() {
                       name="isActive"
                       render={({ field }) => (
                         <FormItem className="flex items-center gap-2">
-                          <FormLabel>Active</FormLabel>
+                          <FormLabel>Ativo</FormLabel>
                           <FormControl>
                             <Switch
                               checked={field.value === 1}
@@ -522,7 +522,7 @@ export default function ProductsManagement() {
                       name="featured"
                       render={({ field }) => (
                         <FormItem className="flex items-center gap-2">
-                          <FormLabel>Featured</FormLabel>
+                          <FormLabel>Destaque</FormLabel>
                           <FormControl>
                             <Switch
                               checked={field.value === 1}
@@ -537,7 +537,7 @@ export default function ProductsManagement() {
 
                   <DialogFooter>
                     <Button type="submit" disabled={createMutation.isPending} data-testid="button-submit">
-                      {createMutation.isPending ? "Creating..." : "Create Product"}
+                      {createMutation.isPending ? "A criar..." : "Criar Produto"}
                     </Button>
                   </DialogFooter>
                 </form>
@@ -563,10 +563,10 @@ export default function ProductsManagement() {
                       <h3 className="font-semibold text-lg">{product.name}</h3>
                       <div className="flex gap-1">
                         {product.featured === 1 && (
-                          <Badge variant="default" className="text-xs">Featured</Badge>
+                          <Badge variant="default" className="text-xs">Destaque</Badge>
                         )}
                         {product.isActive === 0 && (
-                          <Badge variant="secondary" className="text-xs">Inactive</Badge>
+                          <Badge variant="secondary" className="text-xs">Inativo</Badge>
                         )}
                       </div>
                     </div>
@@ -597,12 +597,12 @@ export default function ProductsManagement() {
                           data-testid={`button-edit-${product.id}`}
                         >
                           <Pencil className="h-3 w-3 mr-1" />
-                          Edit
+                          Editar
                         </Button>
                       </DialogTrigger>
                       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                         <DialogHeader>
-                          <DialogTitle>Edit Product</DialogTitle>
+                          <DialogTitle>Editar Produto</DialogTitle>
                         </DialogHeader>
                         <Form {...form}>
                           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -707,7 +707,7 @@ export default function ProductsManagement() {
                                 name="price"
                                 render={({ field }) => (
                                   <FormItem>
-                                    <FormLabel>Price (cents)*</FormLabel>
+                                    <FormLabel>Preço (cêntimos)*</FormLabel>
                                     <FormControl>
                                       <Input
                                         type="number"
@@ -724,15 +724,15 @@ export default function ProductsManagement() {
                                 name="type"
                                 render={({ field }) => (
                                   <FormItem>
-                                    <FormLabel>Type*</FormLabel>
+                                    <FormLabel>Tipo*</FormLabel>
                                     <Select onValueChange={field.onChange} value={field.value}>
                                       <FormControl>
                                         <SelectTrigger>
-                                          <SelectValue placeholder="Select type" />
+                                          <SelectValue placeholder="Selecionar tipo" />
                                         </SelectTrigger>
                                       </FormControl>
                                       <SelectContent>
-                                        <SelectItem value="physical">Physical</SelectItem>
+                                        <SelectItem value="physical">Físico</SelectItem>
                                         <SelectItem value="digital">Digital</SelectItem>
                                       </SelectContent>
                                     </Select>
@@ -764,11 +764,11 @@ export default function ProductsManagement() {
                               name="categoryId"
                               render={({ field }) => (
                                 <FormItem>
-                                  <FormLabel>Category*</FormLabel>
+                                  <FormLabel>Categoria*</FormLabel>
                                   <Select onValueChange={field.onChange} value={field.value}>
                                     <FormControl>
                                       <SelectTrigger>
-                                        <SelectValue placeholder="Select category" />
+                                        <SelectValue placeholder="Selecionar categoria" />
                                       </SelectTrigger>
                                     </FormControl>
                                     <SelectContent>
@@ -789,7 +789,7 @@ export default function ProductsManagement() {
                               name="downloadUrl"
                               render={({ field }) => (
                                 <FormItem>
-                                  <FormLabel>Download URL (for digital products)</FormLabel>
+                                  <FormLabel>URL de Download (produtos digitais)</FormLabel>
                                   <FormControl>
                                     <Input {...field} />
                                   </FormControl>
@@ -799,10 +799,10 @@ export default function ProductsManagement() {
                             />
 
                             <div className="space-y-2">
-                              <FormLabel>Product Images</FormLabel>
+                              <FormLabel>Imagens do Produto</FormLabel>
                               <div className="flex gap-2">
                                 <Input
-                                  placeholder="Image URL"
+                                  placeholder="URL da imagem"
                                   value={imageInput}
                                   onChange={(e) => setImageInput(e.target.value)}
                                 />
@@ -838,7 +838,7 @@ export default function ProductsManagement() {
                                 name="isActive"
                                 render={({ field }) => (
                                   <FormItem className="flex items-center gap-2">
-                                    <FormLabel>Active</FormLabel>
+                                    <FormLabel>Ativo</FormLabel>
                                     <FormControl>
                                       <Switch
                                         checked={field.value === 1}
@@ -853,7 +853,7 @@ export default function ProductsManagement() {
                                 name="featured"
                                 render={({ field }) => (
                                   <FormItem className="flex items-center gap-2">
-                                    <FormLabel>Featured</FormLabel>
+                                    <FormLabel>Destaque</FormLabel>
                                     <FormControl>
                                       <Switch
                                         checked={field.value === 1}
@@ -867,7 +867,7 @@ export default function ProductsManagement() {
 
                             <DialogFooter>
                               <Button type="submit" disabled={updateMutation.isPending}>
-                                {updateMutation.isPending ? "Updating..." : "Update Product"}
+                                {updateMutation.isPending ? "A atualizar..." : "Atualizar Produto"}
                               </Button>
                             </DialogFooter>
                           </form>
@@ -882,7 +882,7 @@ export default function ProductsManagement() {
                       data-testid={`button-delete-${product.id}`}
                     >
                       <Trash2 className="h-3 w-3 mr-1" />
-                      Delete
+                      Apagar
                     </Button>
                   </div>
                 </div>
@@ -895,7 +895,7 @@ export default function ProductsManagement() {
           <Card>
             <CardContent className="p-12 text-center">
               <Package className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-              <p className="text-muted-foreground">No products yet. Create your first product to get started.</p>
+              <p className="text-muted-foreground">Ainda não existem produtos. Crie o primeiro produto para começar.</p>
             </CardContent>
           </Card>
         )}
