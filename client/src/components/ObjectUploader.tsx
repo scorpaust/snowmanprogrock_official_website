@@ -1,14 +1,18 @@
-// FILEPATH: client/src/components/ObjectUploader.tsx
-// Based on javascript_object_storage integration blueprint
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import Uppy from "@uppy/core";
-import { DashboardModal } from "@uppy/react";
+import Dashboard from "@uppy/dashboard";
 import "@uppy/core/dist/style.min.css";
 import "@uppy/dashboard/dist/style.min.css";
 import AwsS3 from "@uppy/aws-s3";
 import type { UploadResult } from "@uppy/core";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface ObjectUploaderProps {
   maxNumberOfFiles?: number;
@@ -35,8 +39,13 @@ export function ObjectUploader({
   variant = "default",
 }: ObjectUploaderProps) {
   const [showModal, setShowModal] = useState(false);
-  const [uppy] = useState(() =>
-    new Uppy({
+  const dashboardRef = useRef<HTMLDivElement>(null);
+  const uppyRef = useRef<Uppy | null>(null);
+
+  useEffect(() => {
+    if (!showModal || !dashboardRef.current) return;
+
+    const uppy = new Uppy({
       restrictions: {
         maxNumberOfFiles,
         maxFileSize,
@@ -47,11 +56,25 @@ export function ObjectUploader({
         shouldUseMultipart: false,
         getUploadParameters: onGetUploadParameters,
       })
+      .use(Dashboard, {
+        inline: true,
+        target: dashboardRef.current,
+        proudlyDisplayPoweredByUppy: false,
+        width: "100%",
+        height: 350,
+      })
       .on("complete", (result) => {
         onComplete?.(result);
         setShowModal(false);
-      })
-  );
+      });
+
+    uppyRef.current = uppy;
+
+    return () => {
+      uppy.destroy();
+      uppyRef.current = null;
+    };
+  }, [showModal, maxNumberOfFiles, maxFileSize, onGetUploadParameters, onComplete]);
 
   return (
     <div>
@@ -65,12 +88,14 @@ export function ObjectUploader({
         {children}
       </Button>
 
-      <DashboardModal
-        uppy={uppy}
-        open={showModal}
-        onRequestClose={() => setShowModal(false)}
-        proudlyDisplayPoweredByUppy={false}
-      />
+      <Dialog open={showModal} onOpenChange={setShowModal}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Upload File</DialogTitle>
+          </DialogHeader>
+          <div ref={dashboardRef} className="w-full" />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
