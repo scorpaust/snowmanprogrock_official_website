@@ -229,14 +229,14 @@ export default function Store({ language = 'pt' }: StoreProps) {
                   </div>
                 </CardContent>
                 <Separator />
-                <CardFooter className="flex flex-wrap justify-between items-center gap-3 pt-6">
+                <CardFooter className="flex flex-col gap-3 pt-6">
                   <div className="text-2xl font-bold" data-testid={`text-product-price-${product.id}`}>
                     €{(product.price / 100).toFixed(2)}
                   </div>
                   <Button
                     onClick={() => handleAddToCart(product)}
                     disabled={isOutOfStock}
-                    className="flex-shrink-0"
+                    className="w-full"
                     data-testid={`button-add-to-cart-${product.id}`}
                   >
                     {isOutOfStock ? (
