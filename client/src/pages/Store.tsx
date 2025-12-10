@@ -181,13 +181,13 @@ export default function Store({ language = 'pt' }: StoreProps) {
           ))}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
           {filteredProducts?.map(product => {
             const isOutOfStock = product.type === 'physical' && (product.stock ?? 0) === 0;
             const isLowStock = product.type === 'physical' && (product.stock ?? 0) > 0 && (product.stock ?? 0) < 10;
 
             return (
-              <Card key={product.id} className="flex flex-col" data-testid={`card-product-${product.id}`}>
+              <Card key={product.id} className="h-full flex flex-col" data-testid={`card-product-${product.id}`}>
                 <Link href={`/loja/produto/${product.id}`} data-testid={`link-product-${product.id}`}>
                   <CardHeader className="p-0 cursor-pointer">
                     <div className="relative w-full h-64 overflow-hidden rounded-t-md">
