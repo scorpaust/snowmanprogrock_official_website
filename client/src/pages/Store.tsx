@@ -220,7 +220,7 @@ export default function Store({ language = 'pt' }: StoreProps) {
                   <CardDescription className="mb-4 line-clamp-3" data-testid={`text-product-description-${product.id}`}>
                     {getProductDescription(product)}
                   </CardDescription>
-                  <div className="mt-auto flex items-center gap-2 flex-wrap">
+                  <div className="mt-auto flex items-center gap-2 flex-wrap min-h-[1.5rem]">
                     {product.type === 'physical' && !isOutOfStock && (
                       <Badge variant={isLowStock ? "destructive" : "outline"} data-testid={`badge-stock-${product.id}`}>
                         {isLowStock ? t.limitedStock : t.inStock} ({product.stock})
