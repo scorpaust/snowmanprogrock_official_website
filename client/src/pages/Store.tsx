@@ -211,16 +211,16 @@ export default function Store({ language = 'pt' }: StoreProps) {
                     </div>
                   </CardHeader>
                 </Link>
-                <CardContent className="flex-1 pt-6">
+                <CardContent className="flex-1 flex flex-col pt-6">
                   <Link href={`/loja/produto/${product.id}`}>
                     <CardTitle className="mb-2 cursor-pointer hover:text-primary transition-colors" data-testid={`text-product-name-${product.id}`}>
                       {getProductName(product)}
                     </CardTitle>
                   </Link>
-                  <CardDescription className="mb-4" data-testid={`text-product-description-${product.id}`}>
+                  <CardDescription className="mb-4 line-clamp-3" data-testid={`text-product-description-${product.id}`}>
                     {getProductDescription(product)}
                   </CardDescription>
-                  <div className="flex items-center gap-2 flex-wrap">
+                  <div className="mt-auto flex items-center gap-2 flex-wrap">
                     {product.type === 'physical' && !isOutOfStock && (
                       <Badge variant={isLowStock ? "destructive" : "outline"} data-testid={`badge-stock-${product.id}`}>
                         {isLowStock ? t.limitedStock : t.inStock} ({product.stock})
