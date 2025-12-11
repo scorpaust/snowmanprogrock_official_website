@@ -1,7 +1,7 @@
 import type { Express, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertNewsSchema, insertEventSchema, insertGallerySchema, insertContactSchema, insertBiographySchema, insertSpotifySettingsSchema, insertUserSchema, updateUserSchema, updateNewsSchema, updateEventSchema, insertProductSchema, updateProductSchema, insertCommentSchema, updateCommentSchema } from "@shared/schema";
+import { insertNewsSchema, insertEventSchema, insertGallerySchema, insertContactSchema, insertBiographySchema, insertSpotifySettingsSchema, insertUserSchema, updateUserSchema, updateNewsSchema, updateEventSchema, insertProductSchema, updateProductSchema, insertCommentSchema, updateCommentSchema, insertBandMemberSchema, updateBandMemberSchema } from "@shared/schema";
 import { registerAuthRoutes, requireAuth, requireRole } from "./auth";
 import Stripe from "stripe";
 import bcrypt from "bcrypt";
@@ -319,6 +319,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(biography);
     } catch (error) {
       res.status(400).json({ error: "Invalid biography data" });
+    }
+  });
+
+  // ===== BAND MEMBERS ROUTES =====
+  app.get("/api/band-members", async (_req, res) => {
+    try {
+      const members = await storage.getAllBandMembers();
+      res.json(members);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch band members" });
+    }
+  });
+
+  app.get("/api/band-members/:id", async (req, res) => {
+    try {
+      const member = await storage.getBandMemberById(req.params.id);
+      if (!member) {
+        return res.status(404).json({ error: "Band member not found" });
+      }
+      res.json(member);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch band member" });
+    }
+  });
+
+  app.post("/api/band-members", requireAuth, async (req, res) => {
+    try {
+      const validated = insertBandMemberSchema.parse(req.body);
+      const member = await storage.createBandMember(validated);
+      res.status(201).json(member);
+    } catch (error) {
+      console.error("Band member creation error:", error);
+      res.status(400).json({ error: "Invalid band member data" });
+    }
+  });
+
+  app.patch("/api/band-members/:id", requireAuth, async (req, res) => {
+    try {
+      const validated = updateBandMemberSchema.parse(req.body);
+      const member = await storage.updateBandMember(req.params.id, validated);
+      if (!member) {
+        return res.status(404).json({ error: "Band member not found" });
+      }
+      res.json(member);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid band member data" });
+    }
+  });
+
+  app.delete("/api/band-members/:id", requireAuth, async (req, res) => {
+    try {
+      const deleted = await storage.deleteBandMember(req.params.id);
+      if (!deleted) {
+        return res.status(404).json({ error: "Band member not found" });
+      }
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete band member" });
     }
   });
 
