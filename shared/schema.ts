@@ -196,6 +196,21 @@ export const orderItems = pgTable("order_items", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
+// Band Members table
+export const bandMembers = pgTable("band_members", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  role: text("role").notNull(), // Portuguese role
+  roleEn: text("role_en"),
+  roleFr: text("role_fr"),
+  roleEs: text("role_es"),
+  roleDe: text("role_de"),
+  image: text("image"), // Photo URL
+  displayOrder: integer("display_order").notNull().default(0), // For ordering members
+  isActive: integer("is_active").notNull().default(1),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
 // Comments table (for news and products)
 export const comments = pgTable("comments", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -263,6 +278,17 @@ export const insertSpotifySettingsSchema = createInsertSchema(spotifySettings).o
   isActive: z.union([z.literal(0), z.literal(1)]),
 });
 
+export const insertBandMemberSchema = createInsertSchema(bandMembers).omit({ id: true, createdAt: true }).extend({
+  roleEn: z.string().optional(),
+  roleFr: z.string().optional(),
+  roleEs: z.string().optional(),
+  roleDe: z.string().optional(),
+  image: z.string().optional(),
+  displayOrder: z.number().int().min(0).default(0),
+  isActive: z.union([z.literal(0), z.literal(1)]).default(1),
+});
+export const updateBandMemberSchema = insertBandMemberSchema.partial().strict();
+
 export const insertCategorySchema = createInsertSchema(categories).omit({ id: true, createdAt: true });
 export const insertProductSchema = createInsertSchema(products).omit({ id: true, createdAt: true, updatedAt: true }).extend({
   type: z.enum(['physical', 'digital']),
@@ -320,3 +346,6 @@ export type Order = typeof orders.$inferSelect;
 
 export type InsertOrderItem = z.infer<typeof insertOrderItemSchema>;
 export type OrderItem = typeof orderItems.$inferSelect;
+
+export type InsertBandMember = z.infer<typeof insertBandMemberSchema>;
+export type BandMember = typeof bandMembers.$inferSelect;
