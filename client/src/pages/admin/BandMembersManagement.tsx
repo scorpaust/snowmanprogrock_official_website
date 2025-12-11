@@ -40,8 +40,9 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Plus, Pencil, Trash2, Users, Loader2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Users, Loader2, Upload } from "lucide-react";
 import { ObjectUploader } from "@/components/ObjectUploader";
+import type { UploadResult } from "@uppy/core";
 
 const memberFormSchema = z.object({
   name: z.string().min(2, "O nome deve ter pelo menos 2 caracteres"),
@@ -165,8 +166,35 @@ export default function BandMembersManagement() {
     }
   };
 
-  const handleImageUpload = (url: string) => {
-    form.setValue("image", url);
+  const handleGetUploadURL = async () => {
+    const response = await apiRequest("POST", "/api/objects/upload", {});
+    if (!response.ok) {
+      throw new Error("Failed to get upload URL");
+    }
+    const data = await response.json();
+    return {
+      method: "PUT" as const,
+      url: data.uploadURL,
+    };
+  };
+
+  const handleUploadComplete = async (result: UploadResult<Record<string, unknown>, Record<string, unknown>>) => {
+    if (result.successful && result.successful.length > 0) {
+      const uploadURL = result.successful[0].uploadURL;
+      if (uploadURL) {
+        try {
+          const response = await apiRequest("POST", "/api/objects/normalize-path", { uploadURL });
+          if (!response.ok) {
+            throw new Error("Failed to normalize path");
+          }
+          const data = await response.json();
+          form.setValue("image", data.objectPath);
+          toast({ title: "Imagem carregada com sucesso" });
+        } catch {
+          toast({ title: "Erro ao processar imagem", variant: "destructive" });
+        }
+      }
+    }
   };
 
   const getInitials = (name: string) => {
@@ -327,9 +355,15 @@ export default function BandMembersManagement() {
                     </div>
                   )}
                   <ObjectUploader
-                    onUploadComplete={handleImageUpload}
-                    acceptedFileTypes={["image/jpeg", "image/png", "image/webp"]}
-                  />
+                    maxNumberOfFiles={1}
+                    maxFileSize={10485760}
+                    onGetUploadParameters={handleGetUploadURL}
+                    onComplete={handleUploadComplete}
+                    variant="outline"
+                  >
+                    <Upload className="h-4 w-4 mr-2" />
+                    Upload Foto
+                  </ObjectUploader>
                   <Input
                     placeholder="Ou cole o URL da imagem"
                     value={field.value ?? ""}
