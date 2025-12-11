@@ -22,6 +22,7 @@ import {
   Image, 
   ShoppingCart, 
   Users, 
+  Users2,
   FileText,
   Settings,
   LogOut,
@@ -60,6 +61,11 @@ const menuItems = [
     title: "Biografia",
     url: "/admin/biografia",
     icon: FileText,
+  },
+  {
+    title: "Membros",
+    url: "/admin/membros",
+    icon: Users2,
   },
   {
     title: "Comentários",
