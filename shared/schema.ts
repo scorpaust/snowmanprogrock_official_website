@@ -116,6 +116,7 @@ export const biography = pgTable("biography", {
   contentFr: text("content_fr"),
   contentEs: text("content_es"),
   contentDe: text("content_de"),
+  bandImage: text("band_image"), // Main band photo URL
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
@@ -271,6 +272,7 @@ export const insertContactSchema = createInsertSchema(contacts).omit({ id: true,
 export const insertBiographySchema = createInsertSchema(biography).omit({ id: true }).extend({
   content: z.string().max(800, "Biography must be 800 characters or less"),
   contentEn: z.string().max(800, "Biography must be 800 characters or less").optional(),
+  bandImage: z.string().optional(),
 });
 export const insertSpotifySettingsSchema = createInsertSchema(spotifySettings).omit({ id: true }).extend({
   embedUrl: z.string().regex(/^https:\/\/open\.spotify\.com\/embed\//, "Must be a Spotify embed URL"),

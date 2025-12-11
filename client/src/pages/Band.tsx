@@ -56,12 +56,20 @@ export default function Band({ language }: BandProps) {
         </div>
 
         <div className="mb-16 aspect-[21/9] bg-gray-900 rounded-md overflow-hidden">
-          <img
-            src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=1920&q=80"
-            alt="Snowman Band"
-            className="w-full h-full object-cover"
-            data-testid="img-band"
-          />
+          {biography?.bandImage ? (
+            <img
+              src={biography.bandImage}
+              alt="Snowman Band"
+              className="w-full h-full object-cover"
+              data-testid="img-band"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900">
+              <span className="text-6xl md:text-8xl font-bold text-gray-700 tracking-widest" data-testid="text-band-placeholder">
+                SNOWMAN
+              </span>
+            </div>
+          )}
         </div>
 
         <div className="max-w-4xl mx-auto">

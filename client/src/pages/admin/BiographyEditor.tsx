@@ -18,10 +18,13 @@ import {
 } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { FileText, Save } from "lucide-react";
+import { FileText, Save, Upload, Image, X } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
 import type { Biography } from "@shared/schema";
 import { insertBiographySchema } from "@shared/schema";
+import { ObjectUploader } from "@/components/ObjectUploader";
+import type { UploadResult } from "@uppy/core";
 
 type BiographyForm = z.infer<typeof insertBiographySchema>;
 
@@ -48,6 +51,7 @@ export default function BiographyEditor() {
       contentFr: "",
       contentEs: "",
       contentDe: "",
+      bandImage: "",
     },
   });
 
@@ -59,6 +63,7 @@ export default function BiographyEditor() {
         contentFr: biography.contentFr || "",
         contentEs: biography.contentEs || "",
         contentDe: biography.contentDe || "",
+        bandImage: biography.bandImage || "",
       });
     }
   }, [biography, form]);
@@ -71,6 +76,7 @@ export default function BiographyEditor() {
         contentFr: data.contentFr || undefined,
         contentEs: data.contentEs || undefined,
         contentDe: data.contentDe || undefined,
+        bandImage: data.bandImage || undefined,
       };
       const response = await apiRequest("PUT", "/api/biography", payload);
       if (!response.ok) throw new Error("Failed to save biography");
@@ -91,6 +97,37 @@ export default function BiographyEditor() {
       });
     },
   });
+
+  const handleGetUploadURL = async () => {
+    const response = await apiRequest("POST", "/api/objects/upload", {});
+    if (!response.ok) {
+      throw new Error("Failed to get upload URL");
+    }
+    const data = await response.json();
+    return {
+      method: "PUT" as const,
+      url: data.uploadURL,
+    };
+  };
+
+  const handleUploadComplete = async (result: UploadResult<Record<string, unknown>, Record<string, unknown>>) => {
+    if (result.successful && result.successful.length > 0) {
+      const uploadURL = result.successful[0].uploadURL;
+      if (uploadURL) {
+        try {
+          const response = await apiRequest("POST", "/api/objects/normalize-path", { uploadURL });
+          if (!response.ok) {
+            throw new Error("Failed to normalize path");
+          }
+          const data = await response.json();
+          form.setValue("bandImage", data.objectPath);
+          toast({ title: "Foto carregada com sucesso" });
+        } catch {
+          toast({ title: "Erro ao processar foto", variant: "destructive" });
+        }
+      }
+    }
+  };
 
   const onSubmit = (data: BiographyForm) => {
     saveMutation.mutate(data);
@@ -121,16 +158,85 @@ export default function BiographyEditor() {
           </div>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Conteúdo da Biografia</CardTitle>
-            <CardDescription>
-              Máximo 800 caracteres por idioma
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Image className="h-5 w-5" />
+                  Foto Principal da Banda
+                </CardTitle>
+                <CardDescription>
+                  Esta foto será exibida na página da Banda
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <FormField
+                  control={form.control}
+                  name="bandImage"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Foto da Banda</FormLabel>
+                      <FormControl>
+                        <div className="space-y-3">
+                          {field.value && (
+                            <div className="relative max-w-md">
+                              <img
+                                src={field.value}
+                                alt="Foto da banda"
+                                className="rounded-lg w-full max-h-64 object-cover"
+                              />
+                              <Button
+                                type="button"
+                                variant="destructive"
+                                size="icon"
+                                className="absolute top-2 right-2"
+                                onClick={() => form.setValue("bandImage", "")}
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          )}
+                          <div className="flex gap-2 items-center flex-wrap">
+                            <ObjectUploader
+                              maxNumberOfFiles={1}
+                              maxFileSize={10485760}
+                              onGetUploadParameters={handleGetUploadURL}
+                              onComplete={handleUploadComplete}
+                              variant="outline"
+                            >
+                              <Upload className="h-4 w-4 mr-2" />
+                              Upload Foto
+                            </ObjectUploader>
+                            <span className="text-muted-foreground text-sm">ou</span>
+                            <Input
+                              placeholder="Cole o URL da imagem"
+                              value={field.value ?? ""}
+                              onChange={field.onChange}
+                              className="max-w-sm"
+                              data-testid="input-band-image"
+                            />
+                          </div>
+                        </div>
+                      </FormControl>
+                      <FormDescription>
+                        Recomendado: imagem de alta qualidade (mínimo 1200x800 pixels)
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Conteúdo da Biografia</CardTitle>
+                <CardDescription>
+                  Máximo 800 caracteres por idioma
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
                 <Tabs defaultValue="pt" className="w-full">
                   <TabsList className="grid w-full grid-cols-5">
                     <TabsTrigger value="pt" data-testid="tab-pt">PT *</TabsTrigger>
@@ -233,13 +339,13 @@ export default function BiographyEditor() {
                     data-testid="button-save"
                   >
                     <Save className="h-4 w-4 mr-2" />
-                    {saveMutation.isPending ? "A guardar..." : "Guardar"}
+                    {saveMutation.isPending ? "A guardar..." : "Guardar Tudo"}
                   </Button>
                 </div>
-              </form>
-            </Form>
-          </CardContent>
-        </Card>
+              </CardContent>
+            </Card>
+          </form>
+        </Form>
       </div>
     </AdminLayout>
   );
