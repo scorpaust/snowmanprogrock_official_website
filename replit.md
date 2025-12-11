@@ -18,7 +18,8 @@ Provide an engaging digital presence for the band with content management, multi
 **Current Status: Backoffice System + Enhanced Features ✅**
 - All 6 frontoffice pages implemented (Home, Banda, Notícias, Eventos, Galeria, Contactos)
 - **Complete backoffice authentication system** with secure login/logout, session management
-- **Admin dashboard** with statistics cards and sidebar navigation (Notícias, Eventos, Galeria, Produtos, Biografia, Utilizadores)
+- **Admin dashboard** with statistics cards and sidebar navigation (Notícias, Eventos, Galeria, Produtos, Biografia, Membros, Utilizadores)
+- **Band member management system** with multilingual roles (PT/EN/FR/ES/DE), image upload, display order, and active status
 - Dark immersive design with purple accents (black/purple/gray palette)
 - **Full multilingual support (PT, EN, FR, ES, DE)** with automatic browser language detection and dropdown selector
 - **5-category contact form** (Geral, Eventos, Parcerias, Loja, Imprensa) with conditional fields and ticket ID generation
@@ -95,6 +96,7 @@ Preferred communication style: Simple, everyday language.
 - gallery: Photos and videos with captions (photo/video type, thumbnails for videos)
 - contacts: Ticket system with prefixes (geral_, eventos_, parc_, loja_, imprensa_) and status tracking
 - biography: Band biography with multilingual content
+- band_members: Band members with multilingual roles (name, role PT/EN/FR/ES/DE, image, displayOrder, isActive)
 - categories: Product categories (name PT/EN, slug, description)
 - products: Store products (name, description, price in cents, type, stock, images)
 - orders: Customer orders (linked to user_profile if authenticated, order details, payment info)
