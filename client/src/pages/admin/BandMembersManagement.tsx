@@ -41,7 +41,7 @@ import {
 } from "@/components/ui/form";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Plus, Pencil, Trash2, Users, Loader2 } from "lucide-react";
-import ObjectUploader from "@/components/ObjectUploader";
+import { ObjectUploader } from "@/components/ObjectUploader";
 
 const memberFormSchema = z.object({
   name: z.string().min(2, "O nome deve ter pelo menos 2 caracteres"),

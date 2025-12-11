@@ -279,12 +279,12 @@ export const insertSpotifySettingsSchema = createInsertSchema(spotifySettings).o
 });
 
 export const insertBandMemberSchema = createInsertSchema(bandMembers).omit({ id: true, createdAt: true }).extend({
-  roleEn: z.string().optional(),
-  roleFr: z.string().optional(),
-  roleEs: z.string().optional(),
-  roleDe: z.string().optional(),
-  image: z.string().optional(),
-  displayOrder: z.number().int().min(0).default(0),
+  roleEn: z.string().nullable().optional(),
+  roleFr: z.string().nullable().optional(),
+  roleEs: z.string().nullable().optional(),
+  roleDe: z.string().nullable().optional(),
+  image: z.string().nullable().optional(),
+  displayOrder: z.coerce.number().int().min(0).default(0),
   isActive: z.union([z.literal(0), z.literal(1)]).default(1),
 });
 export const updateBandMemberSchema = insertBandMemberSchema.partial().strict();
