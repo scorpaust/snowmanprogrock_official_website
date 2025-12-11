@@ -23,6 +23,8 @@ import {
   type InsertOrderItem,
   type Comment,
   type InsertComment,
+  type BandMember,
+  type InsertBandMember,
   users,
   news,
   events,
@@ -35,6 +37,7 @@ import {
   orders,
   orderItems,
   comments,
+  bandMembers,
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { db } from "./db";
@@ -119,6 +122,13 @@ export interface IStorage {
   createComment(comment: InsertComment): Promise<Comment>;
   updateComment(id: string, comment: Partial<InsertComment>): Promise<Comment | undefined>;
   deleteComment(id: string): Promise<boolean>;
+
+  // Band Members
+  getAllBandMembers(): Promise<BandMember[]>;
+  getBandMemberById(id: string): Promise<BandMember | undefined>;
+  createBandMember(member: InsertBandMember): Promise<BandMember>;
+  updateBandMember(id: string, member: Partial<InsertBandMember>): Promise<BandMember | undefined>;
+  deleteBandMember(id: string): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
@@ -134,6 +144,7 @@ export class MemStorage implements IStorage {
   private orders: Map<string, Order>;
   private orderItems: Map<string, OrderItem>;
   private comments: Map<string, Comment>;
+  private bandMembersMap: Map<string, BandMember>;
 
   constructor() {
     this.users = new Map();
@@ -148,6 +159,7 @@ export class MemStorage implements IStorage {
     this.orders = new Map();
     this.orderItems = new Map();
     this.comments = new Map();
+    this.bandMembersMap = new Map();
 
     this.seedData();
   }
@@ -641,6 +653,40 @@ export class MemStorage implements IStorage {
 
   async deleteComment(id: string): Promise<boolean> {
     return this.comments.delete(id);
+  }
+
+  // Band Members
+  async getAllBandMembers(): Promise<BandMember[]> {
+    return Array.from(this.bandMembersMap.values()).sort(
+      (a, b) => a.displayOrder - b.displayOrder
+    );
+  }
+
+  async getBandMemberById(id: string): Promise<BandMember | undefined> {
+    return this.bandMembersMap.get(id);
+  }
+
+  async createBandMember(member: InsertBandMember): Promise<BandMember> {
+    const id = randomUUID();
+    const newMember: BandMember = {
+      ...member,
+      id,
+      createdAt: new Date(),
+    };
+    this.bandMembersMap.set(id, newMember);
+    return newMember;
+  }
+
+  async updateBandMember(id: string, updates: Partial<InsertBandMember>): Promise<BandMember | undefined> {
+    const existing = this.bandMembersMap.get(id);
+    if (!existing) return undefined;
+    const updated: BandMember = { ...existing, ...updates };
+    this.bandMembersMap.set(id, updated);
+    return updated;
+  }
+
+  async deleteBandMember(id: string): Promise<boolean> {
+    return this.bandMembersMap.delete(id);
   }
 }
 
@@ -1176,6 +1222,34 @@ export class DbStorage implements IStorage {
 
   async deleteComment(id: string): Promise<boolean> {
     const result = await db.delete(comments).where(eq(comments.id, id)).returning();
+    return result.length > 0;
+  }
+
+  // Band Members
+  async getAllBandMembers(): Promise<BandMember[]> {
+    return db.select().from(bandMembers).orderBy(bandMembers.displayOrder);
+  }
+
+  async getBandMemberById(id: string): Promise<BandMember | undefined> {
+    const result = await db.select().from(bandMembers).where(eq(bandMembers.id, id)).limit(1);
+    return result[0];
+  }
+
+  async createBandMember(insertMember: InsertBandMember): Promise<BandMember> {
+    const result = await db.insert(bandMembers).values(insertMember).returning();
+    return result[0];
+  }
+
+  async updateBandMember(id: string, updates: Partial<InsertBandMember>): Promise<BandMember | undefined> {
+    const result = await db.update(bandMembers)
+      .set(updates)
+      .where(eq(bandMembers.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async deleteBandMember(id: string): Promise<boolean> {
+    const result = await db.delete(bandMembers).where(eq(bandMembers.id, id)).returning();
     return result.length > 0;
   }
 }
