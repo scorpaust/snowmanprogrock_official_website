@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { ShoppingCart, ArrowLeft, Package, Music, Download } from "lucide-react";
 import type { Product, Category } from "@shared/schema";
+import { CommentSection } from "@/components/CommentSection";
 
 interface ProductDetailProps {
   language?: string;
@@ -324,6 +325,12 @@ export default function ProductDetail({ language = 'pt' }: ProductDetailProps) {
             </Button>
           </div>
         </div>
+
+        <CommentSection 
+          contentType="product" 
+          contentId={product.id} 
+          language={language} 
+        />
       </div>
     </div>
   );

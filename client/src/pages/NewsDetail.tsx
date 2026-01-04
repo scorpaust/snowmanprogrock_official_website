@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft } from "lucide-react";
 import type { News } from "@shared/schema";
+import { CommentSection } from "@/components/CommentSection";
 
 interface NewsDetailProps {
   language: string;
@@ -139,6 +140,12 @@ export default function NewsDetail({ language }: NewsDetailProps) {
             </div>
           )}
         </article>
+
+        <CommentSection 
+          contentType="news" 
+          contentId={news.id} 
+          language={language} 
+        />
       </div>
     </div>
   );
