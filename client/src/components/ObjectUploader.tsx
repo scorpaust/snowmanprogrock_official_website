@@ -42,7 +42,6 @@ export function ObjectUploader({
   accept,
 }: ObjectUploaderProps) {
   const [showModal, setShowModal] = useState(false);
-  const [dashboardMounted, setDashboardMounted] = useState(false);
   const dashboardRef = useRef<HTMLDivElement>(null);
   const uppyRef = useRef<Uppy | null>(null);
 
@@ -52,20 +51,7 @@ export function ObjectUploader({
   }, [onComplete]);
 
   useEffect(() => {
-    if (!showModal) {
-      setDashboardMounted(false);
-      return;
-    }
-
-    const timer = setTimeout(() => {
-      setDashboardMounted(true);
-    }, 100);
-
-    return () => clearTimeout(timer);
-  }, [showModal]);
-
-  useEffect(() => {
-    if (!dashboardMounted || !dashboardRef.current) return;
+    if (!showModal || !dashboardRef.current) return;
 
     const restrictions: Record<string, unknown> = {
       maxNumberOfFiles,
@@ -138,7 +124,7 @@ export function ObjectUploader({
       uppy.destroy();
       uppyRef.current = null;
     };
-  }, [dashboardMounted, maxNumberOfFiles, maxFileSize, onGetUploadParameters, accept, handleComplete]);
+  }, [showModal, maxNumberOfFiles, maxFileSize, onGetUploadParameters, accept, handleComplete]);
 
   const handleOpenChange = (open: boolean) => {
     setShowModal(open);
@@ -170,13 +156,7 @@ export function ObjectUploader({
           <div 
             ref={dashboardRef} 
             className="w-full min-h-[350px]"
-            style={{ display: dashboardMounted ? 'block' : 'none' }}
           />
-          {!dashboardMounted && showModal && (
-            <div className="w-full h-[350px] flex items-center justify-center bg-gray-900 rounded-md">
-              <span className="text-gray-400">A carregar...</span>
-            </div>
-          )}
         </DialogContent>
       </Dialog>
     </div>

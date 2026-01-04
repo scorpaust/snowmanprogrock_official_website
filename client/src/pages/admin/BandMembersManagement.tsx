@@ -6,6 +6,7 @@ import { z } from "zod";
 import type { BandMember } from "@shared/schema";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import AdminLayout from "@/components/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -448,39 +449,42 @@ export default function BandMembersManagement() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
+      <AdminLayout>
+        <div className="flex items-center justify-center min-h-[400px]">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </AdminLayout>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold" data-testid="text-page-title">Gestão de Membros</h1>
-          <p className="text-muted-foreground">
-            Gerir os membros da banda que aparecem na página "A Banda"
-          </p>
+    <AdminLayout>
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold" data-testid="text-page-title">Gestão de Membros</h1>
+            <p className="text-muted-foreground">
+              Gerir os membros da banda que aparecem na página "A Banda"
+            </p>
+          </div>
+          <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+            <DialogTrigger asChild>
+              <Button data-testid="button-add-member">
+                <Plus className="mr-2 h-4 w-4" />
+                Adicionar Membro
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Novo Membro da Banda</DialogTitle>
+                <DialogDescription>
+                  Preencha os dados do novo membro. Os campos marcados com * são obrigatórios.
+                </DialogDescription>
+              </DialogHeader>
+              <MemberFormContent />
+            </DialogContent>
+          </Dialog>
         </div>
-        <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-          <DialogTrigger asChild>
-            <Button data-testid="button-add-member">
-              <Plus className="mr-2 h-4 w-4" />
-              Adicionar Membro
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>Novo Membro da Banda</DialogTitle>
-              <DialogDescription>
-                Preencha os dados do novo membro. Os campos marcados com * são obrigatórios.
-              </DialogDescription>
-            </DialogHeader>
-            <MemberFormContent />
-          </DialogContent>
-        </Dialog>
-      </div>
 
       {members.length === 0 ? (
         <Card>
@@ -581,6 +585,7 @@ export default function BandMembersManagement() {
           ))}
         </div>
       )}
-    </div>
+      </div>
+    </AdminLayout>
   );
 }
