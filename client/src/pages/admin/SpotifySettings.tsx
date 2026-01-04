@@ -15,7 +15,7 @@ import { Music2 } from "lucide-react";
 import AdminLayout from "@/components/AdminLayout";
 
 const spotifyFormSchema = z.object({
-  embedUrl: z.string().regex(/^https:\/\/open\.spotify\.com\/embed\//, "Must be a Spotify embed URL"),
+  embedUrl: z.string().regex(/^https:\/\/open\.spotify\.com\/embed\//, "Deve ser um URL de embed do Spotify"),
   displayType: z.enum(['player', 'banner']),
   isActive: z.boolean(),
 });
@@ -30,7 +30,7 @@ export default function SpotifySettingsPage() {
     queryFn: async () => {
       const response = await apiRequest("GET", "/api/spotify-settings", undefined);
       if (!response.ok) {
-        throw new Error("Failed to fetch settings");
+        throw new Error("Erro ao carregar definições");
       }
       return await response.json();
     },
@@ -68,13 +68,13 @@ export default function SpotifySettingsPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/spotify-settings"] });
       toast({
-        title: "Settings updated",
-        description: "Spotify player settings have been saved.",
+        title: "Definições atualizadas",
+        description: "As definições do Spotify foram guardadas.",
       });
     },
     onError: (error: Error) => {
       toast({
-        title: "Update failed",
+        title: "Erro ao atualizar",
         description: error.message,
         variant: "destructive",
       });
@@ -89,7 +89,7 @@ export default function SpotifySettingsPage() {
     return (
       <AdminLayout>
         <div className="flex items-center justify-center min-h-[400px]">
-          <p className="text-muted-foreground">Loading settings...</p>
+          <p className="text-muted-foreground">A carregar definições...</p>
         </div>
       </AdminLayout>
     );
@@ -103,18 +103,18 @@ export default function SpotifySettingsPage() {
             <Music2 className="h-6 w-6 text-primary" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Spotify Settings</h1>
+            <h1 className="text-3xl font-bold tracking-tight" data-testid="text-page-title">Definições Spotify</h1>
             <p className="text-muted-foreground">
-              Configure the Spotify player for the home page
+              Configure o leitor Spotify para a página inicial
             </p>
           </div>
         </div>
 
         <Card>
           <CardHeader>
-            <CardTitle>Spotify Embed Configuration</CardTitle>
+            <CardTitle>Configuração do Embed Spotify</CardTitle>
             <CardDescription>
-              Control how the Spotify player is displayed on the website
+              Controle como o leitor Spotify é exibido no website
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -125,7 +125,7 @@ export default function SpotifySettingsPage() {
                 name="embedUrl"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Spotify Embed URL</FormLabel>
+                    <FormLabel>URL de Embed do Spotify</FormLabel>
                     <FormControl>
                       <Input
                         placeholder="https://open.spotify.com/embed/album/..."
@@ -134,7 +134,7 @@ export default function SpotifySettingsPage() {
                       />
                     </FormControl>
                     <FormDescription>
-                      Must be a Spotify embed URL (album, playlist, track, etc.)
+                      Deve ser um URL de embed do Spotify (álbum, playlist, faixa, etc.)
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -146,20 +146,20 @@ export default function SpotifySettingsPage() {
                 name="displayType"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Display Type</FormLabel>
+                    <FormLabel>Tipo de Exibição</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger data-testid="select-display-type">
-                          <SelectValue placeholder="Select display type" />
+                          <SelectValue placeholder="Selecione o tipo de exibição" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="player">Player (352px height)</SelectItem>
-                        <SelectItem value="banner">Banner (152px height)</SelectItem>
+                        <SelectItem value="player">Player (352px altura)</SelectItem>
+                        <SelectItem value="banner">Banner (152px altura)</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormDescription>
-                      Choose how the Spotify embed is displayed on the home page
+                      Escolha como o embed do Spotify é exibido na página inicial
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -172,9 +172,9 @@ export default function SpotifySettingsPage() {
                 render={({ field }) => (
                   <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                     <div className="space-y-0.5">
-                      <FormLabel className="text-base">Active</FormLabel>
+                      <FormLabel className="text-base">Ativo</FormLabel>
                       <FormDescription>
-                        Display the Spotify player on the home page
+                        Exibir o leitor Spotify na página inicial
                       </FormDescription>
                     </div>
                     <FormControl>
@@ -185,7 +185,7 @@ export default function SpotifySettingsPage() {
                         onClick={() => field.onChange(!field.value)}
                         data-testid="button-is-active"
                       >
-                        {field.value ? "Enabled" : "Disabled"}
+                        {field.value ? "Ativado" : "Desativado"}
                       </Button>
                     </FormControl>
                   </FormItem>
@@ -198,7 +198,7 @@ export default function SpotifySettingsPage() {
                 disabled={updateMutation.isPending}
                 data-testid="button-save"
               >
-                {updateMutation.isPending ? "Saving..." : "Save Settings"}
+                {updateMutation.isPending ? "A guardar..." : "Guardar Definições"}
               </Button>
             </form>
           </Form>

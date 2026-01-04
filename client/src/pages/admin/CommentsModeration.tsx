@@ -35,10 +35,10 @@ export default function CommentsModeration() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/comments'] });
-      toast({ title: "Comment approved successfully" });
+      toast({ title: "Comentário aprovado com sucesso" });
     },
     onError: () => {
-      toast({ title: "Failed to approve comment", variant: "destructive" });
+      toast({ title: "Erro ao aprovar comentário", variant: "destructive" });
     },
   });
 
@@ -49,10 +49,10 @@ export default function CommentsModeration() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/comments'] });
-      toast({ title: "Comment rejected" });
+      toast({ title: "Comentário rejeitado" });
     },
     onError: () => {
-      toast({ title: "Failed to reject comment", variant: "destructive" });
+      toast({ title: "Erro ao rejeitar comentário", variant: "destructive" });
     },
   });
 
@@ -62,10 +62,10 @@ export default function CommentsModeration() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/comments'] });
-      toast({ title: "Comment deleted successfully" });
+      toast({ title: "Comentário eliminado com sucesso" });
     },
     onError: () => {
-      toast({ title: "Failed to delete comment", variant: "destructive" });
+      toast({ title: "Erro ao eliminar comentário", variant: "destructive" });
     },
   });
 
@@ -78,7 +78,7 @@ export default function CommentsModeration() {
   };
 
   const handleDelete = (id: string) => {
-    if (confirm("Are you sure you want to delete this comment permanently?")) {
+    if (confirm("Tem a certeza que deseja eliminar este comentário permanentemente?")) {
       deleteMutation.mutate(id);
     }
   };
@@ -103,7 +103,7 @@ export default function CommentsModeration() {
     return (
       <AdminLayout>
         <div className="flex items-center justify-center h-64">
-          <p className="text-muted-foreground">Loading comments...</p>
+          <p className="text-muted-foreground">A carregar comentários...</p>
         </div>
       </AdminLayout>
     );
@@ -111,21 +111,21 @@ export default function CommentsModeration() {
 
   return (
     <AdminLayout>
-      <div className="p-6 space-y-6">
+      <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold">Comments Moderation</h1>
-            <p className="text-muted-foreground">Review and approve user comments</p>
+            <h1 className="text-3xl font-bold" data-testid="text-page-title">Moderação de Comentários</h1>
+            <p className="text-muted-foreground">Reveja e aprove os comentários dos utilizadores</p>
           </div>
           <div className="flex gap-2 text-sm">
             <Badge variant="secondary">
               Total: {comments.length}
             </Badge>
             <Badge variant="default">
-              Pending: {comments.filter(c => c.isApproved === 0).length}
+              Pendentes: {comments.filter(c => c.isApproved === 0).length}
             </Badge>
             <Badge variant="outline">
-              Approved: {comments.filter(c => c.isApproved === 1).length}
+              Aprovados: {comments.filter(c => c.isApproved === 1).length}
             </Badge>
           </div>
         </div>
@@ -133,13 +133,13 @@ export default function CommentsModeration() {
         <Tabs value={filter} onValueChange={(v) => setFilter(v as typeof filter)}>
           <TabsList>
             <TabsTrigger value="pending" data-testid="tab-pending">
-              Pending ({comments.filter(c => c.isApproved === 0).length})
+              Pendentes ({comments.filter(c => c.isApproved === 0).length})
             </TabsTrigger>
             <TabsTrigger value="approved" data-testid="tab-approved">
-              Approved ({comments.filter(c => c.isApproved === 1).length})
+              Aprovados ({comments.filter(c => c.isApproved === 1).length})
             </TabsTrigger>
             <TabsTrigger value="all" data-testid="tab-all">
-              All ({comments.length})
+              Todos ({comments.length})
             </TabsTrigger>
           </TabsList>
 
@@ -152,18 +152,18 @@ export default function CommentsModeration() {
                       <div className="flex items-center gap-2">
                         <MessageSquare className="h-4 w-4 text-muted-foreground" />
                         <span className="text-sm text-muted-foreground">
-                          {comment.contentType === 'news' ? 'Comment on News' : 'Comment on Product'}
+                          {comment.contentType === 'news' ? 'Comentário em Notícia' : 'Comentário em Produto'}
                         </span>
                         {comment.isApproved === 1 ? (
-                          <Badge variant="default" className="text-xs">Approved</Badge>
+                          <Badge variant="default" className="text-xs">Aprovado</Badge>
                         ) : (
-                          <Badge variant="secondary" className="text-xs">Pending</Badge>
+                          <Badge variant="secondary" className="text-xs">Pendente</Badge>
                         )}
                       </div>
                       <p className="text-base">{comment.comment}</p>
                       <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                        <span>User ID: {comment.userId.substring(0, 8)}...</span>
-                        <span>Content ID: {comment.contentId.substring(0, 8)}...</span>
+                        <span>ID Utilizador: {comment.userId.substring(0, 8)}...</span>
+                        <span>ID Conteúdo: {comment.contentId.substring(0, 8)}...</span>
                         <span>{formatDate(comment.createdAt)}</span>
                       </div>
                     </div>
@@ -177,7 +177,7 @@ export default function CommentsModeration() {
                           data-testid={`button-approve-${comment.id}`}
                         >
                           <Check className="h-4 w-4 mr-1" />
-                          Approve
+                          Aprovar
                         </Button>
                       ) : (
                         <Button
@@ -188,7 +188,7 @@ export default function CommentsModeration() {
                           data-testid={`button-reject-${comment.id}`}
                         >
                           <X className="h-4 w-4 mr-1" />
-                          Unapprove
+                          Desaprovar
                         </Button>
                       )}
                       <Button
@@ -199,7 +199,7 @@ export default function CommentsModeration() {
                         data-testid={`button-delete-${comment.id}`}
                       >
                         <Trash2 className="h-4 w-4 mr-1" />
-                        Delete
+                        Eliminar
                       </Button>
                     </div>
                   </div>
@@ -212,9 +212,9 @@ export default function CommentsModeration() {
                 <CardContent className="p-12 text-center">
                   <MessageSquare className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                   <p className="text-muted-foreground">
-                    {filter === 'pending' && "No pending comments to review."}
-                    {filter === 'approved' && "No approved comments yet."}
-                    {filter === 'all' && "No comments yet."}
+                    {filter === 'pending' && "Não há comentários pendentes para rever."}
+                    {filter === 'approved' && "Ainda não há comentários aprovados."}
+                    {filter === 'all' && "Ainda não há comentários."}
                   </p>
                 </CardContent>
               </Card>
