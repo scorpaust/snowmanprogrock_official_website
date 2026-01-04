@@ -206,7 +206,7 @@ export default function BiographyEditor() {
                               variant="outline"
                             >
                               <Upload className="h-4 w-4 mr-2" />
-                              Upload Foto
+                              Carregar Foto
                             </ObjectUploader>
                             <span className="text-muted-foreground text-sm">ou</span>
                             <Input

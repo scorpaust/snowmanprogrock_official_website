@@ -440,7 +440,7 @@ export default function GalleryManagement() {
                           variant="outline"
                         >
                           <Upload className="h-4 w-4 mr-2" />
-                          Upload
+                          Carregar
                         </ObjectUploader>
                       </div>
                       <FormDescription>
@@ -475,7 +475,7 @@ export default function GalleryManagement() {
                             variant="outline"
                           >
                             <Upload className="h-4 w-4 mr-2" />
-                            Upload
+                            Carregar
                           </ObjectUploader>
                         </div>
                         <FormDescription>

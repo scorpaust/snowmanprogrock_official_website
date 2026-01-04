@@ -362,7 +362,7 @@ export default function BandMembersManagement() {
                     variant="outline"
                   >
                     <Upload className="h-4 w-4 mr-2" />
-                    Upload Foto
+                    Carregar Foto
                   </ObjectUploader>
                   <Input
                     placeholder="Ou cole o URL da imagem"
