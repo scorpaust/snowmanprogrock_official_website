@@ -156,7 +156,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
           <SidebarFooter className="border-t p-4">
             <div className="text-xs text-muted-foreground mb-2">
-              Logged in as <span className="font-medium text-foreground">{user.username}</span>
+              Sessão iniciada como <span className="font-medium text-foreground">{user.username}</span>
             </div>
             <Button
               variant="ghost"
@@ -166,7 +166,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               data-testid="button-logout"
             >
               <LogOut className="h-4 w-4 mr-2" />
-              Logout
+              Terminar Sessão
             </Button>
           </SidebarFooter>
         </Sidebar>
@@ -176,8 +176,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             <SidebarTrigger data-testid="button-sidebar-toggle" />
             <div className="flex items-center gap-4">
               <div className="text-sm">
-                <span className="text-muted-foreground">Role:</span>{" "}
-                <span className="font-medium capitalize">{user.role}</span>
+                <span className="text-muted-foreground">Função:</span>{" "}
+                <span className="font-medium capitalize">{user.role === 'admin' ? 'Administrador' : 'Editor'}</span>
               </div>
             </div>
           </header>

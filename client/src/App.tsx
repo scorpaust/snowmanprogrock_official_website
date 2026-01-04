@@ -11,6 +11,7 @@ import Footer from "./components/Footer";
 import Home from "./pages/Home";
 import Band from "./pages/Band";
 import News from "./pages/News";
+import NewsDetail from "./pages/NewsDetail";
 import Events from "./pages/Events";
 import Gallery from "./pages/Gallery";
 import Contact from "./pages/Contact";
@@ -43,6 +44,7 @@ function Router({ language, setLanguage }: { language: string; setLanguage: (lan
         <Route path="/" component={() => <Home language={language} />} />
         <Route path="/banda" component={() => <Band language={language} />} />
         <Route path="/noticias" component={() => <News language={language} />} />
+        <Route path="/noticias/:id" component={() => <NewsDetail language={language} />} />
         <Route path="/eventos" component={() => <Events language={language} />} />
         <Route path="/galeria" component={() => <Gallery language={language} />} />
         <Route path="/contactos" component={() => <Contact language={language} />} />
