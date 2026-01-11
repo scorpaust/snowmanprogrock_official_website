@@ -609,14 +609,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/comments", async (req, res) => {
     try {
-      const validated = insertCommentSchema.parse(req.body);
-      const comment = await storage.createComment(validated);
-      res.status(201).json(comment);
-    } catch (error: any) {
-      if (error.name === 'ZodError') {
-        return res.status(400).json({ error: "Invalid comment data", details: error.errors });
+      // Require customer login for comments
+      if (!req.session.customerUserId) {
+        return res.status(401).json({ error: "Login required to comment" });
       }
-      res.status(400).json({ error: "Invalid comment data" });
+      
+      // Get the authenticated user's profile
+      const userProfile = await storage.getUserProfileById(req.session.customerUserId);
+      if (!userProfile) {
+        return res.status(401).json({ error: "User profile not found" });
+      }
+      
+      const { contentType, contentId, comment } = req.body;
+      
+      // Validate required fields
+      if (!contentType || !contentId || !comment) {
+        return res.status(400).json({ error: "Missing required fields" });
+      }
+      
+      if (comment.length < 10 || comment.length > 1000) {
+        return res.status(400).json({ error: "Comment must be between 10 and 1000 characters" });
+      }
+      
+      // Create comment with server-verified user data
+      const newComment = await storage.createComment({
+        userId: userProfile.name,
+        userProfileId: userProfile.id,
+        userName: userProfile.name,
+        userAvatar: userProfile.avatar,
+        userTotalComments: userProfile.totalComments,
+        contentType,
+        contentId,
+        comment,
+        isApproved: 0,
+      });
+      
+      // Increment user's total comments
+      await storage.incrementUserProfileComments(userProfile.id);
+      
+      res.status(201).json(newComment);
+    } catch (error: any) {
+      console.error("Error creating comment:", error);
+      res.status(500).json({ error: "Failed to create comment" });
     }
   });
 

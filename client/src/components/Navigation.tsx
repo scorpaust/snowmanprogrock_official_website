@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
-import { Menu, X, ShoppingCart } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { Menu, X, ShoppingCart, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,6 +13,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useCart } from "@/hooks/use-cart";
 import logoSnowman from "@assets/logo_snowman_transp_GRANDE_White_1760995391367.png";
+
+type UserProfile = {
+  id: string;
+  name: string;
+  avatar: string | null;
+};
 
 interface NavigationProps {
   language: string;
@@ -21,6 +29,11 @@ export default function Navigation({ language, setLanguage }: NavigationProps) {
   const [location] = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { itemCount } = useCart();
+  
+  const { data: currentUser } = useQuery<UserProfile>({
+    queryKey: ['/api/customer/me'],
+    retry: false,
+  });
 
   const menuItems = [
     { path: "/", label: { pt: "Início", en: "Home", fr: "Accueil", es: "Inicio", de: "Startseite" } },
@@ -77,8 +90,28 @@ export default function Navigation({ language, setLanguage }: NavigationProps) {
               ))}
             </div>
 
-            {/* Cart, Language Switcher & Mobile Menu */}
+            {/* User, Cart, Language Switcher & Mobile Menu */}
             <div className="flex items-center gap-4">
+              {/* User Account Button */}
+              <Link href={currentUser ? "/cliente" : "/auth"} data-testid="link-account">
+                {currentUser ? (
+                  <Avatar className="h-8 w-8 border border-primary/30 hover:border-primary cursor-pointer transition-colors">
+                    <AvatarImage src={currentUser.avatar || undefined} />
+                    <AvatarFallback className="bg-primary/20">
+                      <User className="h-4 w-4 text-primary" />
+                    </AvatarFallback>
+                  </Avatar>
+                ) : (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-gray-300 hover:text-white"
+                  >
+                    <User className="h-5 w-5" />
+                  </Button>
+                )}
+              </Link>
+
               {/* Cart Button */}
               <Link href="/loja/checkout" data-testid="link-cart">
                 <Button

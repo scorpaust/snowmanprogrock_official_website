@@ -220,7 +220,11 @@ export const bandMembers = pgTable("band_members", {
 // Comments table (for news and products)
 export const comments = pgTable("comments", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").notNull().references(() => userProfiles.id, { onDelete: "cascade" }),
+  userId: varchar("user_id").notNull(), // Display name for backward compatibility
+  userProfileId: varchar("user_profile_id").references(() => userProfiles.id, { onDelete: "set null" }),
+  userName: text("user_name"), // Cached user name at time of comment
+  userAvatar: text("user_avatar"), // Cached user avatar at time of comment
+  userTotalComments: integer("user_total_comments"), // Cached total comments at time of comment
   contentType: text("content_type").notNull(), // 'news' or 'product'
   contentId: varchar("content_id").notNull(), // ID of the news or product
   comment: text("comment").notNull(),
