@@ -517,14 +517,16 @@ export default function ProductsManagement() {
                         Carregar
                       </ObjectUploader>
                     </div>
-                    <div className="flex flex-wrap gap-2 mt-2">
+                    <div className="flex flex-wrap gap-3 mt-2">
                       {form.watch("images").map((url, index) => (
                         <div key={index} className="relative group">
-                          <img
-                            src={url}
-                            alt={`Product ${index + 1}`}
-                            className="h-20 w-20 object-cover rounded border"
-                          />
+                          <div className="h-24 w-24 border rounded bg-gray-900 flex items-center justify-center overflow-hidden">
+                            <img
+                              src={url}
+                              alt={`Product ${index + 1}`}
+                              className="max-h-full max-w-full object-contain"
+                            />
+                          </div>
                           <Button
                             type="button"
                             variant="destructive"
@@ -860,14 +862,16 @@ export default function ProductsManagement() {
                                   Carregar
                                 </ObjectUploader>
                               </div>
-                              <div className="flex flex-wrap gap-2 mt-2">
+                              <div className="flex flex-wrap gap-3 mt-2">
                                 {form.watch("images").map((url, index) => (
                                   <div key={index} className="relative group">
-                                    <img
-                                      src={url}
-                                      alt={`Product ${index + 1}`}
-                                      className="h-20 w-20 object-cover rounded border"
-                                    />
+                                    <div className="h-24 w-24 border rounded bg-gray-900 flex items-center justify-center overflow-hidden">
+                                      <img
+                                        src={url}
+                                        alt={`Product ${index + 1}`}
+                                        className="max-h-full max-w-full object-contain"
+                                      />
+                                    </div>
                                     <Button
                                       type="button"
                                       variant="destructive"
