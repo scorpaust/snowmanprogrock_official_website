@@ -52,10 +52,20 @@ export function CommentSection({ contentType, contentId, language }: CommentSect
     minLength: { pt: "Comentário deve ter pelo menos 10 caracteres", en: "Comment must be at least 10 characters", fr: "Le commentaire doit contenir au moins 10 caractères", es: "El comentario debe tener al menos 10 caracteres", de: "Kommentar muss mindestens 10 Zeichen haben" },
     loginRequired: { pt: "Inicia sessão para comentar", en: "Login to comment", fr: "Connectez-vous pour commenter", es: "Inicia sesión para comentar", de: "Melden Sie sich an, um zu kommentieren" },
     login: { pt: "Entrar", en: "Login", fr: "Connexion", es: "Entrar", de: "Anmelden" },
+    comment: { pt: "comentário", en: "comment", fr: "commentaire", es: "comentario", de: "Kommentar" },
     comments: { pt: "comentários", en: "comments", fr: "commentaires", es: "comentarios", de: "Kommentare" },
+    approvedComments: { pt: "comentário aprovado", en: "approved comment", fr: "commentaire approuvé", es: "comentario aprobado", de: "genehmigter Kommentar" },
+    approvedCommentsPlural: { pt: "comentários aprovados", en: "approved comments", fr: "commentaires approuvés", es: "comentarios aprobados", de: "genehmigte Kommentare" },
   };
 
   const translate = (key: Record<string, string>) => key[language] || key.pt;
+
+  const getCommentLabel = (count: number) => {
+    if (count === 1) {
+      return translate(t.approvedComments);
+    }
+    return translate(t.approvedCommentsPlural);
+  };
 
   const { data: currentUser } = useQuery<UserProfile>({
     queryKey: ['/api/customer/me'],
@@ -139,7 +149,7 @@ export function CommentSection({ contentType, contentId, language }: CommentSect
                 <div className="flex items-center gap-2 mb-2">
                   <span className="font-medium text-sm">{currentUser.name}</span>
                   <span className="text-xs text-muted-foreground">
-                    {currentUser.totalComments} {translate(t.comments)}
+                    {currentUser.totalComments} {getCommentLabel(currentUser.totalComments)}
                   </span>
                   {getStars(currentUser.totalComments) > 0 && (
                     <div className="flex items-center gap-0.5">
@@ -202,7 +212,7 @@ export function CommentSection({ contentType, contentId, language }: CommentSect
                       <span className="font-medium">{comment.userName || comment.userId}</span>
                       {comment.userTotalComments !== null && (
                         <span className="text-xs text-muted-foreground">
-                          {comment.userTotalComments} {translate(t.comments)}
+                          {comment.userTotalComments} {getCommentLabel(comment.userTotalComments)}
                         </span>
                       )}
                       {stars > 0 && (

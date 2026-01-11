@@ -644,9 +644,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         isApproved: 0,
       });
       
-      // Increment user's total comments
-      await storage.incrementUserProfileComments(userProfile.id);
-      
       res.status(201).json(newComment);
     } catch (error: any) {
       console.error("Error creating comment:", error);
@@ -656,11 +653,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch("/api/comments/:id", requireAuth, requireAdmin, async (req, res) => {
     try {
+      // Get original comment to check if it was already approved
+      const originalComment = await storage.getCommentById(req.params.id);
+      if (!originalComment) {
+        return res.status(404).json({ error: "Comment not found" });
+      }
+      
       const validated = updateCommentSchema.parse(req.body);
       const comment = await storage.updateComment(req.params.id, validated);
       if (!comment) {
         return res.status(404).json({ error: "Comment not found" });
       }
+      
+      // If comment was just approved (was 0, now 1), increment user's total approved comments
+      if (originalComment.isApproved === 0 && validated.isApproved === 1 && comment.userProfileId) {
+        await storage.incrementUserProfileComments(comment.userProfileId);
+        // Update the userTotalComments in the comment to reflect the new count
+        const updatedProfile = await storage.getUserProfileById(comment.userProfileId);
+        if (updatedProfile) {
+          await storage.updateComment(req.params.id, { 
+            userTotalComments: updatedProfile.totalComments 
+          });
+        }
+      }
+      
       res.json(comment);
     } catch (error: any) {
       if (error.name === 'ZodError') {
