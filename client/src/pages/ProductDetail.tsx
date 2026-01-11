@@ -200,11 +200,11 @@ export default function ProductDetail({ language = 'pt' }: ProductDetailProps) {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           <div>
-            <div className="mb-4 relative">
+            <div className="mb-4 relative bg-gray-900 rounded-md flex items-center justify-center h-96">
               <img
                 src={images[selectedImageIndex]}
                 alt={getProductName(product)}
-                className="w-full h-96 object-cover rounded-md"
+                className="max-w-full max-h-full object-contain"
                 data-testid="img-product-main"
               />
               {product.featured === 1 && (
@@ -221,7 +221,7 @@ export default function ProductDetail({ language = 'pt' }: ProductDetailProps) {
                   <button
                     key={index}
                     onClick={() => setSelectedImageIndex(index)}
-                    className={`border-2 rounded-md overflow-hidden transition-all ${
+                    className={`border-2 rounded-md overflow-hidden transition-all bg-gray-900 flex items-center justify-center h-20 ${
                       selectedImageIndex === index
                         ? 'border-primary'
                         : 'border-transparent hover:border-gray-600'
@@ -231,7 +231,7 @@ export default function ProductDetail({ language = 'pt' }: ProductDetailProps) {
                     <img
                       src={img}
                       alt={`${getProductName(product)} ${index + 1}`}
-                      className="w-full h-20 object-cover"
+                      className="max-w-full max-h-full object-contain"
                     />
                   </button>
                 ))}
