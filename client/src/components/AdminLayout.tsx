@@ -28,6 +28,7 @@ import {
   LogOut,
   Music,
   MessageSquare,
+  Mail,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -66,6 +67,11 @@ const menuItems = [
     title: "Membros",
     url: "/admin/membros",
     icon: Users2,
+  },
+  {
+    title: "Contactos",
+    url: "/admin/contactos",
+    icon: Mail,
   },
   {
     title: "Comentários",

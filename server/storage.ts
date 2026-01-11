@@ -80,6 +80,7 @@ export interface IStorage {
   getContactById(id: string): Promise<Contact | undefined>;
   createContact(contact: InsertContact): Promise<Contact>;
   updateContactStatus(id: string, status: string): Promise<Contact | undefined>;
+  deleteContact(id: string): Promise<void>;
 
   // Biography
   getBiography(): Promise<Biography | undefined>;
@@ -158,6 +159,7 @@ export class MemStorage implements IStorage {
   private orderItems: Map<string, OrderItem>;
   private comments: Map<string, Comment>;
   private bandMembersMap: Map<string, BandMember>;
+  private userProfiles: Map<string, UserProfile>;
 
   constructor() {
     this.users = new Map();
@@ -173,6 +175,7 @@ export class MemStorage implements IStorage {
     this.orderItems = new Map();
     this.comments = new Map();
     this.bandMembersMap = new Map();
+    this.userProfiles = new Map();
 
     this.seedData();
   }
@@ -479,6 +482,10 @@ export class MemStorage implements IStorage {
     return updated;
   }
 
+  async deleteContact(id: string): Promise<void> {
+    this.contacts.delete(id);
+  }
+
   // Biography
   async getBiography(): Promise<Biography | undefined> {
     return this.biography;
@@ -700,6 +707,60 @@ export class MemStorage implements IStorage {
 
   async deleteBandMember(id: string): Promise<boolean> {
     return this.bandMembersMap.delete(id);
+  }
+
+  // User Profiles (Customer accounts)
+  async getAllUserProfiles(): Promise<UserProfile[]> {
+    return Array.from(this.userProfiles.values());
+  }
+
+  async getUserProfileById(id: string): Promise<UserProfile | undefined> {
+    return this.userProfiles.get(id);
+  }
+
+  async getUserProfileByEmail(email: string): Promise<UserProfile | undefined> {
+    return Array.from(this.userProfiles.values()).find(p => p.email === email);
+  }
+
+  async createUserProfile(profile: InsertUserProfile): Promise<UserProfile> {
+    const id = randomUUID();
+    const newProfile: UserProfile = {
+      ...profile,
+      id,
+      totalComments: 0,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    this.userProfiles.set(id, newProfile);
+    return newProfile;
+  }
+
+  async updateUserProfile(id: string, updates: Partial<InsertUserProfile>): Promise<UserProfile | undefined> {
+    const existing = this.userProfiles.get(id);
+    if (!existing) return undefined;
+    const updated: UserProfile = { ...existing, ...updates, updatedAt: new Date() };
+    this.userProfiles.set(id, updated);
+    return updated;
+  }
+
+  async deleteUserProfile(id: string): Promise<boolean> {
+    return this.userProfiles.delete(id);
+  }
+
+  async incrementUserProfileComments(id: string): Promise<UserProfile | undefined> {
+    const existing = this.userProfiles.get(id);
+    if (!existing) return undefined;
+    const updated: UserProfile = { 
+      ...existing, 
+      totalComments: (existing.totalComments || 0) + 1,
+      updatedAt: new Date() 
+    };
+    this.userProfiles.set(id, updated);
+    return updated;
+  }
+
+  async getOrdersByUserProfileId(userId: string): Promise<Order[]> {
+    return Array.from(this.orders.values()).filter(o => o.userId === userId);
   }
 }
 
@@ -1053,6 +1114,10 @@ export class DbStorage implements IStorage {
       .where(eq(contacts.id, id))
       .returning();
     return result[0];
+  }
+
+  async deleteContact(id: string): Promise<void> {
+    await db.delete(contacts).where(eq(contacts.id, id));
   }
 
   async getBiography(): Promise<Biography | undefined> {

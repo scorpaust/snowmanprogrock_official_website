@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import AdminLayout from "@/components/AdminLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Newspaper, Calendar, Image, ShoppingCart, MessageSquare, Users } from "lucide-react";
+import { Newspaper, Calendar, Image, ShoppingCart, MessageSquare, Users, Mail } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 
 interface Stats {
@@ -9,6 +9,7 @@ interface Stats {
   events: number;
   gallery: number;
   products: number;
+  contacts: number;
   comments: number;
   users: number;
 }
@@ -50,6 +51,12 @@ export default function Dashboard() {
       value: stats?.products || 0,
       icon: ShoppingCart,
       color: "text-orange-500",
+    },
+    {
+      title: "Contactos Novos",
+      value: stats?.contacts || 0,
+      icon: Mail,
+      color: "text-cyan-500",
     },
     {
       title: "Comentários Pendentes",

@@ -25,6 +25,7 @@ import BiographyEditor from "./pages/admin/BiographyEditor";
 import UsersManagement from "./pages/admin/UsersManagement";
 import ProductsManagement from "./pages/admin/ProductsManagement";
 import CommentsModeration from "./pages/admin/CommentsModeration";
+import ContactsManagement from "./pages/admin/ContactsManagement";
 import BandMembersManagement from "./pages/admin/BandMembersManagement";
 import Checkout from "./pages/Checkout";
 import OrderConfirmation from "./pages/OrderConfirmation";
@@ -65,6 +66,7 @@ function Router({ language, setLanguage }: { language: string; setLanguage: (lan
         <Route path="/admin/biografia" component={BiographyEditor} />
         <Route path="/admin/produtos" component={ProductsManagement} />
         <Route path="/admin/comentarios" component={CommentsModeration} />
+        <Route path="/admin/contactos" component={ContactsManagement} />
         <Route path="/admin/membros" component={BandMembersManagement} />
         <Route path="/admin/utilizadores" component={UsersManagement} />
         <Route component={NotFound} />

@@ -71,20 +71,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ===== ADMIN STATS ROUTE =====
   app.get("/api/admin/stats", requireAuth, async (_req, res) => {
     try {
-      const [news, events, gallery, products, users] = await Promise.all([
+      const [news, events, gallery, products, users, contacts, comments] = await Promise.all([
         storage.getAllNews(),
         storage.getAllEvents(),
         storage.getAllGallery(),
         storage.getAllProducts(),
         storage.getAllUsers(),
+        storage.getAllContacts(),
+        storage.getAllComments(),
       ]);
+
+      const newContacts = contacts.filter(c => c.status === 'new').length;
+      const pendingComments = comments.filter((c: any) => c.isApproved === 0).length;
 
       res.json({
         news: news.length,
         events: events.length,
         gallery: gallery.length,
         products: products.length,
-        comments: 0, // Will be implemented when comment system is ready
+        contacts: newContacts,
+        comments: pendingComments,
         users: users.length,
       });
     } catch (error) {
@@ -302,6 +308,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(contact);
     } catch (error) {
       res.status(500).json({ error: "Failed to update contact status" });
+    }
+  });
+
+  app.delete("/api/contacts/:id", requireAuth, async (req, res) => {
+    try {
+      await storage.deleteContact(req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete contact" });
     }
   });
 
