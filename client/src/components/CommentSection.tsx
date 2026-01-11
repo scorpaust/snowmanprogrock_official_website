@@ -49,6 +49,7 @@ export function CommentSection({ contentType, contentId, language }: CommentSect
     sending: { pt: "A enviar...", en: "Sending...", fr: "Envoi...", es: "Enviando...", de: "Senden..." },
     success: { pt: "Comentário enviado! Aguarda aprovação.", en: "Comment submitted! Awaiting approval.", fr: "Commentaire envoyé! En attente d'approbation.", es: "¡Comentario enviado! Pendiente de aprobación.", de: "Kommentar gesendet! Wartet auf Genehmigung." },
     error: { pt: "Erro ao enviar comentário", en: "Error submitting comment", fr: "Erreur lors de l'envoi", es: "Error al enviar comentario", de: "Fehler beim Senden" },
+    minLength: { pt: "Comentário deve ter pelo menos 10 caracteres", en: "Comment must be at least 10 characters", fr: "Le commentaire doit contenir au moins 10 caractères", es: "El comentario debe tener al menos 10 caracteres", de: "Kommentar muss mindestens 10 Zeichen haben" },
     loginRequired: { pt: "Inicia sessão para comentar", en: "Login to comment", fr: "Connectez-vous pour commenter", es: "Inicia sesión para comentar", de: "Melden Sie sich an, um zu kommentieren" },
     login: { pt: "Entrar", en: "Login", fr: "Connexion", es: "Entrar", de: "Anmelden" },
     comments: { pt: "comentários", en: "comments", fr: "commentaires", es: "comentarios", de: "Kommentare" },
@@ -93,6 +94,10 @@ export function CommentSection({ contentType, contentId, language }: CommentSect
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newComment.trim() || !currentUser) return;
+    if (newComment.trim().length < 10) {
+      toast({ title: translate(t.minLength), variant: "destructive" });
+      return;
+    }
     submitMutation.mutate(newComment.trim());
   };
 
