@@ -15,8 +15,9 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { Plus, Pencil, Trash2, Package, Image as ImageIcon } from "lucide-react";
+import { Plus, Pencil, Trash2, Package, Image as ImageIcon, Upload } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { ObjectUploader } from "@/components/ObjectUploader";
 
 const productFormSchema = z.object({
   name: z.string().min(1, "Nome é obrigatório"),
@@ -228,6 +229,31 @@ export default function ProductsManagement() {
   const removeImage = (index: number) => {
     const currentImages = form.getValues("images");
     form.setValue("images", currentImages.filter((_, i) => i !== index));
+  };
+
+  const handleGetUploadURL = async () => {
+    const response = await apiRequest("POST", "/api/objects/upload", {
+      contentType: "image/jpeg",
+    });
+    const data = await response.json();
+    return { method: "PUT" as const, url: data.url };
+  };
+
+  const handleImageUploadComplete = async (result: any) => {
+    const successfulUploads = result.successful || [];
+    for (const upload of successfulUploads) {
+      const uploadURL = upload.uploadURL;
+      const normalizeResponse = await apiRequest("POST", "/api/objects/normalize-path", {
+        uploadURL,
+      });
+      const { path } = await normalizeResponse.json();
+      const currentImages = form.getValues("images");
+      form.setValue("images", [...currentImages, path]);
+    }
+    toast({
+      title: "Upload completo",
+      description: `${successfulUploads.length} imagem(ns) carregada(s)`,
+    });
   };
 
   const formatPrice = (cents: number) => {
@@ -476,6 +502,16 @@ export default function ProductsManagement() {
                       <Button type="button" onClick={addImage} data-testid="button-add-image">
                         <Plus className="h-4 w-4" />
                       </Button>
+                      <ObjectUploader
+                        onGetUploadParameters={handleGetUploadURL}
+                        onComplete={handleImageUploadComplete}
+                        maxNumberOfFiles={5}
+                        accept={["image/jpeg", "image/png", "image/webp", "image/gif"]}
+                        data-testid="button-upload-product-image"
+                      >
+                        <Upload className="h-4 w-4 mr-2" />
+                        Carregar
+                      </ObjectUploader>
                     </div>
                     <div className="flex flex-wrap gap-2 mt-2">
                       {form.watch("images").map((url, index) => (
@@ -809,6 +845,16 @@ export default function ProductsManagement() {
                                 <Button type="button" onClick={addImage}>
                                   <Plus className="h-4 w-4" />
                                 </Button>
+                                <ObjectUploader
+                                  onGetUploadParameters={handleGetUploadURL}
+                                  onComplete={handleImageUploadComplete}
+                                  maxNumberOfFiles={5}
+                                  accept={["image/jpeg", "image/png", "image/webp", "image/gif"]}
+                                  data-testid="button-edit-upload-product-image"
+                                >
+                                  <Upload className="h-4 w-4 mr-2" />
+                                  Carregar
+                                </ObjectUploader>
                               </div>
                               <div className="flex flex-wrap gap-2 mt-2">
                                 {form.watch("images").map((url, index) => (
