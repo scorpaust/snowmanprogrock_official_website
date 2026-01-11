@@ -232,28 +232,32 @@ export default function ProductsManagement() {
   };
 
   const handleGetUploadURL = async () => {
-    const response = await apiRequest("POST", "/api/objects/upload", {
-      contentType: "image/jpeg",
-    });
+    const response = await apiRequest("POST", "/api/objects/upload", {});
+    if (!response.ok) {
+      throw new Error("Failed to get upload URL");
+    }
     const data = await response.json();
-    return { method: "PUT" as const, url: data.url };
+    return { method: "PUT" as const, url: data.uploadURL };
   };
 
   const handleImageUploadComplete = async (result: any) => {
-    const successfulUploads = result.successful || [];
-    for (const upload of successfulUploads) {
-      const uploadURL = upload.uploadURL;
-      const normalizeResponse = await apiRequest("POST", "/api/objects/normalize-path", {
-        uploadURL,
+    if (result.successful && result.successful.length > 0) {
+      for (const upload of result.successful) {
+        const uploadURL = upload.uploadURL;
+        if (uploadURL) {
+          const normalizeResponse = await apiRequest("POST", "/api/objects/normalize-path", {
+            uploadURL,
+          });
+          const { path } = await normalizeResponse.json();
+          const currentImages = form.getValues("images");
+          form.setValue("images", [...currentImages, path]);
+        }
+      }
+      toast({
+        title: "Upload completo",
+        description: `${result.successful.length} imagem(ns) carregada(s)`,
       });
-      const { path } = await normalizeResponse.json();
-      const currentImages = form.getValues("images");
-      form.setValue("images", [...currentImages, path]);
     }
-    toast({
-      title: "Upload completo",
-      description: `${successfulUploads.length} imagem(ns) carregada(s)`,
-    });
   };
 
   const formatPrice = (cents: number) => {
