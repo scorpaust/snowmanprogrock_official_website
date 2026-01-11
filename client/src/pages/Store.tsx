@@ -190,24 +190,26 @@ export default function Store({ language = 'pt' }: StoreProps) {
               <Card key={product.id} className="h-full flex flex-col" data-testid={`card-product-${product.id}`}>
                 <Link href={`/loja/produto/${product.id}`} data-testid={`link-product-${product.id}`}>
                   <CardHeader className="p-0 cursor-pointer">
-                    <div className="relative w-full h-64 overflow-hidden rounded-t-md bg-black flex items-center justify-center">
+                    <div className="relative w-full h-64 overflow-hidden rounded-t-md bg-black">
                       <img
                         src={product.images?.[0] || 'https://images.unsplash.com/photo-1619983081563-430f63602796?w=800&q=80'}
                         alt={getProductName(product)}
-                        className="max-w-full max-h-full object-contain hover:scale-105 transition-transform duration-300 mx-auto"
+                        className="w-full h-full object-contain hover:scale-105 transition-transform duration-300"
                         data-testid={`img-product-${product.id}`}
                       />
-                      {product.featured === 1 && (
-                        <Badge className="absolute top-2 left-2 bg-purple-600" data-testid={`badge-featured-${product.id}`}>
-                          <Disc className="mr-1 h-3 w-3" />
-                          {t.featured}
-                        </Badge>
-                      )}
-                      {product.type === 'digital' && (
-                        <Badge variant="secondary" className="absolute top-2 right-2" data-testid={`badge-type-${product.id}`}>
-                          {t.digital}
-                        </Badge>
-                      )}
+                      <div className="absolute top-2 left-2 flex flex-col gap-1">
+                        {product.featured === 1 && (
+                          <Badge className="bg-purple-600" data-testid={`badge-featured-${product.id}`}>
+                            <Disc className="mr-1 h-3 w-3" />
+                            {t.featured}
+                          </Badge>
+                        )}
+                        {product.type === 'digital' && (
+                          <Badge variant="secondary" data-testid={`badge-type-${product.id}`}>
+                            {t.digital}
+                          </Badge>
+                        )}
+                      </div>
                     </div>
                   </CardHeader>
                 </Link>
