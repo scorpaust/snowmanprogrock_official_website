@@ -110,7 +110,8 @@ export default function CustomerArea({ language }: CustomerAreaProps) {
     logout: { pt: "Terminar Sessão", en: "Logout", fr: "Déconnexion", es: "Cerrar Sesión", de: "Abmelden" },
     noOrders: { pt: "Ainda não tens encomendas", en: "You have no orders yet", fr: "Vous n'avez pas encore de commandes", es: "Aún no tienes pedidos", de: "Sie haben noch keine Bestellungen" },
     noDownloads: { pt: "Ainda não tens downloads disponíveis", en: "You have no downloads available yet", fr: "Vous n'avez pas encore de téléchargements", es: "Aún no tienes descargas disponibles", de: "Sie haben noch keine Downloads" },
-    comments: { pt: "comentários", en: "comments", fr: "commentaires", es: "comentarios", de: "Kommentare" },
+    comment: { pt: "comentário aprovado", en: "approved comment", fr: "commentaire approuvé", es: "comentario aprobado", de: "genehmigter Kommentar" },
+    comments: { pt: "comentários aprovados", en: "approved comments", fr: "commentaires approuvés", es: "comentarios aprobados", de: "genehmigte Kommentare" },
     stars: { pt: "estrelas", en: "stars", fr: "étoiles", es: "estrellas", de: "Sterne" },
     orderNumber: { pt: "Encomenda", en: "Order", fr: "Commande", es: "Pedido", de: "Bestellung" },
     status: { pt: "Estado", en: "Status", fr: "Statut", es: "Estado", de: "Status" },
@@ -153,6 +154,13 @@ export default function CustomerArea({ language }: CustomerAreaProps) {
   };
 
   const getStars = (totalComments: number) => Math.min(5, Math.floor(totalComments / 100));
+
+  const getCommentLabel = (count: number) => {
+    if (count === 1) {
+      return translate(t.comment);
+    }
+    return translate(t.comments);
+  };
 
   const getDigitalProducts = () => {
     const paidOrders = orders.filter(o => o.status === 'paid' || o.status === 'completed');
@@ -225,7 +233,7 @@ export default function CustomerArea({ language }: CustomerAreaProps) {
               <p className="text-muted-foreground text-sm">{profile.email}</p>
               <div className="flex items-center gap-2 mt-1">
                 <span className="text-xs text-muted-foreground">
-                  {profile.totalComments} {translate(t.comments)}
+                  {profile.totalComments} {getCommentLabel(profile.totalComments)}
                 </span>
                 {stars > 0 && (
                   <div className="flex items-center gap-0.5">
