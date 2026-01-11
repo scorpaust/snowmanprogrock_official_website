@@ -190,11 +190,11 @@ export default function Store({ language = 'pt' }: StoreProps) {
               <Card key={product.id} className="h-full flex flex-col" data-testid={`card-product-${product.id}`}>
                 <Link href={`/loja/produto/${product.id}`} data-testid={`link-product-${product.id}`}>
                   <CardHeader className="p-0 cursor-pointer">
-                    <div className="relative w-full h-64 overflow-hidden rounded-t-md bg-gray-900 flex items-center justify-center">
+                    <div className="relative w-full h-64 overflow-hidden rounded-t-md bg-black flex items-center justify-center">
                       <img
                         src={product.images?.[0] || 'https://images.unsplash.com/photo-1619983081563-430f63602796?w=800&q=80'}
                         alt={getProductName(product)}
-                        className="max-w-full max-h-full object-contain hover:scale-105 transition-transform duration-300"
+                        className="max-w-full max-h-full object-contain hover:scale-105 transition-transform duration-300 mx-auto"
                         data-testid={`img-product-${product.id}`}
                       />
                       {product.featured === 1 && (
