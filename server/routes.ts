@@ -784,8 +784,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ error: "Profile not found" });
       }
       
+      // Calculate approved comments count dynamically
+      const allComments = await storage.getAllComments();
+      const approvedCommentsCount = allComments.filter(
+        c => c.userProfileId === profile.id && c.isApproved === 1
+      ).length;
+      
       const { password: _, ...safeProfile } = profile;
-      res.json(safeProfile);
+      res.json({ ...safeProfile, totalComments: approvedCommentsCount });
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch profile" });
     }
