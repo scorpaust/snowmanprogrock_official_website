@@ -33,6 +33,8 @@ export default function Navigation({ language, setLanguage }: NavigationProps) {
   const { data: currentUser } = useQuery<UserProfile>({
     queryKey: ['/api/customer/me'],
     retry: false,
+    staleTime: 0,
+    gcTime: 0,
   });
 
   const menuItems = [

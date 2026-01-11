@@ -13,8 +13,9 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { User, Settings, ShoppingBag, Star, LogOut, Download, CreditCard, Music } from "lucide-react";
+import { User, Settings, ShoppingBag, Star, LogOut, Download, CreditCard, Music, Upload } from "lucide-react";
 import type { Order, OrderItem, Product } from "@shared/schema";
+import { ObjectUploader } from "@/components/ObjectUploader";
 
 interface CustomerAreaProps {
   language: string;
@@ -90,7 +91,9 @@ export default function CustomerArea({ language }: CustomerAreaProps) {
     downloads: { pt: "Downloads", en: "Downloads", fr: "Téléchargements", es: "Descargas", de: "Downloads" },
     name: { pt: "Nome", en: "Name", fr: "Nom", es: "Nombre", de: "Name" },
     email: { pt: "Email", en: "Email", fr: "Email", es: "Email", de: "E-Mail" },
-    avatar: { pt: "URL do Avatar", en: "Avatar URL", fr: "URL de l'avatar", es: "URL del Avatar", de: "Avatar-URL" },
+    avatar: { pt: "Foto de Perfil", en: "Profile Picture", fr: "Photo de Profil", es: "Foto de Perfil", de: "Profilbild" },
+    uploadAvatar: { pt: "Carregar Foto", en: "Upload Photo", fr: "Télécharger Photo", es: "Subir Foto", de: "Foto hochladen" },
+    avatarUploaded: { pt: "Foto carregada com sucesso", en: "Photo uploaded successfully", fr: "Photo téléchargée", es: "Foto subida", de: "Foto hochgeladen" },
     biography: { pt: "Biografia", en: "Biography", fr: "Biographie", es: "Biografía", de: "Biografie" },
     musicalTastes: { pt: "Gostos Musicais", en: "Musical Tastes", fr: "Goûts Musicaux", es: "Gustos Musicales", de: "Musikgeschmack" },
     musicalTastesPlaceholder: { pt: "Ex: Rock Progressivo, Jazz, Metal...", en: "E.g.: Progressive Rock, Jazz, Metal...", fr: "Ex: Rock Progressif, Jazz, Metal...", es: "Ej: Rock Progresivo, Jazz, Metal...", de: "Z.B.: Progressive Rock, Jazz, Metal..." },
@@ -143,7 +146,8 @@ export default function CustomerArea({ language }: CustomerAreaProps) {
       await apiRequest("POST", "/api/customer/logout", {});
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/customer/me'] });
+      queryClient.removeQueries({ queryKey: ['/api/customer/me'] });
+      queryClient.removeQueries({ queryKey: ['/api/customer/orders'] });
       setLocation("/");
     },
   });
@@ -285,14 +289,47 @@ export default function CustomerArea({ language }: CustomerAreaProps) {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="avatar">{translate(t.avatar)}</Label>
-                      <Input
-                        id="avatar"
-                        value={formData.avatar}
-                        onChange={(e) => setFormData({ ...formData, avatar: e.target.value })}
-                        placeholder="https://..."
-                        data-testid="input-profile-avatar"
-                      />
+                      <Label>{translate(t.avatar)}</Label>
+                      <div className="flex items-center gap-4">
+                        <Avatar className="h-16 w-16 border-2 border-primary/30">
+                          <AvatarImage src={formData.avatar || undefined} />
+                          <AvatarFallback>
+                            <User className="h-8 w-8" />
+                          </AvatarFallback>
+                        </Avatar>
+                        <ObjectUploader
+                          maxNumberOfFiles={1}
+                          maxFileSize={5242880}
+                          accept={["image/jpeg", "image/png", "image/webp", "image/gif"]}
+                          onGetUploadParameters={async () => {
+                            const response = await apiRequest("POST", "/api/objects/upload", {
+                              filename: `avatar-${Date.now()}.jpg`,
+                              contentType: "image/jpeg",
+                            });
+                            const data = await response.json();
+                            return { method: "PUT", url: data.url };
+                          }}
+                          onComplete={async (result) => {
+                            if (result.successful && result.successful.length > 0) {
+                              const uploadedFile = result.successful[0];
+                              const uploadUrl = (uploadedFile as any).uploadURL;
+                              if (uploadUrl) {
+                                const normalizeResponse = await apiRequest("POST", "/api/objects/normalize-path", {
+                                  gcsUrl: uploadUrl,
+                                });
+                                const normalizeData = await normalizeResponse.json();
+                                setFormData({ ...formData, avatar: normalizeData.normalizedPath });
+                                toast({ title: translate(t.avatarUploaded) });
+                              }
+                            }
+                          }}
+                          variant="outline"
+                          data-testid="button-upload-avatar"
+                        >
+                          <Upload className="h-4 w-4 mr-2" />
+                          {translate(t.uploadAvatar)}
+                        </ObjectUploader>
+                      </div>
                     </div>
                   </div>
 

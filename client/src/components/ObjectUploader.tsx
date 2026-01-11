@@ -29,6 +29,7 @@ interface ObjectUploaderProps {
   children: ReactNode;
   variant?: "default" | "outline" | "ghost" | "secondary";
   accept?: string[];
+  "data-testid"?: string;
 }
 
 export function ObjectUploader({
@@ -40,6 +41,7 @@ export function ObjectUploader({
   children,
   variant = "default",
   accept,
+  "data-testid": dataTestId,
 }: ObjectUploaderProps) {
   const [showModal, setShowModal] = useState(false);
   const dashboardRef = useRef<HTMLDivElement>(null);
@@ -140,7 +142,7 @@ export function ObjectUploader({
         className={buttonClassName}
         variant={variant}
         type="button"
-        data-testid="button-upload-file"
+        data-testid={dataTestId || "button-upload-file"}
       >
         {children}
       </Button>
