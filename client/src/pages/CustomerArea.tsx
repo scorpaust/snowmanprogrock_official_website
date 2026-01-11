@@ -94,6 +94,15 @@ export default function CustomerArea({ language }: CustomerAreaProps) {
     avatar: { pt: "Foto de Perfil", en: "Profile Picture", fr: "Photo de Profil", es: "Foto de Perfil", de: "Profilbild" },
     uploadAvatar: { pt: "Carregar Foto", en: "Upload Photo", fr: "Télécharger Photo", es: "Subir Foto", de: "Foto hochladen" },
     avatarUploaded: { pt: "Foto carregada com sucesso", en: "Photo uploaded successfully", fr: "Photo téléchargée", es: "Foto subida", de: "Foto hochgeladen" },
+    uploaderTitle: { pt: "Carregar Foto", en: "Upload Photo", fr: "Télécharger Photo", es: "Subir Foto", de: "Foto hochladen" },
+    uploaderDescription: { pt: "Arraste a foto para aqui ou clique para selecionar", en: "Drag photo here or click to select", fr: "Glissez la photo ici ou cliquez pour sélectionner", es: "Arrastra la foto aquí o haz clic para seleccionar", de: "Foto hierher ziehen oder klicken zum Auswählen" },
+    uploaderDrop: { pt: "Arraste a foto aqui ou %{browseFiles}", en: "Drag photo here or %{browseFiles}", fr: "Glissez la photo ici ou %{browseFiles}", es: "Arrastra la foto aquí o %{browseFiles}", de: "Foto hierher ziehen oder %{browseFiles}" },
+    uploaderBrowse: { pt: "procure no computador", en: "browse files", fr: "parcourir les fichiers", es: "buscar archivos", de: "Dateien durchsuchen" },
+    uploaderComplete: { pt: "Upload completo", en: "Upload complete", fr: "Téléchargement terminé", es: "Subida completada", de: "Upload abgeschlossen" },
+    uploaderDone: { pt: "Concluído", en: "Done", fr: "Terminé", es: "Hecho", de: "Fertig" },
+    uploaderRemove: { pt: "Remover ficheiro", en: "Remove file", fr: "Supprimer le fichier", es: "Eliminar archivo", de: "Datei entfernen" },
+    uploaderDevice: { pt: "O meu dispositivo", en: "My Device", fr: "Mon appareil", es: "Mi dispositivo", de: "Mein Gerät" },
+    uploaderHint: { pt: "Largue a foto aqui", en: "Drop photo here", fr: "Déposez la photo ici", es: "Suelta la foto aquí", de: "Foto hier ablegen" },
     biography: { pt: "Biografia", en: "Biography", fr: "Biographie", es: "Biografía", de: "Biografie" },
     musicalTastes: { pt: "Gostos Musicais", en: "Musical Tastes", fr: "Goûts Musicaux", es: "Gustos Musicales", de: "Musikgeschmack" },
     musicalTastesPlaceholder: { pt: "Ex: Rock Progressivo, Jazz, Metal...", en: "E.g.: Progressive Rock, Jazz, Metal...", fr: "Ex: Rock Progressif, Jazz, Metal...", es: "Ej: Rock Progresivo, Jazz, Metal...", de: "Z.B.: Progressive Rock, Jazz, Metal..." },
@@ -325,6 +334,17 @@ export default function CustomerArea({ language }: CustomerAreaProps) {
                           }}
                           variant="outline"
                           data-testid="button-upload-avatar"
+                          locale={{
+                            dialogTitle: translate(t.uploaderTitle),
+                            dialogDescription: translate(t.uploaderDescription),
+                            dropPasteFiles: translate(t.uploaderDrop),
+                            browseFiles: translate(t.uploaderBrowse),
+                            uploadComplete: translate(t.uploaderComplete),
+                            done: translate(t.uploaderDone),
+                            removeFile: translate(t.uploaderRemove),
+                            myDevice: translate(t.uploaderDevice),
+                            dropHint: translate(t.uploaderHint),
+                          }}
                         >
                           <Upload className="h-4 w-4 mr-2" />
                           {translate(t.uploadAvatar)}

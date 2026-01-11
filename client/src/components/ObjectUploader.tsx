@@ -15,6 +15,18 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
+interface UploaderLocale {
+  dialogTitle: string;
+  dialogDescription: string;
+  dropPasteFiles: string;
+  browseFiles: string;
+  uploadComplete: string;
+  done: string;
+  removeFile: string;
+  myDevice: string;
+  dropHint: string;
+}
+
 interface ObjectUploaderProps {
   maxNumberOfFiles?: number;
   maxFileSize?: number;
@@ -30,7 +42,20 @@ interface ObjectUploaderProps {
   variant?: "default" | "outline" | "ghost" | "secondary";
   accept?: string[];
   "data-testid"?: string;
+  locale?: UploaderLocale;
 }
+
+const defaultLocale: UploaderLocale = {
+  dialogTitle: "Carregar Ficheiro",
+  dialogDescription: "Arraste ficheiros para aqui ou clique para selecionar",
+  dropPasteFiles: "Arraste ficheiros aqui ou %{browseFiles}",
+  browseFiles: "procure no computador",
+  uploadComplete: "Upload completo",
+  done: "Concluído",
+  removeFile: "Remover ficheiro",
+  myDevice: "O meu dispositivo",
+  dropHint: "Largue os ficheiros aqui",
+};
 
 export function ObjectUploader({
   maxNumberOfFiles = 1,
@@ -42,6 +67,7 @@ export function ObjectUploader({
   variant = "default",
   accept,
   "data-testid": dataTestId,
+  locale = defaultLocale,
 }: ObjectUploaderProps) {
   const [showModal, setShowModal] = useState(false);
   const dashboardRef = useRef<HTMLDivElement>(null);
@@ -86,40 +112,13 @@ export function ObjectUploader({
           theme: "dark",
           locale: {
             strings: {
-              dropPasteFiles: "Arraste ficheiros aqui ou %{browseFiles}",
-              browseFiles: "procure no computador",
-              uploadComplete: "Upload completo",
-              uploadPaused: "Upload em pausa",
-              resumeUpload: "Continuar upload",
-              pauseUpload: "Pausar upload",
-              retryUpload: "Tentar novamente",
-              cancelUpload: "Cancelar upload",
-              xFilesSelected: {
-                0: "%{smart_count} ficheiro selecionado",
-                1: "%{smart_count} ficheiros selecionados",
-              },
-              uploadingXFiles: {
-                0: "A carregar %{smart_count} ficheiro",
-                1: "A carregar %{smart_count} ficheiros",
-              },
-              processingXFiles: {
-                0: "A processar %{smart_count} ficheiro",
-                1: "A processar %{smart_count} ficheiros",
-              },
-              done: "Concluído",
-              addMoreFiles: "Adicionar mais ficheiros",
-              removeFile: "Remover ficheiro",
-              editFile: "Editar ficheiro",
-              editing: "A editar %{file}",
-              finishEditingFile: "Terminar edição",
-              myDevice: "O meu dispositivo",
-              dropPasteBoth: "Arraste ficheiros aqui, %{browseFiles} ou %{browseFolders}",
-              dropPasteImportFiles: "Arraste ficheiros aqui, %{browseFiles} ou importe de:",
-              dropPasteImportBoth: "Arraste ficheiros aqui, %{browseFiles}, %{browseFolders} ou importe de:",
-              dropHint: "Largue os ficheiros aqui",
-              browseFolders: "procurar pastas",
-              back: "Voltar",
-              importFrom: "Importar de %{name}",
+              dropPasteFiles: locale.dropPasteFiles,
+              browseFiles: locale.browseFiles,
+              uploadComplete: locale.uploadComplete,
+              done: locale.done,
+              removeFile: locale.removeFile,
+              myDevice: locale.myDevice,
+              dropHint: locale.dropHint,
             },
           },
         })
@@ -135,7 +134,7 @@ export function ObjectUploader({
       }
       uppyRef.current = null;
     };
-  }, [showModal, maxNumberOfFiles, maxFileSize, onGetUploadParameters, accept, handleComplete]);
+  }, [showModal, maxNumberOfFiles, maxFileSize, onGetUploadParameters, accept, handleComplete, locale]);
 
   const handleOpenChange = (open: boolean) => {
     setShowModal(open);
@@ -159,9 +158,9 @@ export function ObjectUploader({
       <Dialog open={showModal} onOpenChange={handleOpenChange}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Carregar Ficheiro</DialogTitle>
+            <DialogTitle>{locale.dialogTitle}</DialogTitle>
             <DialogDescription>
-              Arraste ficheiros para aqui ou clique para selecionar
+              {locale.dialogDescription}
             </DialogDescription>
           </DialogHeader>
           <div 
