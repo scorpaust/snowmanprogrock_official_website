@@ -248,9 +248,9 @@ export default function ProductsManagement() {
           const normalizeResponse = await apiRequest("POST", "/api/objects/normalize-path", {
             uploadURL,
           });
-          const { path } = await normalizeResponse.json();
+          const { objectPath } = await normalizeResponse.json();
           const currentImages = form.getValues("images");
-          form.setValue("images", [...currentImages, path]);
+          form.setValue("images", [...currentImages, objectPath]);
         }
       }
       toast({
