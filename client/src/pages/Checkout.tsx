@@ -10,7 +10,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { ShoppingCart, CreditCard, Loader2 } from "lucide-react";
+import { ShoppingCart, CreditCard, Loader2, Trash2, LogIn } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { Link } from "wouter";
 
 const stripePublicKey = import.meta.env.VITE_STRIPE_PUBLIC_KEY;
 const stripePromise = stripePublicKey ? loadStripe(stripePublicKey) : null;
@@ -108,6 +110,12 @@ function CheckoutForm({ orderId, onSuccess }: CheckoutFormProps) {
   );
 }
 
+type UserProfile = {
+  id: string;
+  email: string;
+  name: string;
+};
+
 export default function Checkout({ language = 'pt' }: { language?: string }) {
   const [, navigate] = useLocation();
   const { cart, items, total, clearCart } = useCart();
@@ -124,6 +132,11 @@ export default function Checkout({ language = 'pt' }: { language?: string }) {
     city: "",
     postalCode: "",
     country: "Portugal",
+  });
+
+  const { data: currentUser, isLoading: isLoadingUser } = useQuery<UserProfile>({
+    queryKey: ['/api/customer/me'],
+    retry: false,
   });
 
   const translations = {
@@ -144,6 +157,10 @@ export default function Checkout({ language = 'pt' }: { language?: string }) {
       subtotal: "Subtotal",
       total: "Total",
       processing: "A processar...",
+      clearCart: "Limpar Carrinho",
+      loginRequired: "Inicie sessão para finalizar a compra",
+      login: "Iniciar Sessão",
+      register: "ou crie uma conta",
     },
     en: {
       title: "Checkout",
@@ -162,6 +179,10 @@ export default function Checkout({ language = 'pt' }: { language?: string }) {
       subtotal: "Subtotal",
       total: "Total",
       processing: "Processing...",
+      clearCart: "Clear Cart",
+      loginRequired: "Login to complete your purchase",
+      login: "Login",
+      register: "or create an account",
     },
   };
 
@@ -236,7 +257,7 @@ export default function Checkout({ language = 'pt' }: { language?: string }) {
 
   if (items.length === 0) {
     return (
-      <div className="container mx-auto px-4 py-16">
+      <div className="container mx-auto px-4 py-16 pt-24">
         <Card className="max-w-md mx-auto">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -255,8 +276,38 @@ export default function Checkout({ language = 'pt' }: { language?: string }) {
     );
   }
 
+  if (!isLoadingUser && !currentUser) {
+    return (
+      <div className="min-h-screen bg-background py-12 pt-24">
+        <div className="container mx-auto px-4 max-w-6xl">
+          <h1 className="text-4xl font-bold mb-8" data-testid="text-checkout-title">{t.title}</h1>
+          <Card className="max-w-md mx-auto">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <LogIn className="h-5 w-5" />
+                {t.loginRequired}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-muted-foreground text-center">{t.register}</p>
+              <Link href="/auth">
+                <Button className="w-full" data-testid="button-login-to-checkout">
+                  <LogIn className="h-4 w-4 mr-2" />
+                  {t.login}
+                </Button>
+              </Link>
+              <Button variant="outline" onClick={() => navigate('/loja')} className="w-full" data-testid="button-back-to-shop">
+                {t.goToShop}
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-background py-12">
+    <div className="min-h-screen bg-background py-12 pt-24">
       <div className="container mx-auto px-4 max-w-6xl">
         <h1 className="text-4xl font-bold mb-8" data-testid="text-checkout-title">{t.title}</h1>
 
@@ -373,11 +424,23 @@ export default function Checkout({ language = 'pt' }: { language?: string }) {
           </div>
 
           <div>
-            <Card className="sticky top-4">
+            <Card className="sticky top-24">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <ShoppingCart className="h-5 w-5" />
-                  {t.cart}
+                <CardTitle className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <ShoppingCart className="h-5 w-5" />
+                    {t.cart}
+                  </div>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={clearCart}
+                    className="text-destructive hover:text-destructive"
+                    data-testid="button-clear-cart"
+                  >
+                    <Trash2 className="h-4 w-4 mr-1" />
+                    {t.clearCart}
+                  </Button>
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
