@@ -37,6 +37,16 @@ export default function Band({ language }: BandProps) {
     }
   };
 
+  const getLocalizedBiography = (bio: Biography) => {
+    switch (language) {
+      case 'en': return bio.contentEn || bio.content;
+      case 'fr': return bio.contentFr || bio.content;
+      case 'es': return bio.contentEs || bio.content;
+      case 'de': return bio.contentDe || bio.content;
+      default: return bio.content;
+    }
+  };
+
   const getInitials = (name: string) => {
     return name
       .split(" ")
@@ -80,7 +90,7 @@ export default function Band({ language }: BandProps) {
           {biography ? (
             <div className="prose prose-invert prose-lg max-w-none" data-testid="text-biography-content">
               <p className="text-gray-300 leading-relaxed whitespace-pre-line">
-                {language === 'en' && biography.contentEn ? biography.contentEn : biography.content}
+                {getLocalizedBiography(biography)}
               </p>
             </div>
           ) : (
