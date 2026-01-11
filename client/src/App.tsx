@@ -30,6 +30,8 @@ import Checkout from "./pages/Checkout";
 import OrderConfirmation from "./pages/OrderConfirmation";
 import Store from "./pages/Store";
 import ProductDetail from "./pages/ProductDetail";
+import CustomerAuth from "./pages/CustomerAuth";
+import CustomerArea from "./pages/CustomerArea";
 import NotFound from "@/pages/not-found";
 
 function Router({ language, setLanguage }: { language: string; setLanguage: (lang: string) => void }) {
@@ -52,6 +54,8 @@ function Router({ language, setLanguage }: { language: string; setLanguage: (lan
         <Route path="/loja/produto/:id" component={() => <ProductDetail language={language} />} />
         <Route path="/loja/checkout" component={() => <Checkout language={language} />} />
         <Route path="/loja/pedido/:orderId" component={OrderConfirmation} />
+        <Route path="/auth" component={() => <CustomerAuth language={language} />} />
+        <Route path="/cliente" component={() => <CustomerArea language={language} />} />
         <Route path="/admin/login" component={Login} />
         <Route path="/admin" component={Dashboard} />
         <Route path="/admin/spotify" component={SpotifySettings} />

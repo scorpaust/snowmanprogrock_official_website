@@ -1,11 +1,17 @@
-import type { Express, NextFunction } from "express";
+import type { Express, NextFunction, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertNewsSchema, insertEventSchema, insertGallerySchema, insertContactSchema, insertBiographySchema, insertSpotifySettingsSchema, insertUserSchema, updateUserSchema, updateNewsSchema, updateEventSchema, insertProductSchema, updateProductSchema, insertCommentSchema, updateCommentSchema, insertBandMemberSchema, updateBandMemberSchema } from "@shared/schema";
+import { insertNewsSchema, insertEventSchema, insertGallerySchema, insertContactSchema, insertBiographySchema, insertSpotifySettingsSchema, insertUserSchema, updateUserSchema, updateNewsSchema, updateEventSchema, insertProductSchema, updateProductSchema, insertCommentSchema, updateCommentSchema, insertBandMemberSchema, updateBandMemberSchema, insertUserProfileSchema } from "@shared/schema";
 import { registerAuthRoutes, requireAuth, requireRole } from "./auth";
 import Stripe from "stripe";
 import bcrypt from "bcrypt";
 import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
+
+declare module 'express-session' {
+  interface SessionData {
+    customerUserId?: string;
+  }
+}
 
 if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
@@ -639,6 +645,145 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ error: "Failed to delete comment" });
+    }
+  });
+
+  // ===== CUSTOMER AUTH ROUTES =====
+  
+  // Customer Registration
+  app.post("/api/customer/register", async (req, res) => {
+    try {
+      const { email, password, name } = req.body;
+      
+      if (!email || !password || !name) {
+        return res.status(400).json({ error: "Email, password and name are required" });
+      }
+      
+      const existingUser = await storage.getUserProfileByEmail(email);
+      if (existingUser) {
+        return res.status(400).json({ error: "Email already registered" });
+      }
+      
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const profile = await storage.createUserProfile({
+        email,
+        password: hashedPassword,
+        name,
+      });
+      
+      req.session.customerUserId = profile.id;
+      
+      const { password: _, ...safeProfile } = profile;
+      res.status(201).json(safeProfile);
+    } catch (error: any) {
+      console.error("Customer registration error:", error);
+      res.status(500).json({ error: "Failed to register" });
+    }
+  });
+  
+  // Customer Login
+  app.post("/api/customer/login", async (req, res) => {
+    try {
+      const { email, password } = req.body;
+      
+      if (!email || !password) {
+        return res.status(400).json({ error: "Email and password are required" });
+      }
+      
+      const profile = await storage.getUserProfileByEmail(email);
+      if (!profile) {
+        return res.status(401).json({ error: "Invalid credentials" });
+      }
+      
+      const isValid = await bcrypt.compare(password, profile.password);
+      if (!isValid) {
+        return res.status(401).json({ error: "Invalid credentials" });
+      }
+      
+      if (profile.isActive === 0) {
+        return res.status(401).json({ error: "Account is inactive" });
+      }
+      
+      req.session.customerUserId = profile.id;
+      
+      const { password: _, ...safeProfile } = profile;
+      res.json(safeProfile);
+    } catch (error) {
+      console.error("Customer login error:", error);
+      res.status(500).json({ error: "Failed to login" });
+    }
+  });
+  
+  // Customer Logout
+  app.post("/api/customer/logout", (req, res) => {
+    req.session.customerUserId = undefined;
+    res.json({ success: true });
+  });
+  
+  // Get current customer
+  app.get("/api/customer/me", async (req, res) => {
+    try {
+      if (!req.session.customerUserId) {
+        return res.status(401).json({ error: "Not authenticated" });
+      }
+      
+      const profile = await storage.getUserProfileById(req.session.customerUserId);
+      if (!profile) {
+        req.session.customerUserId = undefined;
+        return res.status(401).json({ error: "Profile not found" });
+      }
+      
+      const { password: _, ...safeProfile } = profile;
+      res.json(safeProfile);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch profile" });
+    }
+  });
+  
+  // Update customer profile
+  app.patch("/api/customer/profile", async (req, res) => {
+    try {
+      if (!req.session.customerUserId) {
+        return res.status(401).json({ error: "Not authenticated" });
+      }
+      
+      const { name, avatar, biography, musicalTastes, preferredPaymentMethod, phone, address, city, postalCode, country } = req.body;
+      
+      const updated = await storage.updateUserProfile(req.session.customerUserId, {
+        name,
+        avatar,
+        biography,
+        musicalTastes,
+        preferredPaymentMethod,
+        phone,
+        address,
+        city,
+        postalCode,
+        country,
+      });
+      
+      if (!updated) {
+        return res.status(404).json({ error: "Profile not found" });
+      }
+      
+      const { password: _, ...safeProfile } = updated;
+      res.json(safeProfile);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update profile" });
+    }
+  });
+  
+  // Get customer orders
+  app.get("/api/customer/orders", async (req, res) => {
+    try {
+      if (!req.session.customerUserId) {
+        return res.status(401).json({ error: "Not authenticated" });
+      }
+      
+      const orders = await storage.getOrdersByUserProfileId(req.session.customerUserId);
+      res.json(orders);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch orders" });
     }
   });
 

@@ -1,6 +1,8 @@
 import {
   type User,
   type InsertUser,
+  type UserProfile,
+  type InsertUserProfile,
   type News,
   type InsertNews,
   type Event,
@@ -26,6 +28,7 @@ import {
   type BandMember,
   type InsertBandMember,
   users,
+  userProfiles,
   news,
   events,
   gallery,
@@ -129,6 +132,16 @@ export interface IStorage {
   createBandMember(member: InsertBandMember): Promise<BandMember>;
   updateBandMember(id: string, member: Partial<InsertBandMember>): Promise<BandMember | undefined>;
   deleteBandMember(id: string): Promise<boolean>;
+
+  // User Profiles (Customer accounts)
+  getAllUserProfiles(): Promise<UserProfile[]>;
+  getUserProfileById(id: string): Promise<UserProfile | undefined>;
+  getUserProfileByEmail(email: string): Promise<UserProfile | undefined>;
+  createUserProfile(profile: InsertUserProfile): Promise<UserProfile>;
+  updateUserProfile(id: string, profile: Partial<InsertUserProfile>): Promise<UserProfile | undefined>;
+  deleteUserProfile(id: string): Promise<boolean>;
+  incrementUserProfileComments(id: string): Promise<UserProfile | undefined>;
+  getOrdersByUserProfileId(userId: string): Promise<Order[]>;
 }
 
 export class MemStorage implements IStorage {
@@ -1251,6 +1264,53 @@ export class DbStorage implements IStorage {
   async deleteBandMember(id: string): Promise<boolean> {
     const result = await db.delete(bandMembers).where(eq(bandMembers.id, id)).returning();
     return result.length > 0;
+  }
+
+  // User Profiles (Customer accounts)
+  async getAllUserProfiles(): Promise<UserProfile[]> {
+    return db.select().from(userProfiles).orderBy(desc(userProfiles.createdAt));
+  }
+
+  async getUserProfileById(id: string): Promise<UserProfile | undefined> {
+    const result = await db.select().from(userProfiles).where(eq(userProfiles.id, id)).limit(1);
+    return result[0];
+  }
+
+  async getUserProfileByEmail(email: string): Promise<UserProfile | undefined> {
+    const result = await db.select().from(userProfiles).where(eq(userProfiles.email, email)).limit(1);
+    return result[0];
+  }
+
+  async createUserProfile(insertProfile: InsertUserProfile): Promise<UserProfile> {
+    const result = await db.insert(userProfiles).values(insertProfile).returning();
+    return result[0];
+  }
+
+  async updateUserProfile(id: string, updates: Partial<InsertUserProfile>): Promise<UserProfile | undefined> {
+    const result = await db.update(userProfiles)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(userProfiles.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async deleteUserProfile(id: string): Promise<boolean> {
+    const result = await db.delete(userProfiles).where(eq(userProfiles.id, id)).returning();
+    return result.length > 0;
+  }
+
+  async incrementUserProfileComments(id: string): Promise<UserProfile | undefined> {
+    const profile = await this.getUserProfileById(id);
+    if (!profile) return undefined;
+    const result = await db.update(userProfiles)
+      .set({ totalComments: profile.totalComments + 1, updatedAt: new Date() })
+      .where(eq(userProfiles.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async getOrdersByUserProfileId(userId: string): Promise<Order[]> {
+    return db.select().from(orders).where(eq(orders.userId, userId)).orderBy(desc(orders.createdAt));
   }
 }
 
