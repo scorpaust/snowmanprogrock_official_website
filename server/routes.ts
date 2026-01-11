@@ -633,11 +633,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Create comment with server-verified user data
       const newComment = await storage.createComment({
-        userId: userProfile.name,
+        userId: userProfile.id,
         userProfileId: userProfile.id,
         userName: userProfile.name,
         userAvatar: userProfile.avatar,
-        userTotalComments: userProfile.totalComments,
+        userTotalComments: userProfile.totalComments || 0,
         contentType,
         contentId,
         comment,
@@ -703,6 +703,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         email,
         password: hashedPassword,
         name,
+        isActive: 1,
       });
       
       req.session.customerUserId = profile.id;
