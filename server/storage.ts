@@ -44,7 +44,7 @@ import {
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { db } from "./db";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, and } from "drizzle-orm";
 
 export interface IStorage {
   // Users
@@ -1224,6 +1224,11 @@ export class DbStorage implements IStorage {
   }
 
   async deleteProduct(id: string): Promise<boolean> {
+    // First delete related order_items
+    await db.delete(orderItems).where(eq(orderItems.productId, id));
+    // Then delete related comments
+    await db.delete(comments).where(and(eq(comments.contentId, id), eq(comments.contentType, 'product')));
+    // Finally delete the product
     const result = await db.delete(products).where(eq(products.id, id)).returning();
     return result.length > 0;
   }
