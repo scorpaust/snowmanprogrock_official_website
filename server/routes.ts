@@ -737,10 +737,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         isActive: 1,
       });
       
-      req.session.customerUserId = profile.id;
-      
-      const { password: _, ...safeProfile } = profile;
-      res.status(201).json(safeProfile);
+      req.session.regenerate((err) => {
+        if (err) {
+          console.error("Session regenerate error:", err);
+          return res.status(500).json({ error: "Failed to create session" });
+        }
+        req.session.customerUserId = profile.id;
+        req.session.save((saveErr) => {
+          if (saveErr) {
+            console.error("Session save error:", saveErr);
+            return res.status(500).json({ error: "Failed to save session" });
+          }
+          const { password: _, ...safeProfile } = profile;
+          res.status(201).json(safeProfile);
+        });
+      });
     } catch (error: any) {
       console.error("Customer registration error:", error);
       res.status(500).json({ error: "Failed to register" });
@@ -770,10 +781,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ error: "Account is inactive" });
       }
       
-      req.session.customerUserId = profile.id;
-      
-      const { password: _, ...safeProfile } = profile;
-      res.json(safeProfile);
+      req.session.regenerate((err) => {
+        if (err) {
+          console.error("Session regenerate error:", err);
+          return res.status(500).json({ error: "Failed to create session" });
+        }
+        req.session.customerUserId = profile.id;
+        req.session.save((saveErr) => {
+          if (saveErr) {
+            console.error("Session save error:", saveErr);
+            return res.status(500).json({ error: "Failed to save session" });
+          }
+          const { password: _, ...safeProfile } = profile;
+          res.json(safeProfile);
+        });
+      });
     } catch (error) {
       console.error("Customer login error:", error);
       res.status(500).json({ error: "Failed to login" });
@@ -812,6 +834,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Customer file upload - presigned URL
+  app.post("/api/customer/upload", async (req, res) => {
+    try {
+      if (!req.session.customerUserId) {
+        return res.status(401).json({ error: "Not authenticated" });
+      }
+      const objectStorageService = new ObjectStorageService();
+      const uploadURL = await objectStorageService.getObjectEntityUploadURL();
+      res.json({ uploadURL });
+    } catch (error) {
+      console.error("Error generating customer upload URL:", error);
+      res.status(500).json({ error: "Failed to generate upload URL" });
+    }
+  });
+
+  // Customer normalize upload path
+  app.post("/api/customer/normalize-path", async (req, res) => {
+    try {
+      if (!req.session.customerUserId) {
+        return res.status(401).json({ error: "Not authenticated" });
+      }
+      const { uploadURL } = req.body;
+      if (!uploadURL) {
+        return res.status(400).json({ error: "uploadURL is required" });
+      }
+      const objectStorageService = new ObjectStorageService();
+      const normalizedPath = objectStorageService.normalizeObjectEntityPath(uploadURL);
+      res.json({ objectPath: normalizedPath });
+    } catch (error) {
+      console.error("Error normalizing customer path:", error);
+      res.status(500).json({ error: "Failed to normalize path" });
+    }
+  });
+
   // Update customer profile
   app.patch("/api/customer/profile", async (req, res) => {
     try {

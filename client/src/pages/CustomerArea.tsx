@@ -311,23 +311,23 @@ export default function CustomerArea({ language }: CustomerAreaProps) {
                           maxFileSize={5242880}
                           accept={["image/jpeg", "image/png", "image/webp", "image/gif"]}
                           onGetUploadParameters={async () => {
-                            const response = await apiRequest("POST", "/api/objects/upload", {
-                              filename: `avatar-${Date.now()}.jpg`,
-                              contentType: "image/jpeg",
-                            });
+                            const response = await apiRequest("POST", "/api/customer/upload", {});
+                            if (!response.ok) {
+                              throw new Error("Failed to get upload URL");
+                            }
                             const data = await response.json();
-                            return { method: "PUT", url: data.url };
+                            return { method: "PUT" as const, url: data.uploadURL };
                           }}
                           onComplete={async (result) => {
                             if (result.successful && result.successful.length > 0) {
                               const uploadedFile = result.successful[0];
                               const uploadUrl = (uploadedFile as any).uploadURL;
                               if (uploadUrl) {
-                                const normalizeResponse = await apiRequest("POST", "/api/objects/normalize-path", {
-                                  gcsUrl: uploadUrl,
+                                const normalizeResponse = await apiRequest("POST", "/api/customer/normalize-path", {
+                                  uploadURL: uploadUrl,
                                 });
                                 const normalizeData = await normalizeResponse.json();
-                                setFormData({ ...formData, avatar: normalizeData.normalizedPath });
+                                setFormData({ ...formData, avatar: normalizeData.objectPath });
                                 toast({ title: translate(t.avatarUploaded) });
                               }
                             }
