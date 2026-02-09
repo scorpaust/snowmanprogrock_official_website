@@ -137,17 +137,35 @@ export default function ProductDetail({ language = 'pt' }: ProductDetailProps) {
   };
 
   const getProductName = (product: Product) => {
-    return language === 'en' && product.nameEn ? product.nameEn : product.name;
+    const map: Record<string, string | null | undefined> = {
+      en: product.nameEn,
+      fr: product.nameFr,
+      es: product.nameEs,
+      de: product.nameDe,
+    };
+    return map[language] || product.name;
   };
 
   const getProductDescription = (product: Product) => {
-    return language === 'en' && product.descriptionEn ? product.descriptionEn : product.description;
+    const map: Record<string, string | null | undefined> = {
+      en: product.descriptionEn,
+      fr: product.descriptionFr,
+      es: product.descriptionEs,
+      de: product.descriptionDe,
+    };
+    return map[language] || product.description;
   };
 
   const getCategoryName = (categoryId: string) => {
     const category = categories?.find(c => c.id === categoryId);
     if (!category) return '';
-    return language === 'en' && category.nameEn ? category.nameEn : category.name;
+    const map: Record<string, string | null | undefined> = {
+      en: category.nameEn,
+      fr: category.nameFr,
+      es: category.nameEs,
+      de: category.nameDe,
+    };
+    return map[language] || category.name;
   };
 
   if (productLoading) {
