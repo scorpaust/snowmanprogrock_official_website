@@ -64,16 +64,16 @@ export default function Navigation({ language, setLanguage }: NavigationProps) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
-            <Link href="/" data-testid="link-logo">
+            <Link href="/" data-testid="link-logo" className="flex-shrink-0">
               <img 
                 src={logoSnowman} 
                 alt="Snowman" 
-                className="h-12 md:h-14 w-auto hover-elevate active-elevate-2 transition-all"
+                className="h-10 sm:h-12 lg:h-14 w-auto hover-elevate active-elevate-2 transition-all"
               />
             </Link>
 
             {/* Desktop Menu */}
-            <div className="hidden md:flex items-center gap-8">
+            <div className="hidden lg:flex items-center gap-4 xl:gap-8">
               {menuItems.map((item) => (
                 <Link key={item.path} href={item.path} data-testid={`link-${item.label.en.toLowerCase()}`}>
                   <span
@@ -165,7 +165,7 @@ export default function Navigation({ language, setLanguage }: NavigationProps) {
               <Button
                 variant="ghost"
                 size="icon"
-                className="md:hidden text-gray-300 hover:text-white"
+                className="lg:hidden text-gray-300 hover:text-white"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 data-testid="button-mobile-menu"
               >
@@ -178,7 +178,7 @@ export default function Navigation({ language, setLanguage }: NavigationProps) {
 
       {/* Mobile Menu Overlay */}
       {mobileMenuOpen && (
-        <div className="fixed inset-0 z-40 bg-black/95 backdrop-blur-lg md:hidden">
+        <div className="fixed inset-0 z-40 bg-black/95 backdrop-blur-lg lg:hidden">
           <div className="flex flex-col items-center justify-center h-full gap-8">
             {menuItems.map((item) => (
               <Link
