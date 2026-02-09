@@ -49,6 +49,7 @@ export const news = pgTable("news", {
   contentEs: text("content_es"),
   contentDe: text("content_de"),
   images: text("images").array().notNull().default(sql`ARRAY[]::text[]`),
+  videoUrls: text("video_urls").array().notNull().default(sql`ARRAY[]::text[]`),
   publishedAt: timestamp("published_at").notNull().defaultNow(),
   featured: integer("featured").notNull().default(0), // 1 for featured, 0 for regular
 });
