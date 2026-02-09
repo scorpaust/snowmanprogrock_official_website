@@ -40,13 +40,13 @@ export default function NewsDetail({ language }: NewsDetailProps) {
   const translate = (key: Record<string, string>) => key[language] || key.pt;
 
   const getTitle = () => {
-    if (language === 'en' && news?.titleEn) return news.titleEn;
-    return news?.title || '';
+    if (!news) return '';
+    return ({en: news.titleEn, fr: news.titleFr, es: news.titleEs, de: news.titleDe}[language]) || news.title;
   };
 
   const getContent = () => {
-    if (language === 'en' && news?.contentEn) return news.contentEn;
-    return news?.content || '';
+    if (!news) return '';
+    return ({en: news.contentEn, fr: news.contentFr, es: news.contentEs, de: news.contentDe}[language]) || news.content;
   };
 
   if (isLoading) {
@@ -87,7 +87,7 @@ export default function NewsDetail({ language }: NewsDetailProps) {
 
         <article data-testid={`article-news-${news.id}`}>
           {news.images && news.images.length > 0 && (
-            <div className="aspect-video bg-gray-900 rounded-lg overflow-hidden mb-8">
+            <div className="aspect-video bg-muted/30 rounded-lg overflow-hidden mb-8">
               <img
                 src={news.images[0]}
                 alt={getTitle()}
@@ -127,7 +127,7 @@ export default function NewsDetail({ language }: NewsDetailProps) {
               <h2 className="text-2xl font-bold mb-6">Galeria</h2>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 {news.images.slice(1).map((image, index) => (
-                  <div key={index} className="aspect-square bg-gray-900 rounded-lg overflow-hidden">
+                  <div key={index} className="aspect-square bg-muted/30 rounded-lg overflow-hidden">
                     <img
                       src={image}
                       alt={`${getTitle()} - ${index + 2}`}

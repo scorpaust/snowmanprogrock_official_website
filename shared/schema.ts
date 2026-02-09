@@ -265,11 +265,17 @@ export const insertCommentSchema = createInsertSchema(comments).omit({ id: true,
 });
 export const updateCommentSchema = insertCommentSchema.partial().strict();
 export const insertNewsSchema = createInsertSchema(news).omit({ id: true, publishedAt: true }).extend({
-  content: z.string().max(1200, "Content must be 1200 characters or less"),
-  contentEn: z.string().max(1200, "Content must be 1200 characters or less").optional(),
+  content: z.string().max(800, "O conteúdo deve ter no máximo 800 caracteres"),
+  contentEn: z.string().max(800, "Content must be 800 characters or less").optional(),
+  contentFr: z.string().max(800, "Le contenu doit contenir 800 caractères maximum").optional(),
+  contentEs: z.string().max(800, "El contenido debe tener un máximo de 800 caracteres").optional(),
+  contentDe: z.string().max(800, "Der Inhalt darf maximal 800 Zeichen enthalten").optional(),
   titleEn: z.string().optional(),
+  titleFr: z.string().optional(),
+  titleEs: z.string().optional(),
+  titleDe: z.string().optional(),
 });
-export const updateNewsSchema = insertNewsSchema.partial().strict();
+export const updateNewsSchema = insertNewsSchema.partial();
 export const insertEventSchema = createInsertSchema(events).omit({ id: true }).extend({
   eventDate: z.coerce.date(),
   titleEn: z.string().optional(),

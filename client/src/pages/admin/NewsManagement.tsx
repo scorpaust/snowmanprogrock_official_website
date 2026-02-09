@@ -46,14 +46,50 @@ import {
 } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { Newspaper, Plus, Pencil, Trash2, Star } from "lucide-react";
+import { Newspaper, Plus, Pencil, Trash2, Star, Upload, X, Image } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ObjectUploader } from "@/components/ObjectUploader";
 import type { News, InsertNews } from "@shared/schema";
 import { insertNewsSchema } from "@shared/schema";
 import { format } from "date-fns";
+import type { UploadResult } from "@uppy/core";
+
+const MAX_CONTENT = 800;
+const MAX_PARAGRAPH = 350;
+
+const validateParagraphs = (text: string | undefined | null): string | true => {
+  if (!text) return true;
+  const paragraphs = text.split(/(?<=\.)\s+/);
+  for (let i = 0; i < paragraphs.length; i++) {
+    if (paragraphs[i].length > MAX_PARAGRAPH) {
+      return `Parágrafo ${i + 1} excede ${MAX_PARAGRAPH} caracteres (${paragraphs[i].length}). Adicione um ponto final para separar.`;
+    }
+  }
+  return true;
+};
 
 const newsFormSchema = insertNewsSchema.extend({
   images: z.array(z.string()).default([]),
+  content: z.string().max(MAX_CONTENT, `O conteúdo deve ter no máximo ${MAX_CONTENT} caracteres`).refine(
+    (val) => validateParagraphs(val) === true,
+    (val) => ({ message: validateParagraphs(val) as string })
+  ),
+  contentEn: z.string().max(MAX_CONTENT).optional().refine(
+    (val) => !val || validateParagraphs(val) === true,
+    (val) => ({ message: (validateParagraphs(val) as string) || '' })
+  ),
+  contentFr: z.string().max(MAX_CONTENT).optional().refine(
+    (val) => !val || validateParagraphs(val) === true,
+    (val) => ({ message: (validateParagraphs(val) as string) || '' })
+  ),
+  contentEs: z.string().max(MAX_CONTENT).optional().refine(
+    (val) => !val || validateParagraphs(val) === true,
+    (val) => ({ message: (validateParagraphs(val) as string) || '' })
+  ),
+  contentDe: z.string().max(MAX_CONTENT).optional().refine(
+    (val) => !val || validateParagraphs(val) === true,
+    (val) => ({ message: (validateParagraphs(val) as string) || '' })
+  ),
 });
 
 type NewsForm = z.infer<typeof newsFormSchema>;
@@ -232,6 +268,96 @@ export default function NewsManagement() {
     }
   };
 
+  const handleGetUploadURL = async () => {
+    const response = await apiRequest("POST", "/api/objects/upload", {});
+    if (!response.ok) {
+      throw new Error("Failed to get upload URL");
+    }
+    const data = await response.json();
+    return {
+      method: "PUT" as const,
+      url: data.uploadURL,
+    };
+  };
+
+  const handleImageUploadComplete = async (result: UploadResult<Record<string, unknown>, Record<string, unknown>>) => {
+    if (result.successful && result.successful.length > 0) {
+      const uploadURL = result.successful[0].uploadURL;
+      if (uploadURL) {
+        try {
+          const response = await apiRequest("POST", "/api/objects/normalize-path", { uploadURL });
+          if (!response.ok) {
+            throw new Error("Failed to normalize path");
+          }
+          const data = await response.json();
+          const currentImages = form.getValues("images") || [];
+          form.setValue("images", [...currentImages, data.objectPath]);
+          toast({
+            title: "Upload concluído",
+            description: "Imagem carregada com sucesso.",
+          });
+        } catch (error) {
+          console.error("Error normalizing path:", error);
+          toast({
+            title: "Erro",
+            description: "Falha ao processar imagem.",
+            variant: "destructive",
+          });
+        }
+      }
+    }
+  };
+
+  const removeImage = (index: number) => {
+    const currentImages = form.getValues("images") || [];
+    form.setValue("images", currentImages.filter((_, i) => i !== index));
+  };
+
+  const renderContentField = (
+    name: "content" | "contentEn" | "contentFr" | "contentEs" | "contentDe",
+    label: string,
+    placeholder: string,
+    testId: string
+  ) => (
+    <FormField
+      control={form.control}
+      name={name}
+      render={({ field }) => {
+        const value = field.value || "";
+        const charCount = value.length;
+        const isOverLimit = charCount > MAX_CONTENT;
+        const paragraphs = value.split(/(?<=\.)\s+/);
+        const hasLongParagraph = paragraphs.some(p => p.length > MAX_PARAGRAPH);
+        return (
+          <FormItem>
+            <FormLabel>{label}</FormLabel>
+            <FormControl>
+              <Textarea
+                {...field}
+                value={value}
+                maxLength={MAX_CONTENT}
+                placeholder={placeholder}
+                rows={5}
+                data-testid={testId}
+              />
+            </FormControl>
+            <div className="flex items-center justify-between gap-2">
+              <FormDescription className="text-xs">
+                {hasLongParagraph && (
+                  <span className="text-destructive">Cada parágrafo (após ponto final) deve ter no máximo {MAX_PARAGRAPH} caracteres.</span>
+                )}
+              </FormDescription>
+              <FormDescription className={`text-xs text-right ${isOverLimit ? 'text-destructive' : ''}`}>
+                {charCount}/{MAX_CONTENT}
+              </FormDescription>
+            </div>
+            <FormMessage />
+          </FormItem>
+        );
+      }}
+    />
+  );
+
   if (isLoading) {
     return (
       <AdminLayout>
@@ -253,7 +379,7 @@ export default function NewsManagement() {
             <div>
               <h1 className="text-3xl font-bold tracking-tight">Notícias</h1>
               <p className="text-muted-foreground">
-                Gerir artigos e notícias da banda
+                Gerir notícias e artigos da banda
               </p>
             </div>
           </div>
@@ -274,6 +400,7 @@ export default function NewsManagement() {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead>Imagem</TableHead>
                   <TableHead>Título (PT)</TableHead>
                   <TableHead>Data Publicação</TableHead>
                   <TableHead className="text-center">Destaque</TableHead>
@@ -285,13 +412,26 @@ export default function NewsManagement() {
                 {newsList && newsList.length > 0 ? (
                   newsList.map((news) => (
                     <TableRow key={news.id} data-testid={`row-news-${news.id}`}>
-                      <TableCell className="font-medium">{news.title}</TableCell>
+                      <TableCell>
+                        {news.images && news.images[0] ? (
+                          <div className="w-12 h-12 rounded-md overflow-hidden bg-muted">
+                            <img src={news.images[0]} alt="" className="w-full h-full object-cover" />
+                          </div>
+                        ) : (
+                          <div className="w-12 h-12 rounded-md bg-muted flex items-center justify-center">
+                            <Image className="h-4 w-4 text-muted-foreground" />
+                          </div>
+                        )}
+                      </TableCell>
+                      <TableCell className="font-medium max-w-[200px] truncate">{news.title}</TableCell>
                       <TableCell>
                         {format(new Date(news.publishedAt), "dd/MM/yyyy")}
                       </TableCell>
                       <TableCell className="text-center">
-                        {news.featured === 1 && (
-                          <Star className="h-4 w-4 text-yellow-500 inline" />
+                        {news.featured === 1 ? (
+                          <Star className="h-4 w-4 text-yellow-500 mx-auto fill-yellow-500" />
+                        ) : (
+                          <span className="text-muted-foreground">-</span>
                         )}
                       </TableCell>
                       <TableCell className="text-center">
@@ -321,7 +461,7 @@ export default function NewsManagement() {
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center text-muted-foreground">
+                    <TableCell colSpan={6} className="text-center text-muted-foreground">
                       Nenhuma notícia encontrada
                     </TableCell>
                   </TableRow>
@@ -338,12 +478,58 @@ export default function NewsManagement() {
                 {selectedNews ? "Editar Notícia" : "Nova Notícia"}
               </DialogTitle>
               <DialogDescription>
-                Preencha os campos abaixo. Os campos em inglês são opcionais.
+                Preencha os campos abaixo. Os campos em outras línguas são opcionais.
               </DialogDescription>
             </DialogHeader>
 
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="images"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Imagens</FormLabel>
+                      <div className="space-y-3">
+                        {field.value && field.value.length > 0 && (
+                          <div className="grid grid-cols-4 gap-2">
+                            {field.value.map((img, index) => (
+                              <div key={index} className="relative group aspect-square rounded-md overflow-hidden bg-muted">
+                                <img src={img} alt={`Imagem ${index + 1}`} className="w-full h-full object-cover" />
+                                <button
+                                  type="button"
+                                  onClick={() => removeImage(index)}
+                                  className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                                  data-testid={`button-remove-image-${index}`}
+                                >
+                                  <X className="h-3 w-3" />
+                                </button>
+                                {index === 0 && (
+                                  <span className="absolute bottom-1 left-1 bg-primary text-primary-foreground text-[10px] px-1.5 py-0.5 rounded">Principal</span>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        <ObjectUploader
+                          maxNumberOfFiles={1}
+                          maxFileSize={5242880}
+                          accept={["image/jpeg", "image/png", "image/webp", "image/gif"]}
+                          onGetUploadParameters={handleGetUploadURL}
+                          onComplete={handleImageUploadComplete}
+                          variant="outline"
+                          data-testid="button-upload-image"
+                        >
+                          <Upload className="h-4 w-4 mr-2" />
+                          Carregar Imagem
+                        </ObjectUploader>
+                      </div>
+                      <FormDescription>A primeira imagem será a imagem principal da notícia.</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
                 <Tabs defaultValue="pt" className="w-full">
                   <TabsList className="grid w-full grid-cols-5">
                     <TabsTrigger value="pt" data-testid="tab-pt">PT *</TabsTrigger>
@@ -367,20 +553,7 @@ export default function NewsManagement() {
                         </FormItem>
                       )}
                     />
-                    <FormField
-                      control={form.control}
-                      name="content"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Conteúdo (PT) *</FormLabel>
-                          <FormControl>
-                            <Textarea {...field} placeholder="Conteúdo em português" rows={4} data-testid="input-content" />
-                          </FormControl>
-                          <FormDescription>{field.value?.length || 0}/1200 caracteres</FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                    {renderContentField("content", "Conteúdo (PT) *", "Conteúdo em português", "input-content")}
                   </TabsContent>
 
                   <TabsContent value="en" className="space-y-4 mt-4">
@@ -397,20 +570,7 @@ export default function NewsManagement() {
                         </FormItem>
                       )}
                     />
-                    <FormField
-                      control={form.control}
-                      name="contentEn"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Conteúdo (EN)</FormLabel>
-                          <FormControl>
-                            <Textarea {...field} value={field.value || ""} placeholder="Content in English" rows={4} data-testid="input-content-en" />
-                          </FormControl>
-                          <FormDescription>{field.value?.length || 0}/1200 caracteres</FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                    {renderContentField("contentEn", "Conteúdo (EN)", "Content in English", "input-content-en")}
                   </TabsContent>
 
                   <TabsContent value="fr" className="space-y-4 mt-4">
@@ -427,20 +587,7 @@ export default function NewsManagement() {
                         </FormItem>
                       )}
                     />
-                    <FormField
-                      control={form.control}
-                      name="contentFr"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Conteúdo (FR)</FormLabel>
-                          <FormControl>
-                            <Textarea {...field} value={field.value || ""} placeholder="Contenu en français" rows={4} data-testid="input-content-fr" />
-                          </FormControl>
-                          <FormDescription>{field.value?.length || 0}/1200 caracteres</FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                    {renderContentField("contentFr", "Conteúdo (FR)", "Contenu en français", "input-content-fr")}
                   </TabsContent>
 
                   <TabsContent value="es" className="space-y-4 mt-4">
@@ -457,20 +604,7 @@ export default function NewsManagement() {
                         </FormItem>
                       )}
                     />
-                    <FormField
-                      control={form.control}
-                      name="contentEs"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Conteúdo (ES)</FormLabel>
-                          <FormControl>
-                            <Textarea {...field} value={field.value || ""} placeholder="Contenido en español" rows={4} data-testid="input-content-es" />
-                          </FormControl>
-                          <FormDescription>{field.value?.length || 0}/1200 caracteres</FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                    {renderContentField("contentEs", "Conteúdo (ES)", "Contenido en español", "input-content-es")}
                   </TabsContent>
 
                   <TabsContent value="de" className="space-y-4 mt-4">
@@ -487,20 +621,7 @@ export default function NewsManagement() {
                         </FormItem>
                       )}
                     />
-                    <FormField
-                      control={form.control}
-                      name="contentDe"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Conteúdo (DE)</FormLabel>
-                          <FormControl>
-                            <Textarea {...field} value={field.value || ""} placeholder="Inhalt auf Deutsch" rows={4} data-testid="input-content-de" />
-                          </FormControl>
-                          <FormDescription>{field.value?.length || 0}/1200 caracteres</FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                    {renderContentField("contentDe", "Conteúdo (DE)", "Inhalt auf Deutsch", "input-content-de")}
                   </TabsContent>
                 </Tabs>
 

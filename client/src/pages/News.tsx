@@ -3,6 +3,7 @@ import { Link } from "wouter";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Newspaper } from "lucide-react";
 import type { News } from "@shared/schema";
 
 interface NewsProps {
@@ -56,15 +57,20 @@ export default function NewsPage({ language }: NewsProps) {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {sortedNews.map((item) => (
               <Card key={item.id} className="overflow-hidden hover-elevate flex flex-col" data-testid={`card-news-${item.id}`}>
-                {item.images[0] && (
-                  <div className="aspect-video bg-gray-900">
+                <div className="aspect-video bg-muted/50 overflow-hidden">
+                  {item.images[0] ? (
                     <img
                       src={item.images[0]}
-                      alt={language === 'en' && item.titleEn ? item.titleEn : item.title}
+                      alt={({en: item.titleEn, fr: item.titleFr, es: item.titleEs, de: item.titleDe}[language]) || item.title}
                       className="w-full h-full object-cover"
+                      data-testid={`img-news-${item.id}`}
                     />
-                  </div>
-                )}
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <Newspaper className="h-12 w-12 text-muted-foreground/30" />
+                    </div>
+                  )}
+                </div>
                 <div className="p-6 flex flex-col flex-1">
                   <div className="flex items-center gap-2 mb-3">
                     {item.featured === 1 && <Badge>{translate(t.featured)}</Badge>}
@@ -73,10 +79,10 @@ export default function NewsPage({ language }: NewsProps) {
                     </span>
                   </div>
                   <h3 className="text-2xl font-bold mb-4">
-                    {language === 'en' && item.titleEn ? item.titleEn : item.title}
+                    {({en: item.titleEn, fr: item.titleFr, es: item.titleEs, de: item.titleDe}[language]) || item.title}
                   </h3>
                   <p className="text-muted-foreground mb-6 line-clamp-3 flex-1">
-                    {language === 'en' && item.contentEn ? item.contentEn : item.content}
+                    {({en: item.contentEn, fr: item.contentFr, es: item.contentEs, de: item.contentDe}[language]) || item.content}
                   </p>
                   <Link href={`/noticias/${item.id}`}>
                     <Button variant="outline" className="w-full" data-testid={`button-read-news-${item.id}`}>
