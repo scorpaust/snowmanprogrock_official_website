@@ -206,7 +206,7 @@ export class MemStorage implements IStorage {
         content: "Estamos muito felizes em anunciar o lançamento do nosso novo álbum 'Horizons'. Este trabalho representa uma nova direção sonora para a banda, explorando territórios mais experimentais.",
         contentEn: "We are thrilled to announce the release of our new album 'Horizons'. This work represents a new sonic direction for the band, exploring more experimental territories.",
         images: ["https://images.unsplash.com/photo-1619983081563-430f63602796?w=800&q=80"],
-        publishedAt: new Date('2024-01-15'),
+        publishedAt: new Date(),
         featured: 1,
       },
       {
@@ -216,7 +216,7 @@ export class MemStorage implements IStorage {
         content: "A Snowman anuncia a sua primeira tour europeia! Vamos passar por várias cidades icónicas apresentando o novo álbum 'Horizons' ao vivo.",
         contentEn: "Snowman announces its first European tour! We'll be visiting several iconic cities presenting the new album 'Horizons' live.",
         images: ["https://images.unsplash.com/photo-1540039155733-5fca0d5f428e?w=800&q=80"],
-        publishedAt: new Date('2024-02-01'),
+        publishedAt: new Date(),
         featured: 0,
       },
       {
@@ -226,7 +226,7 @@ export class MemStorage implements IStorage {
         content: "Confira a nossa entrevista exclusiva na Rock Magazine onde falamos sobre o processo criativo por trás do novo álbum e os desafios de ser uma banda de prog rock em Portugal.",
         contentEn: "Check out our exclusive interview in Rock Magazine where we talk about the creative process behind the new album and the challenges of being a prog rock band in Portugal.",
         images: ["https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=800&q=80"],
-        publishedAt: new Date('2024-02-10'),
+        publishedAt: new Date(),
         featured: 0,
       },
     ];
@@ -792,7 +792,7 @@ export class DbStorage implements IStorage {
           content: "Estamos muito felizes em anunciar o lançamento do nosso novo álbum 'Horizons'. Este trabalho representa uma nova direção sonora para a banda, explorando territórios mais experimentais.",
           contentEn: "We are thrilled to announce the release of our new album 'Horizons'. This work represents a new sonic direction for the band, exploring more experimental territories.",
           images: ["https://images.unsplash.com/photo-1619983081563-430f63602796?w=800&q=80"],
-          publishedAt: new Date('2024-01-15'),
+          publishedAt: new Date(),
           featured: 1,
         },
         {
@@ -801,7 +801,7 @@ export class DbStorage implements IStorage {
           content: "A Snowman anuncia a sua primeira tour europeia! Vamos passar por várias cidades icónicas apresentando o novo álbum 'Horizons' ao vivo.",
           contentEn: "Snowman announces its first European tour! We'll be visiting several iconic cities presenting the new album 'Horizons' live.",
           images: ["https://images.unsplash.com/photo-1540039155733-5fca0d5f428e?w=800&q=80"],
-          publishedAt: new Date('2024-02-01'),
+          publishedAt: new Date(),
           featured: 0,
         },
         {
@@ -810,7 +810,7 @@ export class DbStorage implements IStorage {
           content: "Confira a nossa entrevista exclusiva na Rock Magazine onde falamos sobre o processo criativo por trás do novo álbum e os desafios de ser uma banda de prog rock em Portugal.",
           contentEn: "Check out our exclusive interview in Rock Magazine where we talk about the creative process behind the new album and the challenges of being a prog rock band in Portugal.",
           images: ["https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=800&q=80"],
-          publishedAt: new Date('2024-02-10'),
+          publishedAt: new Date(),
           featured: 0,
         },
       ]);
