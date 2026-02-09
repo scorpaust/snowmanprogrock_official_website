@@ -2,9 +2,16 @@ import { useQuery } from "@tanstack/react-query";
 import { useParams, Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Play } from "lucide-react";
 import type { News } from "@shared/schema";
 import { CommentSection } from "@/components/CommentSection";
+
+const extractYoutubeId = (url: string): string | null => {
+  const match = url.match(
+    /(?:youtube\.com\/watch\?v=|youtube\.com\/embed\/|youtube\.com\/shorts\/|youtu\.be\/)([a-zA-Z0-9_-]{11})/
+  );
+  return match ? match[1] : null;
+};
 
 interface NewsDetailProps {
   language: string;
@@ -121,6 +128,45 @@ export default function NewsDetail({ language }: NewsDetailProps) {
               </p>
             ))}
           </div>
+
+          {news.videoUrls && news.videoUrls.length > 0 && (
+            <div className="mt-12" data-testid="section-videos">
+              <div className="flex items-center gap-3 mb-6">
+                <Play className="h-5 w-5 text-red-500" />
+                <h2 className="text-2xl font-bold">
+                  {translate({
+                    pt: "Vídeos",
+                    en: "Videos",
+                    fr: "Vidéos",
+                    es: "Vídeos",
+                    de: "Videos",
+                  })}
+                </h2>
+              </div>
+              <div className={`grid gap-6 ${news.videoUrls.length === 1 ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2'}`}>
+                {news.videoUrls.map((url, index) => {
+                  const videoId = extractYoutubeId(url);
+                  if (!videoId) return null;
+                  return (
+                    <div
+                      key={index}
+                      className="relative aspect-video rounded-lg overflow-hidden bg-black/50 shadow-lg"
+                      data-testid={`video-embed-${index}`}
+                    >
+                      <iframe
+                        src={`https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1`}
+                        title={`${getTitle()} - Video ${index + 1}`}
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        allowFullScreen
+                        className="absolute inset-0 w-full h-full"
+                        loading="lazy"
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           {news.images && news.images.length > 1 && (
             <div className="mt-12">

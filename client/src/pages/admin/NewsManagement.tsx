@@ -46,7 +46,7 @@ import {
 } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { Newspaper, Plus, Pencil, Trash2, Star, Upload, X, Image } from "lucide-react";
+import { Newspaper, Plus, Pencil, Trash2, Star, Upload, X, Image, Video, Link2 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ObjectUploader } from "@/components/ObjectUploader";
 import type { News, InsertNews } from "@shared/schema";
@@ -68,8 +68,22 @@ const validateParagraphs = (text: string | undefined | null): string | true => {
   return true;
 };
 
+const youtubeUrlRegex = /^(https?:\/\/)?(www\.)?(youtube\.com\/(watch\?v=|embed\/|shorts\/)|youtu\.be\/).+$/;
+
+const extractYoutubeId = (url: string): string | null => {
+  const patterns = [
+    /(?:youtube\.com\/watch\?v=|youtube\.com\/embed\/|youtube\.com\/shorts\/|youtu\.be\/)([a-zA-Z0-9_-]{11})/,
+  ];
+  for (const pattern of patterns) {
+    const match = url.match(pattern);
+    if (match) return match[1];
+  }
+  return null;
+};
+
 const newsFormSchema = insertNewsSchema.extend({
   images: z.array(z.string()).default([]),
+  videoUrls: z.array(z.string()).default([]),
   content: z.string().max(MAX_CONTENT, `O conteúdo deve ter no máximo ${MAX_CONTENT} caracteres`).refine(
     (val) => validateParagraphs(val) === true,
     (val) => ({ message: validateParagraphs(val) as string })
@@ -100,6 +114,8 @@ export default function NewsManagement() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedNews, setSelectedNews] = useState<News | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [videoUrlInput, setVideoUrlInput] = useState("");
+  const [videoUrlError, setVideoUrlError] = useState("");
 
   const { data: newsList, isLoading } = useQuery<News[]>({
     queryKey: ["/api/news"],
@@ -119,6 +135,7 @@ export default function NewsManagement() {
       contentEs: "",
       contentDe: "",
       images: [],
+      videoUrls: [],
       featured: 0,
     },
   });
@@ -219,6 +236,8 @@ export default function NewsManagement() {
 
   const handleCreate = () => {
     setSelectedNews(null);
+    setVideoUrlInput("");
+    setVideoUrlError("");
     form.reset({
       title: "",
       titleEn: "",
@@ -231,6 +250,7 @@ export default function NewsManagement() {
       contentEs: "",
       contentDe: "",
       images: [],
+      videoUrls: [],
       featured: 0,
     });
     setIsDialogOpen(true);
@@ -238,6 +258,8 @@ export default function NewsManagement() {
 
   const handleEdit = (news: News) => {
     setSelectedNews(news);
+    setVideoUrlInput("");
+    setVideoUrlError("");
     form.reset({
       title: news.title,
       titleEn: news.titleEn || "",
@@ -250,6 +272,7 @@ export default function NewsManagement() {
       contentEs: news.contentEs || "",
       contentDe: news.contentDe || "",
       images: news.images || [],
+      videoUrls: news.videoUrls || [],
       featured: news.featured,
     });
     setIsDialogOpen(true);
@@ -311,6 +334,33 @@ export default function NewsManagement() {
   const removeImage = (index: number) => {
     const currentImages = form.getValues("images") || [];
     form.setValue("images", currentImages.filter((_, i) => i !== index));
+  };
+
+  const addVideoUrl = () => {
+    const url = videoUrlInput.trim();
+    if (!url) return;
+    if (!youtubeUrlRegex.test(url)) {
+      setVideoUrlError("URL inválido. Insira um link válido do YouTube.");
+      return;
+    }
+    const videoId = extractYoutubeId(url);
+    if (!videoId) {
+      setVideoUrlError("Não foi possível extrair o ID do vídeo. Verifique o link.");
+      return;
+    }
+    const currentVideos = form.getValues("videoUrls") || [];
+    if (currentVideos.some(v => extractYoutubeId(v) === videoId)) {
+      setVideoUrlError("Este vídeo já foi adicionado.");
+      return;
+    }
+    form.setValue("videoUrls", [...currentVideos, url]);
+    setVideoUrlInput("");
+    setVideoUrlError("");
+  };
+
+  const removeVideoUrl = (index: number) => {
+    const currentVideos = form.getValues("videoUrls") || [];
+    form.setValue("videoUrls", currentVideos.filter((_, i) => i !== index));
   };
 
   const renderContentField = (
@@ -405,6 +455,7 @@ export default function NewsManagement() {
                   <TableHead>Data Publicação</TableHead>
                   <TableHead className="text-center">Destaque</TableHead>
                   <TableHead className="text-center">Imagens</TableHead>
+                  <TableHead className="text-center">Vídeos</TableHead>
                   <TableHead className="text-right">Ações</TableHead>
                 </TableRow>
               </TableHeader>
@@ -437,6 +488,16 @@ export default function NewsManagement() {
                       <TableCell className="text-center">
                         {news.images?.length || 0}
                       </TableCell>
+                      <TableCell className="text-center">
+                        {news.videoUrls?.length ? (
+                          <div className="flex items-center justify-center gap-1">
+                            <Video className="h-3.5 w-3.5 text-red-500" />
+                            <span>{news.videoUrls.length}</span>
+                          </div>
+                        ) : (
+                          <span className="text-muted-foreground">0</span>
+                        )}
+                      </TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-2">
                           <Button
@@ -461,7 +522,7 @@ export default function NewsManagement() {
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center text-muted-foreground">
+                    <TableCell colSpan={7} className="text-center text-muted-foreground">
                       Nenhuma notícia encontrada
                     </TableCell>
                   </TableRow>
@@ -525,6 +586,81 @@ export default function NewsManagement() {
                         </ObjectUploader>
                       </div>
                       <FormDescription>A primeira imagem será a imagem principal da notícia.</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="videoUrls"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Vídeos YouTube</FormLabel>
+                      <div className="space-y-3">
+                        {field.value && field.value.length > 0 && (
+                          <div className="space-y-2">
+                            {field.value.map((url, index) => {
+                              const videoId = extractYoutubeId(url);
+                              return (
+                                <div key={index} className="flex items-center gap-2 rounded-md border p-2 bg-muted/30">
+                                  {videoId && (
+                                    <img
+                                      src={`https://img.youtube.com/vi/${videoId}/mqdefault.jpg`}
+                                      alt={`Vídeo ${index + 1}`}
+                                      className="w-24 h-14 rounded object-cover flex-shrink-0"
+                                    />
+                                  )}
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-xs text-muted-foreground truncate">{url}</p>
+                                  </div>
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => removeVideoUrl(index)}
+                                    data-testid={`button-remove-video-${index}`}
+                                  >
+                                    <X className="h-4 w-4 text-destructive" />
+                                  </Button>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+                        <div className="flex items-start gap-2">
+                          <div className="flex-1">
+                            <Input
+                              value={videoUrlInput}
+                              onChange={(e) => {
+                                setVideoUrlInput(e.target.value);
+                                setVideoUrlError("");
+                              }}
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter") {
+                                  e.preventDefault();
+                                  addVideoUrl();
+                                }
+                              }}
+                              placeholder="https://www.youtube.com/watch?v=..."
+                              data-testid="input-video-url"
+                            />
+                            {videoUrlError && (
+                              <p className="text-xs text-destructive mt-1">{videoUrlError}</p>
+                            )}
+                          </div>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={addVideoUrl}
+                            data-testid="button-add-video"
+                          >
+                            <Link2 className="h-4 w-4 mr-2" />
+                            Adicionar
+                          </Button>
+                        </div>
+                      </div>
+                      <FormDescription>Cole links do YouTube para embeber vídeos na notícia.</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}

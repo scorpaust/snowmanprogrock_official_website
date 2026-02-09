@@ -265,6 +265,7 @@ export const insertCommentSchema = createInsertSchema(comments).omit({ id: true,
   isApproved: z.union([z.literal(0), z.literal(1)]).default(0),
 });
 export const updateCommentSchema = insertCommentSchema.partial().strict();
+const youtubeUrlPattern = /^(https?:\/\/)?(www\.)?(youtube\.com\/(watch\?v=|embed\/|shorts\/)|youtu\.be\/).+$/;
 export const insertNewsSchema = createInsertSchema(news).omit({ id: true, publishedAt: true }).extend({
   content: z.string().max(800, "O conteúdo deve ter no máximo 800 caracteres"),
   contentEn: z.string().max(800, "Content must be 800 characters or less").optional(),
@@ -275,6 +276,7 @@ export const insertNewsSchema = createInsertSchema(news).omit({ id: true, publis
   titleFr: z.string().optional(),
   titleEs: z.string().optional(),
   titleDe: z.string().optional(),
+  videoUrls: z.array(z.string().regex(youtubeUrlPattern, "URL de YouTube inválido")).default([]),
 });
 export const updateNewsSchema = insertNewsSchema.partial();
 export const insertEventSchema = createInsertSchema(events).omit({ id: true }).extend({

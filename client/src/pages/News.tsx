@@ -3,7 +3,7 @@ import { Link } from "wouter";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Newspaper } from "lucide-react";
+import { Newspaper, Play } from "lucide-react";
 import type { News } from "@shared/schema";
 
 interface NewsProps {
@@ -72,8 +72,14 @@ export default function NewsPage({ language }: NewsProps) {
                   )}
                 </div>
                 <div className="p-6 flex flex-col flex-1">
-                  <div className="flex items-center gap-2 mb-3">
+                  <div className="flex items-center gap-2 flex-wrap mb-3">
                     {item.featured === 1 && <Badge>{translate(t.featured)}</Badge>}
+                    {item.videoUrls && item.videoUrls.length > 0 && (
+                      <Badge variant="outline" className="gap-1" data-testid={`badge-video-${item.id}`}>
+                        <Play className="h-3 w-3 text-red-500 fill-red-500" />
+                        {item.videoUrls.length === 1 ? "Video" : `${item.videoUrls.length} Videos`}
+                      </Badge>
+                    )}
                     <span className="text-sm text-muted-foreground">
                       {new Date(item.publishedAt).toLocaleDateString(getLocale(language))}
                     </span>
