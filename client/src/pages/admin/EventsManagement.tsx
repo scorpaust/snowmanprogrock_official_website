@@ -406,8 +406,14 @@ export default function EventsManagement() {
                           <Input
                             type="datetime-local"
                             {...field}
-                            value={field.value instanceof Date ? field.value.toISOString().slice(0, 16) : field.value}
-                            onChange={(e) => field.onChange(new Date(e.target.value))}
+                            value={(() => {
+                              const d = field.value instanceof Date ? field.value : new Date(field.value as string);
+                              return !isNaN(d.getTime()) ? d.toISOString().slice(0, 16) : '';
+                            })()}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              field.onChange(val ? new Date(val) : new Date());
+                            }}
                             data-testid="input-event-date"
                           />
                         </FormControl>

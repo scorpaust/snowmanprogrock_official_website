@@ -202,12 +202,12 @@ export default function Home({ language }: HomeProps) {
                           {new Date(event.eventDate).getDate()}
                         </div>
                         <div className="text-sm text-muted-foreground uppercase">
-                          {new Date(event.eventDate).toLocaleString(language === 'pt' ? 'pt-PT' : 'en-US', { month: 'short' })}
+                          {new Date(event.eventDate).toLocaleString({pt:'pt-PT',en:'en-US',fr:'fr-FR',es:'es-ES',de:'de-DE'}[language as string] || 'pt-PT', { month: 'short' })}
                         </div>
                       </div>
                       <div>
                         <h3 className="text-xl font-semibold mb-2">
-                          {language === 'en' && event.titleEn ? event.titleEn : event.title}
+                          {({en: event.titleEn, fr: event.titleFr, es: event.titleEs, de: event.titleDe}[language as string]) || event.title}
                         </h3>
                         <p className="text-muted-foreground flex items-center gap-2">
                           <Calendar className="h-4 w-4" />

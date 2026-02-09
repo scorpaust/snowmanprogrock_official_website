@@ -271,12 +271,19 @@ export const insertNewsSchema = createInsertSchema(news).omit({ id: true, publis
 });
 export const updateNewsSchema = insertNewsSchema.partial().strict();
 export const insertEventSchema = createInsertSchema(events).omit({ id: true }).extend({
+  eventDate: z.coerce.date(),
   titleEn: z.string().optional(),
+  titleFr: z.string().optional(),
+  titleEs: z.string().optional(),
+  titleDe: z.string().optional(),
   description: z.string().optional(),
   descriptionEn: z.string().optional(),
+  descriptionFr: z.string().optional(),
+  descriptionEs: z.string().optional(),
+  descriptionDe: z.string().optional(),
   ticketLink: z.string().url("Must be a valid URL").optional().or(z.literal("")),
 });
-export const updateEventSchema = insertEventSchema.partial().strict();
+export const updateEventSchema = insertEventSchema.partial();
 export const insertGallerySchema = createInsertSchema(gallery).omit({ id: true, uploadedAt: true }).extend({
   type: z.enum(['photo', 'video']),
   caption: z.string().optional(),

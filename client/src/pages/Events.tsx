@@ -79,7 +79,7 @@ export default function Events({ language }: EventsProps) {
                       </div>
                       <div className="flex-1">
                         <h3 className="text-2xl font-bold mb-3">
-                          {language === 'en' && event.titleEn ? event.titleEn : event.title}
+                          {({en: event.titleEn, fr: event.titleFr, es: event.titleEs, de: event.titleDe}[language]) || event.title}
                         </h3>
                         <div className="flex items-center gap-2 text-muted-foreground mb-3">
                           <MapPin className="h-4 w-4" />
@@ -96,7 +96,7 @@ export default function Events({ language }: EventsProps) {
                         </div>
                         {event.description && (
                           <p className="text-muted-foreground">
-                            {language === 'en' && event.descriptionEn ? event.descriptionEn : event.description}
+                            {({en: event.descriptionEn, fr: event.descriptionFr, es: event.descriptionEs, de: event.descriptionDe}[language]) || event.description}
                           </p>
                         )}
                       </div>
@@ -143,7 +143,7 @@ export default function Events({ language }: EventsProps) {
                       </div>
                       <div>
                         <h3 className="text-xl font-semibold mb-2">
-                          {language === 'en' && event.titleEn ? event.titleEn : event.title}
+                          {({en: event.titleEn, fr: event.titleFr, es: event.titleEs, de: event.titleDe}[language]) || event.title}
                         </h3>
                         <div className="flex items-center gap-2 text-muted-foreground">
                           <MapPin className="h-4 w-4" />
