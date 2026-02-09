@@ -334,7 +334,7 @@ export default function Contact({ language }: ContactProps) {
                         <FormItem>
                           <FormLabel>{translate(t.form.storeInquiryType)}</FormLabel>
                           <FormControl>
-                            <Input {...field} placeholder="Ex: Product, Distribution, etc." data-testid="input-store-inquiry-type" />
+                            <Input {...field} data-testid="input-store-inquiry-type" />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -410,11 +410,11 @@ export default function Contact({ language }: ContactProps) {
                 <div>
                   <h3 className="font-semibold mb-1">{translate(t.info.email)}</h3>
                   <a
-                    href="mailto:info@snowmanprogrock.com"
+                    href="mailto:snowmanprogrock@gmail.com"
                     className="text-muted-foreground hover:text-primary transition-colors"
                     data-testid="link-email"
                   >
-                    info@snowmanprogrock.com
+                    snowmanprogrock@gmail.com
                   </a>
                 </div>
               </div>
@@ -424,11 +424,11 @@ export default function Contact({ language }: ContactProps) {
                 <div>
                   <h3 className="font-semibold mb-1">{translate(t.info.phone)}</h3>
                   <a
-                    href="tel:+351912345678"
+                    href="tel:+351933289741"
                     className="text-muted-foreground hover:text-primary transition-colors"
                     data-testid="link-phone"
                   >
-                    +351 912 345 678
+                    +351 933 289 741
                   </a>
                 </div>
               </div>
@@ -449,7 +449,7 @@ export default function Contact({ language }: ContactProps) {
               <h3 className="font-semibold mb-4">{translate(t.social.followUs)}</h3>
               <div className="space-y-3">
                 <a
-                  href="https://facebook.com"
+                  href="https://facebook.com/snowmanprogrock"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-3 text-muted-foreground hover:text-primary transition-colors"
@@ -458,7 +458,7 @@ export default function Contact({ language }: ContactProps) {
                   <span>Facebook</span>
                 </a>
                 <a
-                  href="https://instagram.com"
+                  href="https://instagram.com/snowmanprogrock"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-3 text-muted-foreground hover:text-primary transition-colors"
@@ -467,7 +467,7 @@ export default function Contact({ language }: ContactProps) {
                   <span>Instagram</span>
                 </a>
                 <a
-                  href="https://youtube.com"
+                  href="https://www.youtube.com/@snowmanprogressiverock4833"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-3 text-muted-foreground hover:text-primary transition-colors"

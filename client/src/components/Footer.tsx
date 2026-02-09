@@ -37,7 +37,7 @@ export default function Footer({ language }: FooterProps) {
             </h4>
             <div className="flex gap-4">
               <a
-                href="https://facebook.com"
+                href="https://facebook.com/snowmanprogrock"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-gray-400 hover:text-primary transition-colors"
@@ -46,7 +46,7 @@ export default function Footer({ language }: FooterProps) {
                 <Facebook className="h-5 w-5" />
               </a>
               <a
-                href="https://instagram.com"
+                href="https://instagram.com/snowmanprogrock"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-gray-400 hover:text-primary transition-colors"
@@ -55,7 +55,7 @@ export default function Footer({ language }: FooterProps) {
                 <Instagram className="h-5 w-5" />
               </a>
               <a
-                href="https://youtube.com"
+                href="https://www.youtube.com/@snowmanprogressiverock4833"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-gray-400 hover:text-primary transition-colors"
@@ -64,7 +64,7 @@ export default function Footer({ language }: FooterProps) {
                 <Youtube className="h-5 w-5" />
               </a>
               <a
-                href="https://twitter.com"
+                href="https://x.com/snowman50028425"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-gray-400 hover:text-primary transition-colors"
@@ -82,7 +82,7 @@ export default function Footer({ language }: FooterProps) {
             </h4>
             <div className="flex gap-4">
               <a
-                href="https://spotify.com"
+                href="https://open.spotify.com/intl-pt/artist/7CrlODwdYEezWlZ2unZaY2"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-gray-400 hover:text-primary transition-colors"
@@ -91,7 +91,7 @@ export default function Footer({ language }: FooterProps) {
                 <SiSpotify className="h-5 w-5" />
               </a>
               <a
-                href="https://music.apple.com"
+                href="https://music.apple.com/us/artist/snowman/1457004194"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-gray-400 hover:text-primary transition-colors"
@@ -100,7 +100,7 @@ export default function Footer({ language }: FooterProps) {
                 <SiApplemusic className="h-5 w-5" />
               </a>
               <a
-                href="https://bandcamp.com"
+                href="https://snowmanprogrock.bandcamp.com"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-gray-400 hover:text-primary transition-colors"

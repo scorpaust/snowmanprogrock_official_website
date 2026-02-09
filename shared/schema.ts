@@ -141,9 +141,15 @@ export const categories = pgTable("categories", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   name: text("name").notNull(),
   nameEn: text("name_en"),
+  nameFr: text("name_fr"),
+  nameEs: text("name_es"),
+  nameDe: text("name_de"),
   slug: text("slug").notNull().unique(), // 'discografia', 'merch', etc
   description: text("description"),
   descriptionEn: text("description_en"),
+  descriptionFr: text("description_fr"),
+  descriptionEs: text("description_es"),
+  descriptionDe: text("description_de"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
