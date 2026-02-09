@@ -408,7 +408,9 @@ export default function EventsManagement() {
                             {...field}
                             value={(() => {
                               const d = field.value instanceof Date ? field.value : new Date(field.value as string);
-                              return !isNaN(d.getTime()) ? d.toISOString().slice(0, 16) : '';
+                              if (isNaN(d.getTime())) return '';
+                              const pad = (n: number) => String(n).padStart(2, '0');
+                              return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
                             })()}
                             onChange={(e) => {
                               const val = e.target.value;
@@ -466,8 +468,9 @@ export default function EventsManagement() {
                         <FormItem>
                           <FormLabel>Descrição (PT)</FormLabel>
                           <FormControl>
-                            <Textarea {...field} value={field.value || ""} placeholder="Descrição do evento" rows={3} data-testid="input-description" />
+                            <Textarea {...field} value={field.value || ""} maxLength={400} placeholder="Descrição do evento" rows={3} data-testid="input-description" />
                           </FormControl>
+                          <FormDescription className="text-right text-xs">{(field.value || "").length}/400</FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -495,8 +498,9 @@ export default function EventsManagement() {
                         <FormItem>
                           <FormLabel>Descrição (EN)</FormLabel>
                           <FormControl>
-                            <Textarea {...field} value={field.value || ""} placeholder="Event description" rows={3} data-testid="input-description-en" />
+                            <Textarea {...field} value={field.value || ""} maxLength={400} placeholder="Event description" rows={3} data-testid="input-description-en" />
                           </FormControl>
+                          <FormDescription className="text-right text-xs">{(field.value || "").length}/400</FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -524,8 +528,9 @@ export default function EventsManagement() {
                         <FormItem>
                           <FormLabel>Descrição (FR)</FormLabel>
                           <FormControl>
-                            <Textarea {...field} value={field.value || ""} placeholder="Description de l'événement" rows={3} data-testid="input-description-fr" />
+                            <Textarea {...field} value={field.value || ""} maxLength={400} placeholder="Description de l'événement" rows={3} data-testid="input-description-fr" />
                           </FormControl>
+                          <FormDescription className="text-right text-xs">{(field.value || "").length}/400</FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -553,8 +558,9 @@ export default function EventsManagement() {
                         <FormItem>
                           <FormLabel>Descrição (ES)</FormLabel>
                           <FormControl>
-                            <Textarea {...field} value={field.value || ""} placeholder="Descripción del evento" rows={3} data-testid="input-description-es" />
+                            <Textarea {...field} value={field.value || ""} maxLength={400} placeholder="Descripción del evento" rows={3} data-testid="input-description-es" />
                           </FormControl>
+                          <FormDescription className="text-right text-xs">{(field.value || "").length}/400</FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -582,8 +588,9 @@ export default function EventsManagement() {
                         <FormItem>
                           <FormLabel>Descrição (DE)</FormLabel>
                           <FormControl>
-                            <Textarea {...field} value={field.value || ""} placeholder="Veranstaltungsbeschreibung" rows={3} data-testid="input-description-de" />
+                            <Textarea {...field} value={field.value || ""} maxLength={400} placeholder="Veranstaltungsbeschreibung" rows={3} data-testid="input-description-de" />
                           </FormControl>
+                          <FormDescription className="text-right text-xs">{(field.value || "").length}/400</FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
