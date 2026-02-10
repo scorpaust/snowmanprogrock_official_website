@@ -9,6 +9,17 @@ interface GalleryProps {
   language: string;
 }
 
+function getCaption(item: Gallery, language: string): string {
+  const captionMap: Record<string, string | null | undefined> = {
+    pt: item.caption,
+    en: item.captionEn,
+    fr: item.captionFr,
+    es: item.captionEs,
+    de: item.captionDe,
+  };
+  return captionMap[language] || item.caption || '';
+}
+
 export default function GalleryPage({ language }: GalleryProps) {
   const { data: gallery, isLoading } = useQuery<Gallery[]>({ queryKey: ["/api/gallery"] });
   const [activeTab, setActiveTab] = useState<'photos' | 'videos'>('photos');
@@ -43,7 +54,6 @@ export default function GalleryPage({ language }: GalleryProps) {
           {translate(t.title)}
         </h1>
 
-        {/* Tab Switcher */}
         <div className="flex gap-4 mb-12">
           <Button
             variant={activeTab === 'photos' ? 'default' : 'outline'}
@@ -61,7 +71,6 @@ export default function GalleryPage({ language }: GalleryProps) {
           </Button>
         </div>
 
-        {/* Photos Grid */}
         {activeTab === 'photos' && (
           <>
             {photos.length > 0 ? (
@@ -75,13 +84,14 @@ export default function GalleryPage({ language }: GalleryProps) {
                   >
                     <img
                       src={photo.url}
-                      alt={photo.caption || ''}
+                      alt={getCaption(photo, language)}
+                      loading="lazy"
                       className="w-full h-auto object-cover"
                     />
                     {photo.caption && (
                       <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
                         <p className="text-white text-sm">
-                          {language === 'en' && photo.captionEn ? photo.captionEn : photo.caption}
+                          {getCaption(photo, language)}
                         </p>
                       </div>
                     )}
@@ -96,7 +106,6 @@ export default function GalleryPage({ language }: GalleryProps) {
           </>
         )}
 
-        {/* Videos Grid */}
         {activeTab === 'videos' && (
           <>
             {videos.length > 0 ? (
@@ -110,7 +119,8 @@ export default function GalleryPage({ language }: GalleryProps) {
                   >
                     <img
                       src={video.thumbnail || video.url}
-                      alt={video.caption || ''}
+                      alt={getCaption(video, language)}
+                      loading="lazy"
                       className="w-full h-full object-cover"
                     />
                     <div className="absolute inset-0 bg-black/40 flex items-center justify-center group-hover:bg-black/60 transition-colors">
@@ -121,7 +131,7 @@ export default function GalleryPage({ language }: GalleryProps) {
                     {video.caption && (
                       <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
                         <p className="text-white text-sm">
-                          {language === 'en' && video.captionEn ? video.captionEn : video.caption}
+                          {getCaption(video, language)}
                         </p>
                       </div>
                     )}
@@ -137,14 +147,13 @@ export default function GalleryPage({ language }: GalleryProps) {
         )}
       </div>
 
-      {/* Lightbox Dialog */}
       <Dialog open={!!selectedMedia} onOpenChange={() => setSelectedMedia(null)}>
         <DialogContent className="max-w-6xl p-0 bg-black border-gray-800" data-testid="dialog-lightbox">
           <div className="relative">
             <Button
               variant="ghost"
               size="icon"
-              className="absolute top-4 right-4 z-10 text-white hover:bg-white/20"
+              className="absolute top-4 right-4 z-10 text-white"
               onClick={() => setSelectedMedia(null)}
               data-testid="button-close-lightbox"
             >
@@ -155,7 +164,7 @@ export default function GalleryPage({ language }: GalleryProps) {
                 {selectedMedia.type === 'photo' ? (
                   <img
                     src={selectedMedia.url}
-                    alt={selectedMedia.caption || ''}
+                    alt={getCaption(selectedMedia, language)}
                     className="w-full h-auto max-h-[90vh] object-contain"
                   />
                 ) : (
@@ -169,7 +178,7 @@ export default function GalleryPage({ language }: GalleryProps) {
                 {selectedMedia.caption && (
                   <div className="p-6 bg-black">
                     <p className="text-white text-center">
-                      {language === 'en' && selectedMedia.captionEn ? selectedMedia.captionEn : selectedMedia.caption}
+                      {getCaption(selectedMedia, language)}
                     </p>
                   </div>
                 )}
