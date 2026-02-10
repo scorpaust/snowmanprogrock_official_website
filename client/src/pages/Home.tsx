@@ -115,7 +115,7 @@ export default function Home({ language }: HomeProps) {
                       {featuredNews.images[0] && (
                         <img
                           src={featuredNews.images[0]}
-                          alt={language === 'en' && featuredNews.titleEn ? featuredNews.titleEn : featuredNews.title}
+                          alt={({en: featuredNews.titleEn, fr: featuredNews.titleFr, es: featuredNews.titleEs, de: featuredNews.titleDe}[language]) || featuredNews.title}
                           className="w-full h-full object-cover"
                         />
                       )}
@@ -124,10 +124,10 @@ export default function Home({ language }: HomeProps) {
                       <div>
                         <Badge className="mb-4">Featured</Badge>
                         <h3 className="text-3xl font-bold mb-4">
-                          {language === 'en' && featuredNews.titleEn ? featuredNews.titleEn : featuredNews.title}
+                          {({en: featuredNews.titleEn, fr: featuredNews.titleFr, es: featuredNews.titleEs, de: featuredNews.titleDe}[language]) || featuredNews.title}
                         </h3>
                         <p className="text-muted-foreground mb-6 line-clamp-3">
-                          {language === 'en' && featuredNews.contentEn ? featuredNews.contentEn : featuredNews.content}
+                          {({en: featuredNews.contentEn, fr: featuredNews.contentFr, es: featuredNews.contentEs, de: featuredNews.contentDe}[language]) || featuredNews.content}
                         </p>
                       </div>
                       <Link href={`/noticias/${featuredNews.id}`}>
@@ -147,17 +147,17 @@ export default function Home({ language }: HomeProps) {
                     <div className="aspect-video bg-gray-900">
                       <img
                         src={item.images[0]}
-                        alt={language === 'en' && item.titleEn ? item.titleEn : item.title}
+                        alt={({en: item.titleEn, fr: item.titleFr, es: item.titleEs, de: item.titleDe}[language]) || item.title}
                         className="w-full h-full object-cover"
                       />
                     </div>
                   )}
                   <div className="p-6">
                     <h3 className="text-xl font-semibold mb-3">
-                      {language === 'en' && item.titleEn ? item.titleEn : item.title}
+                      {({en: item.titleEn, fr: item.titleFr, es: item.titleEs, de: item.titleDe}[language]) || item.title}
                     </h3>
                     <p className="text-muted-foreground mb-4 line-clamp-2">
-                      {language === 'en' && item.contentEn ? item.contentEn : item.content}
+                      {({en: item.contentEn, fr: item.contentFr, es: item.contentEs, de: item.contentDe}[language]) || item.content}
                     </p>
                     <Link href={`/noticias/${item.id}`}>
                       <Button variant="ghost" size="sm" className="p-0" data-testid={`button-read-news-${item.id}`}>
