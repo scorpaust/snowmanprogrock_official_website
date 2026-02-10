@@ -73,6 +73,7 @@ export interface IStorage {
   getAllGallery(): Promise<Gallery[]>;
   getGalleryById(id: string): Promise<Gallery | undefined>;
   createGalleryItem(item: InsertGallery): Promise<Gallery>;
+  updateGalleryItem(id: string, item: Partial<InsertGallery>): Promise<Gallery | undefined>;
   deleteGalleryItem(id: string): Promise<boolean>;
 
   // Contacts
@@ -440,6 +441,14 @@ export class MemStorage implements IStorage {
     };
     this.gallery.set(id, item);
     return item;
+  }
+
+  async updateGalleryItem(id: string, updates: Partial<InsertGallery>): Promise<Gallery | undefined> {
+    const existing = this.gallery.get(id);
+    if (!existing) return undefined;
+    const updated = { ...existing, ...updates };
+    this.gallery.set(id, updated);
+    return updated;
   }
 
   async deleteGalleryItem(id: string): Promise<boolean> {
@@ -1080,6 +1089,11 @@ export class DbStorage implements IStorage {
 
   async createGalleryItem(insertGallery: InsertGallery): Promise<Gallery> {
     const result = await db.insert(gallery).values(insertGallery).returning();
+    return result[0];
+  }
+
+  async updateGalleryItem(id: string, updates: Partial<InsertGallery>): Promise<Gallery | undefined> {
+    const result = await db.update(gallery).set(updates).where(eq(gallery.id, id)).returning();
     return result[0];
   }
 

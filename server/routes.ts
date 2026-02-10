@@ -1,7 +1,7 @@
 import type { Express, NextFunction, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertNewsSchema, insertEventSchema, insertGallerySchema, insertContactSchema, insertBiographySchema, insertSpotifySettingsSchema, insertUserSchema, updateUserSchema, updateNewsSchema, updateEventSchema, insertProductSchema, updateProductSchema, insertCommentSchema, updateCommentSchema, insertBandMemberSchema, updateBandMemberSchema, insertUserProfileSchema } from "@shared/schema";
+import { insertNewsSchema, insertEventSchema, insertGallerySchema, updateGallerySchema, insertContactSchema, insertBiographySchema, insertSpotifySettingsSchema, insertUserSchema, updateUserSchema, updateNewsSchema, updateEventSchema, insertProductSchema, updateProductSchema, insertCommentSchema, updateCommentSchema, insertBandMemberSchema, updateBandMemberSchema, insertUserProfileSchema } from "@shared/schema";
 import { registerAuthRoutes, requireAuth, requireRole } from "./auth";
 import Stripe from "stripe";
 import bcrypt from "bcrypt";
@@ -245,6 +245,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validated = insertGallerySchema.parse(req.body);
       const item = await storage.createGalleryItem(validated);
       res.status(201).json(item);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid gallery data" });
+    }
+  });
+
+  app.patch("/api/gallery/:id", requireAuth, async (req, res) => {
+    try {
+      const validated = updateGallerySchema.parse(req.body);
+      const updated = await storage.updateGalleryItem(req.params.id, validated);
+      if (!updated) {
+        return res.status(404).json({ error: "Gallery item not found" });
+      }
+      res.json(updated);
     } catch (error) {
       res.status(400).json({ error: "Invalid gallery data" });
     }

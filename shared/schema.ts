@@ -299,6 +299,7 @@ export const insertGallerySchema = createInsertSchema(gallery).omit({ id: true, 
   captionEn: z.string().optional(),
   thumbnail: z.string().optional(),
 });
+export const updateGallerySchema = insertGallerySchema.partial();
 export const insertContactSchema = createInsertSchema(contacts).omit({ id: true, ticketId: true, status: true, createdAt: true, updatedAt: true });
 export const insertBiographySchema = createInsertSchema(biography).omit({ id: true }).extend({
   content: z.string().max(800, "Biography must be 800 characters or less"),
