@@ -35,6 +35,7 @@ export default function Store({ language = 'pt' }: StoreProps) {
       continueShopping: "Continuar a Comprar",
       addedToCart: "Adicionado ao carrinho!",
       productAdded: "produto foi adicionado ao carrinho.",
+      loading: "Carregando...",
     },
     en: {
       title: "Store",
@@ -51,6 +52,7 @@ export default function Store({ language = 'pt' }: StoreProps) {
       continueShopping: "Continue Shopping",
       addedToCart: "Added to cart!",
       productAdded: "has been added to your cart.",
+      loading: "Loading...",
     },
     es: {
       title: "Tienda",
@@ -67,6 +69,7 @@ export default function Store({ language = 'pt' }: StoreProps) {
       continueShopping: "Seguir Comprando",
       addedToCart: "¡Añadido al carrito!",
       productAdded: "se ha añadido a tu carrito.",
+      loading: "Cargando...",
     },
     fr: {
       title: "Boutique",
@@ -83,6 +86,7 @@ export default function Store({ language = 'pt' }: StoreProps) {
       continueShopping: "Continuer les Achats",
       addedToCart: "Ajouté au panier!",
       productAdded: "a été ajouté à votre panier.",
+      loading: "Chargement...",
     },
     de: {
       title: "Shop",
@@ -99,6 +103,7 @@ export default function Store({ language = 'pt' }: StoreProps) {
       continueShopping: "Weiter Einkaufen",
       addedToCart: "Zum Warenkorb hinzugefügt!",
       productAdded: "wurde Ihrem Warenkorb hinzugefügt.",
+      loading: "Laden...",
     },
   };
 
@@ -159,7 +164,7 @@ export default function Store({ language = 'pt' }: StoreProps) {
       <div className="min-h-screen bg-background py-16">
         <div className="container mx-auto px-4">
           <div className="flex justify-center items-center min-h-[50vh]">
-            <div className="text-muted-foreground">Loading...</div>
+            <div className="text-muted-foreground">{t.loading}</div>
           </div>
         </div>
       </div>

@@ -947,16 +947,28 @@ export class DbStorage implements IStorage {
         {
           name: "Discografia",
           nameEn: "Discography",
+          nameFr: "Discographie",
+          nameEs: "Discografía",
+          nameDe: "Diskographie",
           slug: "discografia",
           description: "Álbuns e singles da banda Snowman",
           descriptionEn: "Snowman band albums and singles",
+          descriptionFr: "Albums et singles du groupe Snowman",
+          descriptionEs: "Álbumes y singles de la banda Snowman",
+          descriptionDe: "Alben und Singles der Band Snowman",
         },
         {
           name: "Merchandise",
           nameEn: "Merchandise",
+          nameFr: "Marchandise",
+          nameEs: "Mercancía",
+          nameDe: "Merchandise",
           slug: "merch",
           description: "Produtos oficiais da banda",
           descriptionEn: "Official band merchandise",
+          descriptionFr: "Produits officiels du groupe",
+          descriptionEs: "Productos oficiales de la banda",
+          descriptionDe: "Offizielle Band-Merchandise",
         },
       ]);
     }

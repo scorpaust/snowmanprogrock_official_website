@@ -30,6 +30,7 @@ export default function Home({ language }: HomeProps) {
     noNews: { pt: "Nenhuma notícia disponível", en: "No news available", fr: "Aucune actualité disponible", es: "No hay noticias disponibles", de: "Keine Nachrichten verfügbar" },
     noEvents: { pt: "Nenhum evento agendado", en: "No upcoming events", fr: "Aucun événement à venir", es: "No hay eventos próximos", de: "Keine bevorstehenden Veranstaltungen" },
     tickets: { pt: "Bilhetes", en: "Tickets", fr: "Billets", es: "Entradas", de: "Tickets" },
+    featured: { pt: "Destaque", en: "Featured", fr: "À la une", es: "Destacado", de: "Hervorgehoben" },
   };
 
   const translate = (key: any) => key[language as keyof typeof key] || key.pt;
@@ -122,7 +123,7 @@ export default function Home({ language }: HomeProps) {
                     </div>
                     <div className="p-8 flex flex-col justify-between">
                       <div>
-                        <Badge className="mb-4">Featured</Badge>
+                        <Badge className="mb-4">{translate(t.featured)}</Badge>
                         <h3 className="text-3xl font-bold mb-4">
                           {({en: featuredNews.titleEn, fr: featuredNews.titleFr, es: featuredNews.titleEs, de: featuredNews.titleDe}[language]) || featuredNews.title}
                         </h3>

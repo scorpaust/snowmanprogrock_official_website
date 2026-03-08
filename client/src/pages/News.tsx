@@ -19,6 +19,8 @@ export default function NewsPage({ language }: NewsProps) {
     readMore: { pt: "Ler Mais", en: "Read More", fr: "Lire Plus", es: "Leer Más", de: "Mehr Lesen" },
     noNews: { pt: "Nenhuma notícia disponível", en: "No news available", fr: "Aucune actualité disponible", es: "No hay noticias disponibles", de: "Keine Nachrichten verfügbar" },
     loading: { pt: "Carregando...", en: "Loading...", fr: "Chargement...", es: "Cargando...", de: "Laden..." },
+    video: { pt: "Vídeo", en: "Video", fr: "Vidéo", es: "Vídeo", de: "Video" },
+    videos: { pt: "Vídeos", en: "Videos", fr: "Vidéos", es: "Vídeos", de: "Videos" },
   };
 
   const getLocale = (lang: string) => {
@@ -77,7 +79,7 @@ export default function NewsPage({ language }: NewsProps) {
                     {item.videoUrls && item.videoUrls.length > 0 && (
                       <Badge variant="outline" className="gap-1" data-testid={`badge-video-${item.id}`}>
                         <Play className="h-3 w-3 text-red-500 fill-red-500" />
-                        {item.videoUrls.length === 1 ? "Video" : `${item.videoUrls.length} Videos`}
+                        {item.videoUrls.length === 1 ? translate(t.video) : `${item.videoUrls.length} ${translate(t.videos)}`}
                       </Badge>
                     )}
                     <span className="text-sm text-muted-foreground">

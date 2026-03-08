@@ -40,6 +40,8 @@ export default function ProductDetail({ language = 'pt' }: ProductDetailProps) {
       addedToCart: "Adicionado ao carrinho!",
       productAdded: "foi adicionado ao carrinho.",
       quantity: "Quantidade",
+      loading: "Carregando...",
+      description: "Descrição",
     },
     en: {
       backToStore: "Back to Store",
@@ -58,6 +60,8 @@ export default function ProductDetail({ language = 'pt' }: ProductDetailProps) {
       addedToCart: "Added to cart!",
       productAdded: "has been added to your cart.",
       quantity: "Quantity",
+      loading: "Loading...",
+      description: "Description",
     },
     es: {
       backToStore: "Volver a la Tienda",
@@ -76,6 +80,8 @@ export default function ProductDetail({ language = 'pt' }: ProductDetailProps) {
       addedToCart: "¡Añadido al carrito!",
       productAdded: "se ha añadido a tu carrito.",
       quantity: "Cantidad",
+      loading: "Cargando...",
+      description: "Descripción",
     },
     fr: {
       backToStore: "Retour à la Boutique",
@@ -94,6 +100,8 @@ export default function ProductDetail({ language = 'pt' }: ProductDetailProps) {
       addedToCart: "Ajouté au panier!",
       productAdded: "a été ajouté à votre panier.",
       quantity: "Quantité",
+      loading: "Chargement...",
+      description: "Description",
     },
     de: {
       backToStore: "Zurück zum Shop",
@@ -112,6 +120,8 @@ export default function ProductDetail({ language = 'pt' }: ProductDetailProps) {
       addedToCart: "Zum Warenkorb hinzugefügt!",
       productAdded: "wurde Ihrem Warenkorb hinzugefügt.",
       quantity: "Menge",
+      loading: "Laden...",
+      description: "Beschreibung",
     },
   };
 
@@ -173,7 +183,7 @@ export default function ProductDetail({ language = 'pt' }: ProductDetailProps) {
       <div className="min-h-screen bg-background py-16">
         <div className="container mx-auto px-4">
           <div className="flex justify-center items-center min-h-[50vh]">
-            <div className="text-muted-foreground">Loading...</div>
+            <div className="text-muted-foreground">{t.loading}</div>
           </div>
         </div>
       </div>
@@ -280,7 +290,7 @@ export default function ProductDetail({ language = 'pt' }: ProductDetailProps) {
             <Separator className="my-6" />
 
             <div className="mb-6">
-              <h2 className="text-xl font-semibold mb-3">Descrição</h2>
+              <h2 className="text-xl font-semibold mb-3">{t.description}</h2>
               <p className="text-muted-foreground leading-relaxed" data-testid="text-product-description">
                 {getProductDescription(product)}
               </p>
