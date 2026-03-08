@@ -1,5 +1,5 @@
-import { Facebook, Instagram, Youtube, Twitter } from "lucide-react";
-import { SiSpotify, SiApplemusic, SiBandcamp } from "react-icons/si";
+import { Facebook, Instagram, Youtube } from "lucide-react";
+import { SiSpotify, SiApplemusic, SiBandcamp, SiX } from "react-icons/si";
 import logoSnowman from "@assets/logo_snowman_transp_GRANDE_White_1760995391367.png";
 
 interface FooterProps {
@@ -70,7 +70,7 @@ export default function Footer({ language }: FooterProps) {
                 className="text-gray-400 hover:text-primary transition-colors"
                 data-testid="link-twitter"
               >
-                <Twitter className="h-5 w-5" />
+                <SiX className="h-5 w-5" />
               </a>
             </div>
           </div>
