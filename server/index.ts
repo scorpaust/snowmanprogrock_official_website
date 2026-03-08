@@ -5,6 +5,10 @@ import { setupVite, serveStatic, log } from "./vite";
 
 const app = express();
 
+if (process.env.NODE_ENV === "production") {
+  app.set("trust proxy", 1);
+}
+
 // Stripe webhook endpoint needs raw body before JSON parsing
 app.use('/api/stripe-webhook', express.raw({ type: 'application/json' }));
 
@@ -24,7 +28,7 @@ app.use(
     cookie: {
       secure: process.env.NODE_ENV === "production",
       httpOnly: true,
-      sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
+      sameSite: "lax",
       maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
     },
   })
