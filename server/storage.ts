@@ -46,6 +46,7 @@ import {
   downloadTokens,
 } from "@shared/schema";
 import { randomUUID } from "crypto";
+import bcrypt from "bcrypt";
 import { db } from "./db";
 import { eq, desc, and } from "drizzle-orm";
 
@@ -820,6 +821,23 @@ export class MemStorage implements IStorage {
 
 export class DbStorage implements IStorage {
   async seedData() {
+    try {
+      const existingUsers = await db.select().from(users).limit(1);
+      if (existingUsers.length === 0) {
+        const hashedPassword = await bcrypt.hash("snowman2024", 10);
+        await db.insert(users).values({
+          username: "admin",
+          email: "snowmanprogrock@gmail.com",
+          password: hashedPassword,
+          role: "admin",
+          isActive: 1,
+        });
+        console.log("Admin user seeded successfully");
+      }
+    } catch (err) {
+      console.error("Error seeding admin user:", err);
+    }
+
     const existingBio = await db.select().from(biography).limit(1);
     if (existingBio.length === 0) {
       await db.insert(biography).values({
@@ -1485,7 +1503,11 @@ export class DbStorage implements IStorage {
 
 async function initStorage(): Promise<DbStorage> {
   const dbStorage = new DbStorage();
-  await dbStorage.seedData();
+  try {
+    await dbStorage.seedData();
+  } catch (err) {
+    console.error("Error during database seeding (non-fatal):", err);
+  }
   return dbStorage;
 }
 
