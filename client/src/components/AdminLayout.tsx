@@ -29,6 +29,7 @@ import {
   Music,
   MessageSquare,
   Mail,
+  ClipboardList,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -57,6 +58,11 @@ const menuItems = [
     title: "Produtos",
     url: "/admin/produtos",
     icon: ShoppingCart,
+  },
+  {
+    title: "Encomendas",
+    url: "/admin/encomendas",
+    icon: ClipboardList,
   },
   {
     title: "Biografia",

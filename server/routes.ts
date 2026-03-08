@@ -71,7 +71,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ===== ADMIN STATS ROUTE =====
   app.get("/api/admin/stats", requireAuth, async (_req, res) => {
     try {
-      const [news, events, gallery, products, users, contacts, comments] = await Promise.all([
+      const [news, events, gallery, products, users, contacts, comments, allOrders] = await Promise.all([
         storage.getAllNews(),
         storage.getAllEvents(),
         storage.getAllGallery(),
@@ -79,10 +79,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         storage.getAllUsers(),
         storage.getAllContacts(),
         storage.getAllComments(),
+        storage.getAllOrders(),
       ]);
 
       const newContacts = contacts.filter(c => c.status === 'new').length;
       const pendingComments = comments.filter((c: any) => c.isApproved === 0).length;
+      const pendingOrders = allOrders.filter(o => o.status === 'pending' || o.status === 'paid').length;
 
       res.json({
         news: news.length,
@@ -92,6 +94,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         contacts: newContacts,
         comments: pendingComments,
         users: users.length,
+        orders: allOrders.length,
+        pendingOrders,
       });
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch stats" });
@@ -1371,6 +1375,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error("Error creating order item:", error);
       res.status(400).json({ error: "Failed to create order item: " + error.message });
+    }
+  });
+
+  app.get("/api/admin/orders", requireAuth, async (_req, res) => {
+    try {
+      const allOrders = await storage.getAllOrders();
+      res.json(allOrders);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch orders" });
+    }
+  });
+
+  app.get("/api/admin/orders/:id/items", requireAuth, async (req, res) => {
+    try {
+      const items = await storage.getOrderItemsByOrderId(req.params.id);
+      res.json(items);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch order items" });
+    }
+  });
+
+  app.patch("/api/admin/orders/:id/status", requireAuth, async (req, res) => {
+    try {
+      const { status } = req.body;
+      const validStatuses = ['pending', 'paid', 'processing', 'shipped', 'completed', 'cancelled'];
+      if (!validStatuses.includes(status)) {
+        return res.status(400).json({ error: "Invalid status" });
+      }
+      const order = await storage.updateOrderStatus(req.params.id, status);
+      if (!order) {
+        return res.status(404).json({ error: "Order not found" });
+      }
+      res.json(order);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update order status" });
+    }
+  });
+
+  app.patch("/api/admin/orders/:id/notes", requireAuth, async (req, res) => {
+    try {
+      const { notes } = req.body;
+      const order = await storage.updateOrder(req.params.id, { notes });
+      if (!order) {
+        return res.status(404).json({ error: "Order not found" });
+      }
+      res.json(order);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update order notes" });
     }
   });
 

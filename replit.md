@@ -18,12 +18,13 @@ Provide an engaging digital presence for the band with content management, multi
 **Current Status: Backoffice System + Enhanced Features ✅**
 - All 6 frontoffice pages implemented (Home, Banda, Notícias, Eventos, Galeria, Contactos)
 - **Complete backoffice authentication system** with secure login/logout, session management
-- **Admin dashboard** with statistics cards and sidebar navigation (Notícias, Eventos, Galeria, Produtos, Biografia, Membros, Utilizadores)
+- **Admin dashboard** with statistics cards and sidebar navigation (Notícias, Eventos, Galeria, Produtos, Encomendas, Biografia, Membros, Utilizadores)
 - **Band member management system** with multilingual roles (PT/EN/FR/ES/DE), image upload, display order, and active status
 - Dark immersive design with purple accents (black/purple/gray palette)
 - **Full multilingual support (PT, EN, FR, ES, DE)** with automatic browser language detection and dropdown selector
 - **5-category contact form** (Geral, Eventos, Parcerias, Loja, Imprensa) with conditional fields and ticket ID generation
 - E-commerce with Stripe integration (cards, Multibanco, MB WAY, PayPal)
+- **Order management system** in backoffice: view all orders, customer details, shipping addresses, order items, status workflow (Pendente → Pago → Em Processamento → Enviado → Concluído), internal notes for tracking
 - **Protected digital downloads** with signed time-limited tokens (2h expiry), max 5 downloads per purchase, user-exclusive access
 - Google Analytics integration configured
 - PWA manifest + service worker (production-ready)

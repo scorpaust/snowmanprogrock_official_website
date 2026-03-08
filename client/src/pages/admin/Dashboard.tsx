@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import AdminLayout from "@/components/AdminLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Newspaper, Calendar, Image, ShoppingCart, MessageSquare, Users, Mail } from "lucide-react";
+import { Newspaper, Calendar, Image, ShoppingCart, MessageSquare, Users, Mail, ClipboardList } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 
 interface Stats {
@@ -12,6 +12,8 @@ interface Stats {
   contacts: number;
   comments: number;
   users: number;
+  orders: number;
+  pendingOrders: number;
 }
 
 export default function Dashboard() {
@@ -51,6 +53,12 @@ export default function Dashboard() {
       value: stats?.products || 0,
       icon: ShoppingCart,
       color: "text-orange-500",
+    },
+    {
+      title: "Encomendas Pendentes",
+      value: stats?.pendingOrders || 0,
+      icon: ClipboardList,
+      color: "text-red-500",
     },
     {
       title: "Contactos Novos",
@@ -124,6 +132,7 @@ export default function Dashboard() {
               <li>Eventos: Gerir eventos e concertos da banda</li>
               <li>Galeria: Adicionar fotos e vídeos</li>
               <li>Produtos: Gerir a loja online (discos, merchandise)</li>
+              <li>Encomendas: Ver e gerir encomendas, moradas de envio e estados</li>
               <li>Biografia: Editar a biografia da banda</li>
               <li>Utilizadores: Gerir utilizadores do backoffice</li>
             </ul>
