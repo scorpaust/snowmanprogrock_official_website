@@ -10,6 +10,25 @@ declare module 'express-session' {
   }
 }
 
+async function ensureAdminExists() {
+  try {
+    const allUsers = await storage.getAllUsers();
+    if (allUsers.length === 0) {
+      const hashedPassword = await bcrypt.hash("snowman2024", 10);
+      await storage.createUser({
+        username: "admin",
+        email: "snowmanprogrock@gmail.com",
+        password: hashedPassword,
+        role: "admin",
+        isActive: 1,
+      });
+      console.log("Admin user auto-created on first login attempt");
+    }
+  } catch (err) {
+    console.error("Error ensuring admin exists:", err);
+  }
+}
+
 export function registerAuthRoutes(app: Express) {
   app.post("/api/auth/login", async (req, res) => {
     try {
@@ -18,6 +37,8 @@ export function registerAuthRoutes(app: Express) {
       if (!username || !password) {
         return res.status(400).json({ error: "Username and password required" });
       }
+
+      await ensureAdminExists();
 
       const user = await storage.getUserByUsername(username);
       if (!user) {
