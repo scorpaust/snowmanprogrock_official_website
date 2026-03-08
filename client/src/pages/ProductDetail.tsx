@@ -10,6 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { ShoppingCart, ArrowLeft, Package, Music, Download } from "lucide-react";
 import type { Product, Category } from "@shared/schema";
 import { CommentSection } from "@/components/CommentSection";
+import { useSEO } from "@/hooks/use-seo";
 
 interface ProductDetailProps {
   language?: string;
@@ -134,6 +135,18 @@ export default function ProductDetail({ language = 'pt' }: ProductDetailProps) {
 
   const { data: categories } = useQuery<Category[]>({
     queryKey: ["/api/categories"],
+  });
+
+  const productName = product ? (({en: product.nameEn, fr: product.nameFr, es: product.nameEs, de: product.nameDe}[language]) || product.name) : "";
+  const productDesc = product ? (({en: product.descriptionEn, fr: product.descriptionFr, es: product.descriptionEs, de: product.descriptionDe}[language]) || product.description || "") : "";
+  const productImage = product?.images && product.images.length > 0 ? product.images[0] : undefined;
+  useSEO({
+    title: productName || t.loading,
+    description: productDesc ? productDesc.substring(0, 160) : undefined,
+    image: productImage || undefined,
+    url: `/loja/produto/${productId}`,
+    type: "product",
+    lang: language,
   });
 
   const handleAddToCart = () => {

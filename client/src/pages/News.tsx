@@ -5,12 +5,23 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Newspaper, Play } from "lucide-react";
 import type { News } from "@shared/schema";
+import { useSEO } from "@/hooks/use-seo";
 
 interface NewsProps {
   language: string;
 }
 
+const seoByLang: Record<string, { title: string; description: string }> = {
+  pt: { title: "Notícias", description: "As últimas notícias da banda Snowman. Artigos, entrevistas, novos lançamentos e novidades do mundo do rock progressivo." },
+  en: { title: "News", description: "Latest news from Snowman. Articles, interviews, new releases and updates from the world of progressive rock." },
+  fr: { title: "Actualités", description: "Les dernières actualités de Snowman. Articles, interviews, nouvelles sorties et actualités du rock progressif." },
+  es: { title: "Noticias", description: "Las últimas noticias de Snowman. Artículos, entrevistas, nuevos lanzamientos y novedades del rock progresivo." },
+  de: { title: "Nachrichten", description: "Neueste Nachrichten von Snowman. Artikel, Interviews, neue Veröffentlichungen und Neuigkeiten aus der Welt des Progressive Rock." },
+};
+
 export default function NewsPage({ language }: NewsProps) {
+  const seo = seoByLang[language] || seoByLang.pt;
+  useSEO({ title: seo.title, description: seo.description, url: "/noticias", lang: language });
   const { data: news, isLoading } = useQuery<News[]>({ queryKey: ["/api/news"] });
 
   const t = {

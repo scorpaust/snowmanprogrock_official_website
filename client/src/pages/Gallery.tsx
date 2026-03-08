@@ -4,10 +4,19 @@ import { X, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import type { Gallery } from "@shared/schema";
+import { useSEO } from "@/hooks/use-seo";
 
 interface GalleryProps {
   language: string;
 }
+
+const seoByLang: Record<string, { title: string; description: string }> = {
+  pt: { title: "Galeria", description: "Galeria de fotos e vídeos da banda Snowman. Momentos dos concertos, bastidores e videoclipes de rock progressivo." },
+  en: { title: "Gallery", description: "Photo and video gallery of Snowman. Concert moments, behind the scenes and progressive rock music videos." },
+  fr: { title: "Galerie", description: "Galerie de photos et vidéos de Snowman. Moments de concerts, coulisses et clips de rock progressif." },
+  es: { title: "Galería", description: "Galería de fotos y vídeos de Snowman. Momentos de conciertos, tras bastidores y videoclips de rock progresivo." },
+  de: { title: "Galerie", description: "Foto- und Videogalerie von Snowman. Konzertmomente, Hinter den Kulissen und Progressive-Rock-Musikvideos." },
+};
 
 function getCaption(item: Gallery, language: string): string {
   const captionMap: Record<string, string | null | undefined> = {
@@ -21,6 +30,8 @@ function getCaption(item: Gallery, language: string): string {
 }
 
 export default function GalleryPage({ language }: GalleryProps) {
+  const seo = seoByLang[language] || seoByLang.pt;
+  useSEO({ title: seo.title, description: seo.description, url: "/galeria", lang: language });
   const { data: gallery, isLoading } = useQuery<Gallery[]>({ queryKey: ["/api/gallery"] });
   const [activeTab, setActiveTab] = useState<'photos' | 'videos'>('photos');
   const [selectedMedia, setSelectedMedia] = useState<Gallery | null>(null);

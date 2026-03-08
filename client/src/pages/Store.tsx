@@ -9,12 +9,23 @@ import { Separator } from "@/components/ui/separator";
 import { ShoppingCart, Package, Music, Disc } from "lucide-react";
 import { Link } from "wouter";
 import type { Product, Category } from "@shared/schema";
+import { useSEO } from "@/hooks/use-seo";
 
 interface StoreProps {
   language?: string;
 }
 
+const seoByLang: Record<string, { title: string; description: string }> = {
+  pt: { title: "Loja", description: "Loja oficial Snowman. Compra álbuns, merchandise e produtos digitais da banda de rock progressivo de Portugal." },
+  en: { title: "Store", description: "Official Snowman store. Buy albums, merchandise and digital products from Portugal's progressive rock band." },
+  fr: { title: "Boutique", description: "Boutique officielle Snowman. Achetez albums, merchandise et produits numériques du groupe de rock progressif." },
+  es: { title: "Tienda", description: "Tienda oficial Snowman. Compra álbumes, merchandise y productos digitales de la banda de rock progresivo de Portugal." },
+  de: { title: "Shop", description: "Offizieller Snowman Shop. Kaufen Sie Alben, Merchandise und digitale Produkte der Progressive-Rock-Band aus Portugal." },
+};
+
 export default function Store({ language = 'pt' }: StoreProps) {
+  const seo = seoByLang[language] || seoByLang.pt;
+  useSEO({ title: seo.title, description: seo.description, url: "/loja", lang: language });
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const { addItem } = useCart();
   const { toast } = useToast();

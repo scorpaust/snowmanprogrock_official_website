@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Play } from "lucide-react";
 import type { News } from "@shared/schema";
 import { CommentSection } from "@/components/CommentSection";
+import { useSEO } from "@/hooks/use-seo";
 
 const extractYoutubeId = (url: string): string | null => {
   const match = url.match(
@@ -55,6 +56,18 @@ export default function NewsDetail({ language }: NewsDetailProps) {
     if (!news) return '';
     return ({en: news.contentEn, fr: news.contentFr, es: news.contentEs, de: news.contentDe}[language]) || news.content;
   };
+
+  const newsTitle = getTitle();
+  const newsContent = getContent();
+  const newsImage = news?.imageUrl || (news?.images && news.images.length > 0 ? news.images[0] : undefined);
+  useSEO({
+    title: newsTitle || translate(t.loading),
+    description: newsContent ? newsContent.substring(0, 160) : undefined,
+    image: newsImage || undefined,
+    url: `/noticias/${id}`,
+    type: "article",
+    lang: language,
+  });
 
   if (isLoading) {
     return (

@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import type { Contact } from "@shared/schema";
+import { useSEO } from "@/hooks/use-seo";
 import {
   Form,
   FormControl,
@@ -42,7 +43,17 @@ interface ContactProps {
   language: string;
 }
 
+const seoByLang: Record<string, { title: string; description: string }> = {
+  pt: { title: "Contactos", description: "Entra em contacto com a banda Snowman. Informações gerais, reservas de eventos, parcerias, apoio à loja e imprensa." },
+  en: { title: "Contact", description: "Get in touch with Snowman. General inquiries, event bookings, partnerships, store support and press." },
+  fr: { title: "Contact", description: "Contactez Snowman. Informations générales, réservations d'événements, partenariats, support boutique et presse." },
+  es: { title: "Contacto", description: "Contacta con Snowman. Información general, reservas de eventos, colaboraciones, soporte de tienda y prensa." },
+  de: { title: "Kontakt", description: "Kontaktieren Sie Snowman. Allgemeine Anfragen, Veranstaltungsbuchungen, Partnerschaften, Shop-Support und Presse." },
+};
+
 export default function Contact({ language }: ContactProps) {
+  const seo = seoByLang[language] || seoByLang.pt;
+  useSEO({ title: seo.title, description: seo.description, url: "/contactos", lang: language });
   const [contactMode, setContactMode] = useState<'geral' | 'eventos' | 'parc' | 'loja' | 'imprensa'>('geral');
   const [ticketId, setTicketId] = useState<string | null>(null);
   const { toast } = useToast();

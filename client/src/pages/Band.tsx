@@ -2,12 +2,23 @@ import { useQuery } from "@tanstack/react-query";
 import type { Biography, BandMember } from "@shared/schema";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Loader2 } from "lucide-react";
+import { useSEO } from "@/hooks/use-seo";
 
 interface BandProps {
   language: string;
 }
 
+const seoByLang: Record<string, { title: string; description: string }> = {
+  pt: { title: "A Banda", description: "Conhece os membros e a história da banda Snowman. Rock progressivo de Portugal com uma mistura única de ritmos complexos e paisagens sonoras atmosféricas." },
+  en: { title: "The Band", description: "Meet the members and history of Snowman. Progressive rock from Portugal with a unique blend of complex rhythms and atmospheric soundscapes." },
+  fr: { title: "Le Groupe", description: "Découvrez les membres et l'histoire de Snowman. Rock progressif du Portugal avec un mélange unique de rythmes complexes." },
+  es: { title: "La Banda", description: "Conoce a los miembros y la historia de Snowman. Rock progresivo de Portugal con una mezcla única de ritmos complejos." },
+  de: { title: "Die Band", description: "Lernen Sie die Mitglieder und Geschichte von Snowman kennen. Progressive Rock aus Portugal mit einer einzigartigen Mischung." },
+};
+
 export default function Band({ language }: BandProps) {
+  const seo = seoByLang[language] || seoByLang.pt;
+  useSEO({ title: seo.title, description: seo.description, url: "/banda", lang: language });
   const { data: biography } = useQuery<Biography>({ queryKey: ["/api/biography"] });
   const { data: members = [], isLoading: membersLoading } = useQuery<BandMember[]>({ 
     queryKey: ["/api/band-members"] 

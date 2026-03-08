@@ -3,12 +3,23 @@ import { Calendar, MapPin, Clock, ExternalLink, Music } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import type { Event } from "@shared/schema";
+import { useSEO } from "@/hooks/use-seo";
 
 interface EventsProps {
   language: string;
 }
 
+const seoByLang: Record<string, { title: string; description: string }> = {
+  pt: { title: "Eventos", description: "Próximos concertos e eventos da banda Snowman. Vê as datas, locais e compra bilhetes para os nossos espetáculos de rock progressivo." },
+  en: { title: "Events", description: "Upcoming shows and events from Snowman. See dates, venues and buy tickets for our progressive rock performances." },
+  fr: { title: "Événements", description: "Prochains concerts et événements de Snowman. Consultez les dates, lieux et achetez des billets pour nos spectacles." },
+  es: { title: "Eventos", description: "Próximos conciertos y eventos de Snowman. Consulta fechas, lugares y compra entradas para nuestros espectáculos." },
+  de: { title: "Veranstaltungen", description: "Kommende Konzerte und Veranstaltungen von Snowman. Daten, Veranstaltungsorte und Tickets für unsere Auftritte." },
+};
+
 export default function Events({ language }: EventsProps) {
+  const seo = seoByLang[language] || seoByLang.pt;
+  useSEO({ title: seo.title, description: seo.description, url: "/eventos", lang: language });
   const { data: events, isLoading } = useQuery<Event[]>({ queryKey: ["/api/events"] });
 
   const t = {

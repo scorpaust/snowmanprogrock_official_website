@@ -7,12 +7,23 @@ import { Badge } from "@/components/ui/badge";
 import type { News, Event, Gallery } from "@shared/schema";
 import logoSnowman from "@assets/logo_snowman_transp_GRANDE_White_1760995391367.png";
 import { SpotifyPlayer } from "@/components/SpotifyPlayer";
+import { useSEO } from "@/hooks/use-seo";
 
 interface HomeProps {
   language: string;
 }
 
+const seoByLang: Record<string, { title: string; description: string }> = {
+  pt: { title: "Snowman - Banda de Rock Progressivo de Portugal", description: "Snowman é uma banda de rock progressivo de Portugal. Descobre a nossa música, próximos concertos, notícias e loja oficial." },
+  en: { title: "Snowman - Progressive Rock Band from Portugal", description: "Snowman is a progressive rock band from Portugal. Discover our music, upcoming shows, latest news and official store." },
+  fr: { title: "Snowman - Groupe de Rock Progressif du Portugal", description: "Snowman est un groupe de rock progressif du Portugal. Découvrez notre musique, concerts, actualités et boutique officielle." },
+  es: { title: "Snowman - Banda de Rock Progresivo de Portugal", description: "Snowman es una banda de rock progresivo de Portugal. Descubre nuestra música, próximos conciertos, noticias y tienda oficial." },
+  de: { title: "Snowman - Progressive Rock Band aus Portugal", description: "Snowman ist eine Progressive-Rock-Band aus Portugal. Entdecken Sie unsere Musik, kommende Konzerte, Nachrichten und den offiziellen Shop." },
+};
+
 export default function Home({ language }: HomeProps) {
+  const seo = seoByLang[language] || seoByLang.pt;
+  useSEO({ title: seo.title, fullTitle: true, description: seo.description, url: "/", lang: language });
   const { data: news } = useQuery<News[]>({ queryKey: ["/api/news"] });
   const { data: events } = useQuery<Event[]>({ queryKey: ["/api/events"] });
   const { data: gallery } = useQuery<Gallery[]>({ queryKey: ["/api/gallery"] });
