@@ -16,6 +16,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { User, Settings, ShoppingBag, Star, LogOut, Download, CreditCard, Music, Upload } from "lucide-react";
 import type { Order, OrderItem, Product } from "@shared/schema";
 import { ObjectUploader } from "@/components/ObjectUploader";
+import { AlertCircle } from "lucide-react";
 
 interface CustomerAreaProps {
   language: string;
@@ -52,6 +53,23 @@ export default function CustomerArea({ language }: CustomerAreaProps) {
 
   const { data: products = [] } = useQuery<Product[]>({
     queryKey: ['/api/products'],
+  });
+
+  type DigitalPurchase = {
+    orderItemId: string;
+    productId: string;
+    productName: string;
+    productImage: string | null;
+    orderNumber: string;
+    purchaseDate: string;
+    totalDownloadsUsed: number;
+    maxDownloads: number;
+    hasDigitalFile: boolean;
+  };
+
+  const { data: digitalPurchases = [], isLoading: downloadsLoading } = useQuery<DigitalPurchase[]>({
+    queryKey: ['/api/customer/digital-purchases'],
+    enabled: !!profile,
   });
 
   const [formData, setFormData] = useState({
@@ -122,6 +140,12 @@ export default function CustomerArea({ language }: CustomerAreaProps) {
     logout: { pt: "Terminar Sessão", en: "Logout", fr: "Déconnexion", es: "Cerrar Sesión", de: "Abmelden" },
     noOrders: { pt: "Ainda não tens encomendas", en: "You have no orders yet", fr: "Vous n'avez pas encore de commandes", es: "Aún no tienes pedidos", de: "Sie haben noch keine Bestellungen" },
     noDownloads: { pt: "Ainda não tens downloads disponíveis", en: "You have no downloads available yet", fr: "Vous n'avez pas encore de téléchargements", es: "Aún no tienes descargas disponibles", de: "Sie haben noch keine Downloads" },
+    downloadsRemaining: { pt: "downloads restantes", en: "downloads remaining", fr: "téléchargements restants", es: "descargas restantes", de: "Downloads verbleibend" },
+    downloadLimitReached: { pt: "Limite de downloads atingido", en: "Download limit reached", fr: "Limite de téléchargements atteint", es: "Límite de descargas alcanzado", de: "Download-Limit erreicht" },
+    generating: { pt: "A gerar link...", en: "Generating link...", fr: "Génération du lien...", es: "Generando enlace...", de: "Link wird generiert..." },
+    downloadNow: { pt: "Descarregar", en: "Download", fr: "Télécharger", es: "Descargar", de: "Herunterladen" },
+    purchasedOn: { pt: "Comprado em", en: "Purchased on", fr: "Acheté le", es: "Comprado el", de: "Gekauft am" },
+    orderRef: { pt: "Encomenda", en: "Order", fr: "Commande", es: "Pedido", de: "Bestellung" },
     comment: { pt: "comentário aprovado", en: "approved comment", fr: "commentaire approuvé", es: "comentario aprobado", de: "genehmigter Kommentar" },
     comments: { pt: "comentários aprovados", en: "approved comments", fr: "commentaires approuvés", es: "comentarios aprobados", de: "genehmigte Kommentare" },
     stars: { pt: "estrelas", en: "stars", fr: "étoiles", es: "estrellas", de: "Sterne" },
@@ -157,6 +181,7 @@ export default function CustomerArea({ language }: CustomerAreaProps) {
     onSuccess: () => {
       queryClient.removeQueries({ queryKey: ['/api/customer/me'] });
       queryClient.removeQueries({ queryKey: ['/api/customer/orders'] });
+      queryClient.removeQueries({ queryKey: ['/api/customer/digital-purchases'] });
       setLocation("/");
     },
   });
@@ -175,11 +200,26 @@ export default function CustomerArea({ language }: CustomerAreaProps) {
     return translate(t.comments);
   };
 
-  const getDigitalProducts = () => {
-    const paidOrders = orders.filter(o => o.status === 'paid' || o.status === 'completed');
-    const digitalProductIds = new Set<string>();
-    
-    return products.filter(p => p.type === 'digital' && p.downloadUrl);
+  const [downloadingItem, setDownloadingItem] = useState<string | null>(null);
+
+  const handleDownload = async (orderItemId: string) => {
+    try {
+      setDownloadingItem(orderItemId);
+      const response = await apiRequest("POST", `/api/customer/downloads/${orderItemId}/generate-token`, {});
+      const data = await response.json();
+
+      if (data.token) {
+        window.open(`/api/downloads/${data.token}`, '_blank');
+        queryClient.invalidateQueries({ queryKey: ['/api/customer/digital-purchases'] });
+      }
+    } catch (error: any) {
+      toast({
+        title: translate(t.downloadLimitReached),
+        variant: "destructive",
+      });
+    } finally {
+      setDownloadingItem(null);
+    }
   };
 
   const formatDate = (dateString: string) => {
@@ -501,43 +541,80 @@ export default function CustomerArea({ language }: CustomerAreaProps) {
             <Card>
               <CardHeader>
                 <CardTitle>{translate(t.downloads)}</CardTitle>
+                <CardDescription className="text-sm text-muted-foreground">
+                  {language === 'pt' ? 'Os downloads são exclusivos para ti. Cada compra permite até 5 downloads.' :
+                   language === 'en' ? 'Downloads are exclusive to you. Each purchase allows up to 5 downloads.' :
+                   language === 'fr' ? 'Les téléchargements sont exclusifs. Chaque achat permet jusqu\'à 5 téléchargements.' :
+                   language === 'es' ? 'Las descargas son exclusivas para ti. Cada compra permite hasta 5 descargas.' :
+                   'Downloads sind exklusiv für Sie. Jeder Kauf erlaubt bis zu 5 Downloads.'}
+                </CardDescription>
               </CardHeader>
               <CardContent>
-                {getDigitalProducts().length === 0 ? (
+                {downloadsLoading ? (
+                  <p className="text-center text-muted-foreground py-8">{translate(t.loading)}</p>
+                ) : digitalPurchases.length === 0 ? (
                   <p className="text-center text-muted-foreground py-8" data-testid="text-no-downloads">
                     {translate(t.noDownloads)}
                   </p>
                 ) : (
                   <div className="space-y-4">
-                    {getDigitalProducts().map((product) => (
-                      <Card key={product.id} className="hover-elevate" data-testid={`download-${product.id}`}>
-                        <CardContent className="pt-6">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-4">
-                              {product.images && product.images.length > 0 && (
-                                <img
-                                  src={product.images[0]}
-                                  alt={product.name}
-                                  className="h-16 w-16 rounded object-cover"
-                                />
-                              )}
+                    {digitalPurchases.map((purchase) => {
+                      const remainingDownloads = purchase.maxDownloads - purchase.totalDownloadsUsed;
+                      const isLimitReached = remainingDownloads <= 0;
+                      const isDownloading = downloadingItem === purchase.orderItemId;
+
+                      return (
+                        <Card key={purchase.orderItemId} className="hover-elevate" data-testid={`download-${purchase.orderItemId}`}>
+                          <CardContent className="pt-6">
+                            <div className="flex items-center justify-between flex-wrap gap-4">
+                              <div className="flex items-center gap-4">
+                                {purchase.productImage && (
+                                  <img
+                                    src={purchase.productImage}
+                                    alt={purchase.productName}
+                                    className="h-16 w-16 rounded object-cover"
+                                  />
+                                )}
+                                <div>
+                                  <p className="font-medium" data-testid={`text-download-name-${purchase.orderItemId}`}>{purchase.productName}</p>
+                                  <p className="text-sm text-muted-foreground">
+                                    {translate(t.orderRef)} #{purchase.orderNumber}
+                                  </p>
+                                  <p className="text-sm text-muted-foreground">
+                                    {translate(t.purchasedOn)} {formatDate(purchase.purchaseDate)}
+                                  </p>
+                                  <div className="flex items-center gap-2 mt-1">
+                                    <Badge variant={isLimitReached ? "destructive" : "secondary"}>
+                                      {isLimitReached
+                                        ? translate(t.downloadLimitReached)
+                                        : `${remainingDownloads}/${purchase.maxDownloads} ${translate(t.downloadsRemaining)}`
+                                      }
+                                    </Badge>
+                                  </div>
+                                </div>
+                              </div>
                               <div>
-                                <p className="font-medium">{product.name}</p>
-                                <p className="text-sm text-muted-foreground">{product.description}</p>
+                                {isLimitReached ? (
+                                  <Button disabled variant="secondary" data-testid={`button-download-disabled-${purchase.orderItemId}`}>
+                                    <AlertCircle className="h-4 w-4 mr-2" />
+                                    {translate(t.downloadLimitReached)}
+                                  </Button>
+                                ) : (
+                                  <Button
+                                    onClick={() => handleDownload(purchase.orderItemId)}
+                                    disabled={isDownloading}
+                                    data-testid={`button-download-${purchase.orderItemId}`}
+                                  >
+                                    <Download className="h-4 w-4 mr-2" />
+                                    {isDownloading ? translate(t.generating) : translate(t.downloadNow)}
+                                  </Button>
+                                )}
                               </div>
                             </div>
-                            {product.downloadUrl && (
-                              <Button asChild>
-                                <a href={product.downloadUrl} target="_blank" rel="noopener noreferrer" data-testid={`button-download-${product.id}`}>
-                                  <Download className="h-4 w-4 mr-2" />
-                                  Download
-                                </a>
-                              </Button>
-                            )}
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
                   </div>
                 )}
               </CardContent>

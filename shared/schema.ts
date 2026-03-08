@@ -172,7 +172,8 @@ export const products = pgTable("products", {
   categoryId: varchar("category_id").notNull().references(() => categories.id, { onDelete: "restrict" }),
   images: text("images").array().notNull().default(sql`ARRAY[]::text[]`),
   stock: integer("stock").notNull().default(0), // for physical products
-  downloadUrl: text("download_url"), // for digital products
+  downloadUrl: text("download_url"), // legacy: external download URL
+  digitalFileUrl: text("digital_file_url"), // object storage path for protected digital file
   isActive: integer("is_active").notNull().default(1), // 1 for active, 0 for inactive
   featured: integer("featured").notNull().default(0), // 1 for featured, 0 for regular
   createdAt: timestamp("created_at").notNull().defaultNow(),
@@ -206,6 +207,19 @@ export const orderItems = pgTable("order_items", {
   productName: text("product_name").notNull(), // snapshot at purchase time
   quantity: integer("quantity").notNull(),
   price: integer("price").notNull(), // price per unit in cents at purchase time
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+// Download Tokens table (for protected digital downloads)
+export const downloadTokens = pgTable("download_tokens", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  orderItemId: varchar("order_item_id").notNull().references(() => orderItems.id, { onDelete: "cascade" }),
+  productId: varchar("product_id").notNull().references(() => products.id, { onDelete: "restrict" }),
+  userId: varchar("user_id").notNull().references(() => userProfiles.id, { onDelete: "cascade" }),
+  token: text("token").notNull().unique(),
+  downloadsUsed: integer("downloads_used").notNull().default(0),
+  maxDownloads: integer("max_downloads").notNull().default(5),
+  expiresAt: timestamp("expires_at").notNull(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
@@ -312,6 +326,11 @@ export const insertSpotifySettingsSchema = createInsertSchema(spotifySettings).o
   isActive: z.union([z.literal(0), z.literal(1)]),
 });
 
+export const insertDownloadTokenSchema = createInsertSchema(downloadTokens).omit({ id: true, createdAt: true }).extend({
+  maxDownloads: z.number().int().positive().default(5),
+  downloadsUsed: z.number().int().min(0).default(0),
+});
+
 export const insertBandMemberSchema = createInsertSchema(bandMembers).omit({ id: true, createdAt: true }).extend({
   roleEn: z.string().nullable().optional(),
   roleFr: z.string().nullable().optional(),
@@ -383,3 +402,6 @@ export type OrderItem = typeof orderItems.$inferSelect;
 
 export type InsertBandMember = z.infer<typeof insertBandMemberSchema>;
 export type BandMember = typeof bandMembers.$inferSelect;
+
+export type InsertDownloadToken = z.infer<typeof insertDownloadTokenSchema>;
+export type DownloadToken = typeof downloadTokens.$inferSelect;

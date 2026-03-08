@@ -538,6 +538,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Products
+  const stripPrivateProductFields = (product: any) => {
+    const { digitalFileUrl, ...safeProduct } = product;
+    return safeProduct;
+  };
+
   app.get("/api/products", async (req, res) => {
     try {
       const { categoryId, active, featured } = req.query;
@@ -553,7 +558,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         products = await storage.getAllProducts();
       }
       
-      res.json(products);
+      const isAdmin = !!(req.session as any)?.userId;
+      res.json(isAdmin ? products : products.map(stripPrivateProductFields));
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch products" });
     }
@@ -565,7 +571,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!product) {
         return res.status(404).json({ error: "Product not found" });
       }
-      res.json(product);
+      const isAdmin = !!(req.session as any)?.userId;
+      res.json(isAdmin ? product : stripPrivateProductFields(product));
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch product" });
     }
@@ -925,6 +932,198 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(orders);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch orders" });
+    }
+  });
+
+  // ===== PROTECTED DIGITAL DOWNLOADS =====
+
+  app.get("/api/customer/digital-purchases", async (req, res) => {
+    try {
+      if (!req.session.customerUserId) {
+        return res.status(401).json({ error: "Not authenticated" });
+      }
+
+      const customerOrders = await storage.getOrdersByUserProfileId(req.session.customerUserId);
+      const paidOrders = customerOrders.filter(o => o.status === 'paid' || o.status === 'completed');
+
+      const digitalPurchases: Array<{
+        orderItemId: string;
+        productId: string;
+        productName: string;
+        productImage: string | null;
+        orderNumber: string;
+        purchaseDate: string;
+        totalDownloadsUsed: number;
+        maxDownloads: number;
+        hasDigitalFile: boolean;
+      }> = [];
+
+      for (const order of paidOrders) {
+        const items = await storage.getOrderItemsByOrderId(order.id);
+        for (const item of items) {
+          const product = await storage.getProductById(item.productId);
+          if (product && product.type === 'digital' && (product.digitalFileUrl || product.downloadUrl)) {
+            const tokens = await storage.getDownloadTokensByOrderItem(item.id);
+            const totalUsed = tokens.reduce((sum, t) => sum + t.downloadsUsed, 0);
+            const maxDownloads = tokens.length > 0 ? tokens[0].maxDownloads : 5;
+
+            digitalPurchases.push({
+              orderItemId: item.id,
+              productId: product.id,
+              productName: item.productName,
+              productImage: product.images?.[0] || null,
+              orderNumber: order.orderNumber,
+              purchaseDate: order.createdAt.toISOString(),
+              totalDownloadsUsed: totalUsed,
+              maxDownloads,
+              hasDigitalFile: !!product.digitalFileUrl,
+            });
+          }
+        }
+      }
+
+      res.json(digitalPurchases);
+    } catch (error) {
+      console.error("Error fetching digital purchases:", error);
+      res.status(500).json({ error: "Failed to fetch digital purchases" });
+    }
+  });
+
+  app.post("/api/customer/downloads/:orderItemId/generate-token", async (req, res) => {
+    try {
+      if (!req.session.customerUserId) {
+        return res.status(401).json({ error: "Not authenticated" });
+      }
+
+      const { orderItemId } = req.params;
+      const userId = req.session.customerUserId;
+
+      let orderItem: any = null;
+      let parentOrder: any = null;
+
+      const customerOrders = await storage.getOrdersByUserProfileId(userId);
+      for (const order of customerOrders) {
+        if (order.status !== 'paid' && order.status !== 'completed') continue;
+        const orderItems = await storage.getOrderItemsByOrderId(order.id);
+        const found = orderItems.find(i => i.id === orderItemId);
+        if (found) {
+          orderItem = found;
+          parentOrder = order;
+          break;
+        }
+      }
+
+      if (!orderItem || !parentOrder) {
+        return res.status(404).json({ error: "Purchase not found or not paid" });
+      }
+
+      const product = await storage.getProductById(orderItem.productId);
+      if (!product || product.type !== 'digital') {
+        return res.status(400).json({ error: "Product is not a digital product" });
+      }
+
+      if (!product.digitalFileUrl && !product.downloadUrl) {
+        return res.status(400).json({ error: "No digital file available for this product" });
+      }
+
+      const MAX_DOWNLOADS = 5;
+      const existingTokens = await storage.getDownloadTokensByOrderItem(orderItemId);
+      const totalUsed = existingTokens.reduce((sum, t) => sum + t.downloadsUsed, 0);
+      if (totalUsed >= MAX_DOWNLOADS) {
+        return res.status(403).json({ error: "Download limit reached", downloadsUsed: totalUsed, maxDownloads: MAX_DOWNLOADS });
+      }
+
+      const { randomUUID } = await import("crypto");
+      const tokenString = randomUUID();
+      const expiresAt = new Date(Date.now() + 2 * 60 * 60 * 1000);
+
+      const downloadToken = await storage.createDownloadToken({
+        orderItemId,
+        productId: product.id,
+        userId,
+        token: tokenString,
+        downloadsUsed: 0,
+        maxDownloads: MAX_DOWNLOADS,
+        expiresAt,
+      });
+
+      res.json({
+        token: downloadToken.token,
+        expiresAt: downloadToken.expiresAt.toISOString(),
+        downloadsRemaining: MAX_DOWNLOADS - totalUsed,
+      });
+    } catch (error) {
+      console.error("Error generating download token:", error);
+      res.status(500).json({ error: "Failed to generate download token" });
+    }
+  });
+
+  app.get("/api/downloads/:token", async (req, res) => {
+    try {
+      if (!req.session.customerUserId) {
+        return res.status(401).json({ error: "Not authenticated" });
+      }
+
+      const downloadToken = await storage.getDownloadTokenByToken(req.params.token);
+      if (!downloadToken) {
+        return res.status(404).json({ error: "Invalid download token" });
+      }
+
+      if (downloadToken.userId !== req.session.customerUserId) {
+        return res.status(403).json({ error: "This download token does not belong to you" });
+      }
+
+      if (new Date() > downloadToken.expiresAt) {
+        return res.status(410).json({ error: "Download token has expired" });
+      }
+
+      const allTokens = await storage.getDownloadTokensByOrderItem(downloadToken.orderItemId);
+      const totalUsed = allTokens.reduce((sum, t) => sum + t.downloadsUsed, 0);
+      if (totalUsed >= downloadToken.maxDownloads) {
+        return res.status(403).json({ error: "Download limit reached" });
+      }
+
+      const product = await storage.getProductById(downloadToken.productId);
+      if (!product) {
+        return res.status(404).json({ error: "Product not found" });
+      }
+
+      if (product.digitalFileUrl) {
+        try {
+          const objService = new ObjectStorageService();
+          const objectFile = await objService.getObjectEntityFile(product.digitalFileUrl);
+          await storage.incrementDownloadCount(downloadToken.id);
+          res.set({ "Content-Disposition": `attachment; filename="${product.name.replace(/[^a-zA-Z0-9._-]/g, '_')}"` });
+          await objService.downloadObject(objectFile, res, 0);
+          return;
+        } catch (err) {
+          if (err instanceof ObjectNotFoundError) {
+            return res.status(404).json({ error: "Digital file not found in storage" });
+          }
+          throw err;
+        }
+      }
+
+      if (product.downloadUrl) {
+        await storage.incrementDownloadCount(downloadToken.id);
+        return res.redirect(product.downloadUrl);
+      }
+
+      return res.status(404).json({ error: "No digital file available" });
+    } catch (error) {
+      console.error("Error processing download:", error);
+      res.status(500).json({ error: "Failed to process download" });
+    }
+  });
+
+  app.post("/api/objects/upload-digital", requireAuth, async (req, res) => {
+    try {
+      const objService = new ObjectStorageService();
+      const url = await objService.getObjectEntityUploadURL();
+      res.json({ url });
+    } catch (error) {
+      console.error("Error generating digital upload URL:", error);
+      res.status(500).json({ error: "Failed to generate upload URL" });
     }
   });
 

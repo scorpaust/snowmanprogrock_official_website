@@ -24,6 +24,7 @@ Provide an engaging digital presence for the band with content management, multi
 - **Full multilingual support (PT, EN, FR, ES, DE)** with automatic browser language detection and dropdown selector
 - **5-category contact form** (Geral, Eventos, Parcerias, Loja, Imprensa) with conditional fields and ticket ID generation
 - E-commerce with Stripe integration (cards, Multibanco, MB WAY, PayPal)
+- **Protected digital downloads** with signed time-limited tokens (2h expiry), max 5 downloads per purchase, user-exclusive access
 - Google Analytics integration configured
 - PWA manifest + service worker (production-ready)
 - Admin credentials: admin / snowman2024 (email: snowmanprogrock@gmail.com)
@@ -101,6 +102,7 @@ Preferred communication style: Simple, everyday language.
 - products: Store products (name, description, price in cents, type, stock, images)
 - orders: Customer orders (linked to user_profile if authenticated, order details, payment info)
 - order_items: Items in each order
+- download_tokens: Protected download tokens (orderItemId, productId, userId, token, downloadsUsed, maxDownloads=5, expiresAt)
 - comments: User comments on news and products (pending approval by admin)
 ```
 

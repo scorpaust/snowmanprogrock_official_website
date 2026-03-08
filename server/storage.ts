@@ -27,6 +27,8 @@ import {
   type InsertComment,
   type BandMember,
   type InsertBandMember,
+  type DownloadToken,
+  type InsertDownloadToken,
   users,
   userProfiles,
   news,
@@ -41,6 +43,7 @@ import {
   orderItems,
   comments,
   bandMembers,
+  downloadTokens,
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { db } from "./db";
@@ -144,6 +147,13 @@ export interface IStorage {
   deleteUserProfile(id: string): Promise<boolean>;
   incrementUserProfileComments(id: string): Promise<UserProfile | undefined>;
   getOrdersByUserProfileId(userId: string): Promise<Order[]>;
+
+  // Download Tokens
+  createDownloadToken(token: InsertDownloadToken): Promise<DownloadToken>;
+  getDownloadTokenByToken(token: string): Promise<DownloadToken | undefined>;
+  getDownloadTokensByOrderItem(orderItemId: string): Promise<DownloadToken[]>;
+  getDownloadTokensByUser(userId: string): Promise<DownloadToken[]>;
+  incrementDownloadCount(id: string): Promise<DownloadToken | undefined>;
 }
 
 export class MemStorage implements IStorage {
@@ -771,6 +781,41 @@ export class MemStorage implements IStorage {
   async getOrdersByUserProfileId(userId: string): Promise<Order[]> {
     return Array.from(this.orders.values()).filter(o => o.userId === userId);
   }
+
+  private downloadTokensMap: Map<string, DownloadToken> = new Map();
+
+  async createDownloadToken(token: InsertDownloadToken): Promise<DownloadToken> {
+    const id = randomUUID();
+    const newToken: DownloadToken = {
+      id,
+      ...token,
+      downloadsUsed: token.downloadsUsed ?? 0,
+      maxDownloads: token.maxDownloads ?? 5,
+      createdAt: new Date(),
+    } as DownloadToken;
+    this.downloadTokensMap.set(id, newToken);
+    return newToken;
+  }
+
+  async getDownloadTokenByToken(token: string): Promise<DownloadToken | undefined> {
+    return Array.from(this.downloadTokensMap.values()).find(t => t.token === token);
+  }
+
+  async getDownloadTokensByOrderItem(orderItemId: string): Promise<DownloadToken[]> {
+    return Array.from(this.downloadTokensMap.values()).filter(t => t.orderItemId === orderItemId);
+  }
+
+  async getDownloadTokensByUser(userId: string): Promise<DownloadToken[]> {
+    return Array.from(this.downloadTokensMap.values()).filter(t => t.userId === userId);
+  }
+
+  async incrementDownloadCount(id: string): Promise<DownloadToken | undefined> {
+    const existing = this.downloadTokensMap.get(id);
+    if (!existing) return undefined;
+    const updated = { ...existing, downloadsUsed: existing.downloadsUsed + 1 };
+    this.downloadTokensMap.set(id, updated);
+    return updated;
+  }
 }
 
 export class DbStorage implements IStorage {
@@ -1395,6 +1440,34 @@ export class DbStorage implements IStorage {
 
   async getOrdersByUserProfileId(userId: string): Promise<Order[]> {
     return db.select().from(orders).where(eq(orders.userId, userId)).orderBy(desc(orders.createdAt));
+  }
+
+  async createDownloadToken(token: InsertDownloadToken): Promise<DownloadToken> {
+    const result = await db.insert(downloadTokens).values(token).returning();
+    return result[0];
+  }
+
+  async getDownloadTokenByToken(token: string): Promise<DownloadToken | undefined> {
+    const result = await db.select().from(downloadTokens).where(eq(downloadTokens.token, token));
+    return result[0];
+  }
+
+  async getDownloadTokensByOrderItem(orderItemId: string): Promise<DownloadToken[]> {
+    return db.select().from(downloadTokens).where(eq(downloadTokens.orderItemId, orderItemId));
+  }
+
+  async getDownloadTokensByUser(userId: string): Promise<DownloadToken[]> {
+    return db.select().from(downloadTokens).where(eq(downloadTokens.userId, userId)).orderBy(desc(downloadTokens.createdAt));
+  }
+
+  async incrementDownloadCount(id: string): Promise<DownloadToken | undefined> {
+    const existing = await db.select().from(downloadTokens).where(eq(downloadTokens.id, id));
+    if (!existing[0]) return undefined;
+    const result = await db.update(downloadTokens)
+      .set({ downloadsUsed: existing[0].downloadsUsed + 1 })
+      .where(eq(downloadTokens.id, id))
+      .returning();
+    return result[0];
   }
 }
 

@@ -36,6 +36,7 @@ const productFormSchema = z.object({
   images: z.array(z.string()).default([]),
   stock: z.number().int().min(0, "Stock não pode ser negativo").default(0),
   downloadUrl: z.string().optional(),
+  digitalFileUrl: z.string().optional(),
   isActive: z.number().int().min(0).max(1).default(1),
   featured: z.number().int().min(0).max(1).default(0),
 });
@@ -60,6 +61,7 @@ type Product = {
   images: string[];
   stock: number;
   downloadUrl: string | null;
+  digitalFileUrl: string | null;
   isActive: number;
   featured: number;
   createdAt: string;
@@ -106,6 +108,7 @@ export default function ProductsManagement() {
       images: [],
       stock: 0,
       downloadUrl: "",
+      digitalFileUrl: "",
       isActive: 1,
       featured: 0,
     },
@@ -124,6 +127,7 @@ export default function ProductsManagement() {
         descriptionEs: data.descriptionEs || null,
         descriptionDe: data.descriptionDe || null,
         downloadUrl: data.downloadUrl || null,
+        digitalFileUrl: data.digitalFileUrl || null,
       };
       const response = await apiRequest("POST", "/api/products", payload);
       return response.json();
@@ -152,6 +156,7 @@ export default function ProductsManagement() {
         descriptionEs: data.descriptionEs || null,
         descriptionDe: data.descriptionDe || null,
         downloadUrl: data.downloadUrl || null,
+        digitalFileUrl: data.digitalFileUrl || null,
       };
       const response = await apiRequest("PATCH", `/api/products/${id}`, payload);
       return response.json();
@@ -207,6 +212,7 @@ export default function ProductsManagement() {
       images: product.images,
       stock: product.stock,
       downloadUrl: product.downloadUrl || "",
+      digitalFileUrl: product.digitalFileUrl || "",
       isActive: product.isActive,
       featured: product.featured,
     });
@@ -238,6 +244,33 @@ export default function ProductsManagement() {
     }
     const data = await response.json();
     return { method: "PUT" as const, url: data.uploadURL };
+  };
+
+  const handleGetDigitalUploadURL = async () => {
+    const response = await apiRequest("POST", "/api/objects/upload-digital", {});
+    if (!response.ok) {
+      throw new Error("Failed to get digital upload URL");
+    }
+    const data = await response.json();
+    return { method: "PUT" as const, url: data.url };
+  };
+
+  const handleDigitalFileUploadComplete = async (result: any) => {
+    if (result.successful && result.successful.length > 0) {
+      const upload = result.successful[0];
+      const uploadURL = upload.uploadURL;
+      if (uploadURL) {
+        const normalizeResponse = await apiRequest("POST", "/api/objects/normalize-path", {
+          uploadURL,
+        });
+        const { objectPath } = await normalizeResponse.json();
+        form.setValue("digitalFileUrl", objectPath);
+        toast({
+          title: "Ficheiro digital carregado",
+          description: "O ficheiro foi carregado com sucesso",
+        });
+      }
+    }
   };
 
   const handleImageUploadComplete = async (result: any) => {
@@ -480,19 +513,56 @@ export default function ProductsManagement() {
                     )}
                   />
 
-                  <FormField
-                    control={form.control}
-                    name="downloadUrl"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>URL de Download (produtos digitais)</FormLabel>
-                        <FormControl>
-                          <Input {...field} data-testid="input-download-url" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  {form.watch("type") === "digital" && (
+                    <div className="space-y-4 p-4 border rounded-md bg-muted/30">
+                      <FormLabel>Ficheiro Digital (protegido)</FormLabel>
+                      <p className="text-sm text-muted-foreground">
+                        Carregue o ficheiro digital (ZIP, MP3, FLAC, WAV, etc.) que será disponibilizado apenas aos compradores.
+                      </p>
+                      {form.watch("digitalFileUrl") ? (
+                        <div className="flex items-center gap-2">
+                          <Badge>Ficheiro carregado</Badge>
+                          <span className="text-sm text-muted-foreground truncate max-w-[200px]">
+                            {form.watch("digitalFileUrl")}
+                          </span>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => form.setValue("digitalFileUrl", "")}
+                            data-testid="button-remove-digital-file"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <ObjectUploader
+                          onGetUploadParameters={handleGetDigitalUploadURL}
+                          onComplete={handleDigitalFileUploadComplete}
+                          maxNumberOfFiles={1}
+                          accept={[".zip", ".mp3", ".flac", ".wav", ".aac", ".ogg", ".m4a", "audio/*", "application/zip", "application/x-zip-compressed"]}
+                          data-testid="button-upload-digital-file"
+                        >
+                          <Upload className="h-4 w-4 mr-2" />
+                          Carregar Ficheiro Digital
+                        </ObjectUploader>
+                      )}
+                      <FormField
+                        control={form.control}
+                        name="downloadUrl"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>URL de Download Externo (alternativa)</FormLabel>
+                            <FormControl>
+                              <Input {...field} placeholder="https://..." data-testid="input-download-url" />
+                            </FormControl>
+                            <p className="text-xs text-muted-foreground">Opcional: URL externo se não carregar ficheiro acima</p>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  )}
 
                   <div className="space-y-2">
                     <FormLabel>Imagens do Produto</FormLabel>
@@ -826,19 +896,56 @@ export default function ProductsManagement() {
                               )}
                             />
 
-                            <FormField
-                              control={form.control}
-                              name="downloadUrl"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>URL de Download (produtos digitais)</FormLabel>
-                                  <FormControl>
-                                    <Input {...field} />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
+                            {form.watch("type") === "digital" && (
+                              <div className="space-y-4 p-4 border rounded-md bg-muted/30">
+                                <FormLabel>Ficheiro Digital (protegido)</FormLabel>
+                                <p className="text-sm text-muted-foreground">
+                                  Carregue o ficheiro digital que será disponibilizado apenas aos compradores.
+                                </p>
+                                {form.watch("digitalFileUrl") ? (
+                                  <div className="flex items-center gap-2">
+                                    <Badge>Ficheiro carregado</Badge>
+                                    <span className="text-sm text-muted-foreground truncate max-w-[200px]">
+                                      {form.watch("digitalFileUrl")}
+                                    </span>
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      size="icon"
+                                      onClick={() => form.setValue("digitalFileUrl", "")}
+                                      data-testid="button-edit-remove-digital-file"
+                                    >
+                                      <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                  </div>
+                                ) : (
+                                  <ObjectUploader
+                                    onGetUploadParameters={handleGetDigitalUploadURL}
+                                    onComplete={handleDigitalFileUploadComplete}
+                                    maxNumberOfFiles={1}
+                                    accept={[".zip", ".mp3", ".flac", ".wav", ".aac", ".ogg", ".m4a", "audio/*", "application/zip", "application/x-zip-compressed"]}
+                                    data-testid="button-edit-upload-digital-file"
+                                  >
+                                    <Upload className="h-4 w-4 mr-2" />
+                                    Carregar Ficheiro Digital
+                                  </ObjectUploader>
+                                )}
+                                <FormField
+                                  control={form.control}
+                                  name="downloadUrl"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel>URL de Download Externo (alternativa)</FormLabel>
+                                      <FormControl>
+                                        <Input {...field} placeholder="https://..." />
+                                      </FormControl>
+                                      <p className="text-xs text-muted-foreground">Opcional: URL externo se não carregar ficheiro acima</p>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+                              </div>
+                            )}
 
                             <div className="space-y-2">
                               <FormLabel>Imagens do Produto</FormLabel>
