@@ -1074,6 +1074,67 @@ export class DbStorage implements IStorage {
         ]);
       }
     }
+
+    const existingMembers = await db.select().from(bandMembers).limit(1);
+    if (existingMembers.length === 0) {
+      await db.insert(bandMembers).values([
+        {
+          name: "Pedro Miguel Fernandes",
+          role: "Guitarra e Voz",
+          roleEn: "Guitar and Vocals",
+          roleFr: "Guitare et Voix",
+          roleEs: "Guitarra y Voz",
+          roleDe: "Gitarre und Gesang",
+          image: "/objects/uploads/68d300af-ce49-479e-8773-543ef1e4c373",
+          displayOrder: 0,
+          isActive: 1,
+        },
+        {
+          name: "Dinis Miguel Costa",
+          role: "Teclados",
+          roleEn: "Keyboards",
+          roleFr: "Claviers",
+          roleEs: "Teclados",
+          roleDe: "Keyboards",
+          image: "/objects/uploads/a66179e7-c49b-4485-bf62-e4505d6b1104",
+          displayOrder: 1,
+          isActive: 1,
+        },
+        {
+          name: "David Vieira",
+          role: "Bateria",
+          roleEn: "Drums",
+          roleFr: "Batterie",
+          roleEs: "Batería",
+          roleDe: "Schlagzeug",
+          image: "/objects/uploads/bb95d328-1032-49dd-aa98-3ac7d45ba9bb",
+          displayOrder: 3,
+          isActive: 1,
+        },
+        {
+          name: "Ruydabass",
+          role: "Baixo",
+          roleEn: "Bass",
+          roleFr: "Basse",
+          roleEs: "Bajo",
+          roleDe: "Bass",
+          image: "/objects/uploads/b4cd97a4-a494-498a-bd39-7b3276f40250",
+          displayOrder: 4,
+          isActive: 1,
+        },
+        {
+          name: "João Nero",
+          role: "Guitarra Ritmo",
+          roleEn: "Rhythm Guitar",
+          roleFr: "Guitare Rythmique",
+          roleEs: "Guitarra Rítmica",
+          roleDe: "Rhythmusgitarre",
+          image: "/objects/uploads/b6c58d8e-cdbd-481b-b8fb-8bd669169f56",
+          displayOrder: 5,
+          isActive: 1,
+        },
+      ]);
+    }
   }
 
   async getAllUsers(): Promise<User[]> {
