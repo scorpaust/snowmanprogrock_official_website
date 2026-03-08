@@ -48,7 +48,7 @@ import {
 import { randomUUID } from "crypto";
 import bcrypt from "bcrypt";
 import { db } from "./db";
-import { eq, desc, and } from "drizzle-orm";
+import { eq, desc, and, sql } from "drizzle-orm";
 
 export interface IStorage {
   // Users
@@ -838,19 +838,41 @@ export class DbStorage implements IStorage {
       console.error("Error seeding admin user:", err);
     }
 
+    const SEED_VERSION = 2;
+    const needsReseed = await this.checkSeedVersion(SEED_VERSION);
+
+    if (needsReseed) {
+      console.log(`Reseeding database to version ${SEED_VERSION}...`);
+      await db.delete(bandMembers);
+      await db.delete(downloadTokens);
+      await db.delete(orderItems);
+      await db.delete(orders);
+      await db.delete(products);
+      await db.delete(categories);
+      await db.delete(gallery);
+      await db.delete(events);
+      await db.delete(news);
+      await db.delete(spotifySettings);
+      await db.delete(biography);
+    }
+
     const existingBio = await db.select().from(biography).limit(1);
     if (existingBio.length === 0) {
       await db.insert(biography).values({
-        content: "Snowman é uma banda de rock progressivo portuguesa formada em Lisboa. Com uma abordagem única que combina complexidade rítmica, atmosferas envolventes e uma energia vibrante, a banda tem conquistado palcos e corações por todo o país.",
-        contentEn: "Snowman is a Portuguese progressive rock band formed in Lisbon. With a unique approach that combines rhythmic complexity, immersive atmospheres and vibrant energy, the band has been conquering stages and hearts across the country.",
+        content: "Nascidos em Portugal e movidos pela paixão do rock progressivo, os Snowman criam paisagens sonoras intensas e emotivas, inspiradas por Pink Floyd, Genesis, Porcupine Tree e Camel. Liderados por Pedro Fernandes (voz, guitarra) e Dinis Costa (teclados), e acompanhados por músicos convidados como David Vieira, Ruydabass, João Nero e Cristiana Gomes, o projeto cresce desde 2018. Com discos como In a Better Place (2022) e Transient Reality (2024), afirmaram-se como uma das vozes mais autênticas do prog rock nacional. Após o aclamado single Hand in Hand (Toda a Palavra é Corpo), 2026 marca um novo capítulo com o lançamento de Another Cigarette, aprofundando ainda mais a sua identidade sonora única.",
+        contentEn: "Born in Portugal and driven by a passion for progressive rock, Snowman crafts intense and emotional soundscapes inspired by Pink Floyd, Genesis, Porcupine Tree, and Camel. Led by Pedro Fernandes (vocals, guitar) and Dinis Costa (keyboards), and joined by guest musicians like David Vieira, Ruydabass, João Nero, and Cristiana Gomes, the project has been growing since 2018. With albums like In a Better Place (2022) and Transient Reality (2024), they've become one of Portugal's most authentic prog rock voices. Following the acclaimed single Hand in Hand (Toda a Palavra é Corpo), 2026 marks a new chapter with Another Cigarette, deepening their unique sonic identity.",
+        contentFr: "Nés au Portugal et portés par la passion du rock progressif, Snowman tisse des paysages sonores intenses et émouvants, inspirés par Pink Floyd, Genesis, Porcupine Tree et Camel. Mené par Pedro Fernandes (voix, guitare) et Dinis Costa (claviers), avec des musiciens invités comme David Vieira, Ruydabass, João Nero et Cristiana Gomes, le projet évolue depuis 2018. Avec les albums In a Better Place (2022) et Transient Reality (2024), Snowman s'impose comme l'une des voix les plus authentiques du prog rock portugais. Après le single acclamé Hand in Hand (Toda a Palavra é Corpo), 2026 marque un nouveau chapitre avec Another Cigarette, approfondissant leur identité sonore unique.",
+        contentEs: "Nacidos en Portugal y movidos por la pasión del rock progresivo, Snowman crea paisajes sonoros intensos y emotivos, inspirados en Pink Floyd, Genesis, Porcupine Tree y Camel. Liderados por Pedro Fernandes (voz, guitarra) y Dinis Costa (teclados), junto a músicos invitados como David Vieira, Ruydabass, João Nero y Cristiana Gomes, el proyecto crece desde 2018. Con álbumes como In a Better Place (2022) y Transient Reality (2024), se han consolidado como una de las voces más auténticas del prog rock portugués. Tras el aclamado sencillo Hand in Hand (Toda la Palabra es Cuerpo), 2026 marca un nuevo capítulo con el lanzamiento de Another Cigarette, una obra que profundiza su identidad sonora única.",
+        contentDe: "Snowman, gegründet in Portugal, lässt sich von der Leidenschaft für Progressive Rock antreiben und schafft intensive, emotionale Klanglandschaften, inspiriert von Pink Floyd, Genesis, Porcupine Tree und Camel. Geleitet von Pedro Fernandes (Gesang, Gitarre) und Dinis Costa (Keyboards), unterstützt von Gästen wie David Vieira, Ruydabass, João Nero und Cristiana Gomes, wächst das Projekt seit 2018 stetig. Mit Alben wie In a Better Place (2022) und Transient Reality (2024) etablierte sich Snowman als eine der authentischsten Stimmen des portugiesischen Prog Rocks. Nach der gefeierten Single Hand in Hand (Toda a Palavra é Corpo) eröffnet 2026 mit Another Cigarette ein neues Kapitel in ihrer klanglichen Reise.",
+        bandImage: "/objects/uploads/3f418012-4c9f-415a-a19d-d8324c79f10e",
       });
     }
 
     const existingSpotify = await db.select().from(spotifySettings).limit(1);
     if (existingSpotify.length === 0) {
       await db.insert(spotifySettings).values({
-        embedUrl: "https://open.spotify.com/embed/album/7MXVkk9YMctZqd1Srtv4MB",
-        displayType: "player",
+        embedUrl: "https://open.spotify.com/embed/album/619NixBSvlPPEH50CZqgM1",
+        displayType: "banner",
         isActive: 1,
       });
     }
@@ -859,31 +881,20 @@ export class DbStorage implements IStorage {
     if (existingNews.length === 0) {
       await db.insert(news).values([
         {
-          title: "Novo Álbum 'Horizons' Lançado",
-          titleEn: "New Album 'Horizons' Released",
-          content: "Estamos muito felizes em anunciar o lançamento do nosso novo álbum 'Horizons'. Este trabalho representa uma nova direção sonora para a banda, explorando territórios mais experimentais.",
-          contentEn: "We are thrilled to announce the release of our new album 'Horizons'. This work represents a new sonic direction for the band, exploring more experimental territories.",
-          images: ["https://images.unsplash.com/photo-1619983081563-430f63602796?w=800&q=80"],
-          publishedAt: new Date(),
+          title: `"Another Cigarette": o novo fôlego introspectivo dos Snowman`,
+          titleEn: `"Another Cigarette" marks a new chapter for Snowman`,
+          titleFr: `"Another Cigarette" : le nouveau souffle introspectif de Snowman`,
+          titleEs: `"Another Cigarette": el nuevo impulso introspectivo de Snowman`,
+          titleDe: `„Another Cigarette": der neue introspektive Atemzug von Snowman`,
+          content: `A banda portuguesa Snowman, conhecida pelas suas paisagens sonoras atmosféricas e progressivas, acaba de lançar o single "Another Cigarette". A canção, escrita por Pedro Miguel Fernandes e produzida por André Eusébio (Lemon Drops Media), mergulha num universo melancólico e introspectivo, onde vício, memória e identidade se entrelaçam. O videoclipe oficial já está disponível e acompanha o lançamento do tema, que marca uma nova fase criativa para a banda, com uma abordagem mais direta, mas fiel às suas raízes progressivas. Com três álbuns no currículo, os Snowman continuam a explorar a fragilidade humana através da música.`,
+          contentEn: `Portuguese band Snowman, known for their atmospheric and progressive soundscapes, have just released their new single "Another Cigarette". Written by Pedro Miguel Fernandes and produced by André Eusébio (Lemon Drops Media), the track dives into a melancholic, introspective world where addiction, memory, and identity collide. The official video is now available and marks a new creative chapter for the band — more direct, yet true to their progressive roots. With three albums already released, Snowman continue to explore human fragility through emotionally charged music.`,
+          contentFr: `Le groupe portugais Snowman, connu pour ses paysages sonores atmosphériques et progressifs, vient de sortir le single "Another Cigarette". Écrite par Pedro Miguel Fernandes et produite par André Eusébio (Lemon Drops Media), la chanson plonge dans un univers mélancolique et introspectif, où se mêlent dépendance, mémoire et identité. Le clip officiel est désormais disponible et accompagne la sortie du morceau, qui marque une nouvelle phase créative pour le groupe, avec une approche plus directe tout en restant fidèle à ses racines progressives. Avec trois albums à leur actif, Snowman continue d'explorer la fragilité humaine à travers la musique.`,
+          contentEs: `La banda portuguesa Snowman, conocida por sus paisajes sonoros atmosféricos y progresivos, acaba de lanzar el single "Another Cigarette". Escrita por Pedro Miguel Fernandes y producida por André Eusébio (Lemon Drops Media), la canción se sumerge en un universo melancólico e introspectivo, donde se entrelazan la adicción, la memoria y la identidad. El videoclip oficial ya está disponible y acompaña el lanzamiento del tema, que marca una nueva etapa creativa para la banda, con un enfoque más directo, pero fiel a sus raíces progresivas. Con tres discos en su trayectoria, Snowman sigue explorando la fragilidad humana a través de la música.`,
+          contentDe: `Die portugiesische Band Snowman, bekannt für ihre atmosphärischen und progressiven Klanglandschaften, hat soeben ihre neue Single „Another Cigarette" veröffentlicht. Der Song, geschrieben von Pedro Miguel Fernandes und produziert von André Eusébio (Lemon Drops Media), taucht ein in eine melancholische und introspektive Welt, in der sich Sucht, Erinnerung und Identität miteinander verweben. Das offizielle Musikvideo ist jetzt verfügbar und begleitet die Veröffentlichung des Titels, der eine neue kreative Phase der Band einläutet – direkter, aber dennoch treu zu ihren progressiven Wurzeln. Mit drei Alben im Gepäck erforscht Snowman weiterhin die Zerbrechlichkeit des menschlichen Daseins durch Musik.`,
+          images: ["/objects/uploads/a8583f67-e2e1-4ac3-805a-178e1011741d"],
+          videoUrls: ["https://youtu.be/UnXDFIrEAUQ?si=VO65rLj7wyukOVOc"],
+          publishedAt: new Date('2026-02-09T23:49:54.366Z'),
           featured: 1,
-        },
-        {
-          title: "Tour Europeia Anunciada",
-          titleEn: "European Tour Announced",
-          content: "A Snowman anuncia a sua primeira tour europeia! Vamos passar por várias cidades icónicas apresentando o novo álbum 'Horizons' ao vivo.",
-          contentEn: "Snowman announces its first European tour! We'll be visiting several iconic cities presenting the new album 'Horizons' live.",
-          images: ["https://images.unsplash.com/photo-1540039155733-5fca0d5f428e?w=800&q=80"],
-          publishedAt: new Date(),
-          featured: 0,
-        },
-        {
-          title: "Entrevista na Rock Magazine",
-          titleEn: "Interview in Rock Magazine",
-          content: "Confira a nossa entrevista exclusiva na Rock Magazine onde falamos sobre o processo criativo por trás do novo álbum e os desafios de ser uma banda de prog rock em Portugal.",
-          contentEn: "Check out our exclusive interview in Rock Magazine where we talk about the creative process behind the new album and the challenges of being a prog rock band in Portugal.",
-          images: ["https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=800&q=80"],
-          publishedAt: new Date(),
-          featured: 0,
         },
       ]);
     }
@@ -892,26 +903,15 @@ export class DbStorage implements IStorage {
     if (existingEvents.length === 0) {
       await db.insert(events).values([
         {
-          title: "Snowman Live em Lisboa",
+          title: "SNOWMAN – Uma Viagem Pelo Som",
           titleEn: "Snowman Live in Lisbon",
-          venue: "LAV - Lisboa ao Vivo",
-          city: "Lisboa",
+          venue: "Cine Incrível",
+          city: "Almada",
           country: "Portugal",
-          eventDate: new Date('2024-06-15T21:00:00'),
-          description: "Apresentação do novo álbum 'Horizons' em Lisboa",
+          eventDate: new Date('2025-08-22T20:00:00'),
+          description: "Pela primeira vez ao vivo, os Snowman sobem ao palco para um concerto único, onde apresentam os grandes momentos da sua discografia — desde a introspeção de Inner Light, passando pela densidade emocional de Transient Reality, até à poesia sonora de Hand in Hand (Toda a Palavra é Corpo).",
           descriptionEn: "Presentation of the new album 'Horizons' in Lisbon",
-          ticketLink: "https://example.com/tickets",
-        },
-        {
-          title: "Festival RockFest Porto",
-          titleEn: "RockFest Porto Festival",
-          venue: "Hard Club",
-          city: "Porto",
-          country: "Portugal",
-          eventDate: new Date('2024-07-20T20:00:00'),
-          description: "Participação no Festival RockFest Porto",
-          descriptionEn: "Participation in RockFest Porto Festival",
-          ticketLink: "https://example.com/tickets",
+          ticketLink: "https://www.seetickets.com/pt/event/snowman-rock-progressivo/cine-incrivel/3458501",
         },
       ]);
     }
@@ -921,44 +921,43 @@ export class DbStorage implements IStorage {
       await db.insert(gallery).values([
         {
           type: 'photo',
-          url: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&q=80',
-          caption: 'Live in Lisbon 2024',
-          captionEn: 'Live in Lisbon 2024',
+          url: '/objects/uploads/2359cedf-2582-4a77-b92b-4f17f857e59f',
+          caption: 'Gravação "In a Better Place" (2020). Foto de Daniel Pêgo.',
+          captionEn: 'Recording of In a Better Place (2020). Photo by Daniel Pêgo.',
+          captionFr: 'Enregistrement de In a Better Place (2020). Photo de Daniel Pêgo.',
+          captionEs: 'Grabación de In a Better Place (2020). Foto de Daniel Pêgo.',
+          captionDe: 'Aufnahme von In a Better Place (2020). Foto von Daniel Pêgo.',
         },
         {
           type: 'photo',
-          url: 'https://images.unsplash.com/photo-1501612780327-45045538702b?w=800&q=80',
-          caption: 'Studio Session',
-          captionEn: 'Studio Session',
+          url: '/objects/uploads/02caf81e-a381-4e52-9190-cf0bb64156b7',
+          caption: 'André Eusébio (Produtor). Gravação "In a Better Place" (2020). Foto de Daniel Pêgo.',
+          captionEn: "André Eusébio (Producer). Recording of 'In a Better Place' (2020). Photo by Daniel Pêgo.",
+          captionFr: "André Eusébio (Producteur). Enregistrement de « In a Better Place » (2020). Photo de Daniel Pêgo.",
+          captionEs: 'André Eusébio (Productor). Grabación de "In a Better Place" (2020). Foto de Daniel Pêgo.',
+          captionDe: 'André Eusébio (Produzent). Aufnahme von „In a Better Place" (2020). Foto von Daniel Pêgo.',
         },
         {
           type: 'photo',
-          url: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&q=80',
-          caption: 'Backstage Moments',
-          captionEn: 'Backstage Moments',
+          url: '/objects/uploads/cdc24186-7391-44fe-92f8-ace28a143280',
+          caption: "Dinis Costa. Gravação 'In a Better Place' (2020). Foto de Daniel Pêgo.",
+          captionEn: 'Dinis Costa. Recording of In a Better Place (2020). Photo by Daniel Pêgo.',
+          captionFr: 'Dinis Costa. Enregistrement de In a Better Place (2020). Photo de Daniel Pêgo.',
+          captionEs: 'Dinis Costa. Grabación de In a Better Place (2020). Foto de Daniel Pêgo.',
+          captionDe: 'Dinis Costa. Aufnahme von In a Better Place (2020). Foto von Daniel Pêgo.',
         },
         {
           type: 'photo',
-          url: 'https://images.unsplash.com/photo-1511735111819-9a3f7709049c?w=800&q=80',
-          caption: 'Album Recording',
-          captionEn: 'Album Recording',
-        },
-        {
-          type: 'photo',
-          url: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=800&q=80',
-          caption: 'Concert Night',
-          captionEn: 'Concert Night',
-        },
-        {
-          type: 'photo',
-          url: 'https://images.unsplash.com/photo-1524368535928-5b5e00ddc76b?w=800&q=80',
-          caption: 'On Tour',
-          captionEn: 'On Tour',
+          url: '/objects/uploads/ca910d8a-59a4-4043-803d-9be8f6d92ab4',
+          caption: "Ruydabass. Gravação 'In a Better Place' (2020). Foto de Daniel Pêgo.",
+          captionEn: 'Ruydabass. Recording of In a Better Place (2020). Photo by Daniel Pêgo.',
+          captionFr: 'Ruydabass. Enregistrement de In a Better Place (2020). Photo de Daniel Pêgo.',
+          captionEs: 'Ruydabass. Grabación de In a Better Place (2020). Foto de Daniel Pêgo.',
+          captionDe: 'Aufnahme von In a Better Place (2020). Foto von Daniel Pêgo.',
         },
       ]);
     }
 
-    // E-commerce seed data
     const existingCategories = await db.select().from(categories).limit(1);
     if (existingCategories.length === 0) {
       await db.insert(categories).values([
@@ -994,82 +993,65 @@ export class DbStorage implements IStorage {
     const existingProducts = await db.select().from(products).limit(1);
     if (existingProducts.length === 0) {
       const discografiaCategory = await db.select().from(categories).where(eq(categories.slug, 'discografia')).limit(1);
-      const merchCategory = await db.select().from(categories).where(eq(categories.slug, 'merch')).limit(1);
-      
       const discografiaId = discografiaCategory[0]?.id;
-      const merchId = merchCategory[0]?.id;
 
-      if (discografiaId && merchId) {
+      if (discografiaId) {
         await db.insert(products).values([
           {
-            name: "Horizons - Álbum Digital",
-            nameEn: "Horizons - Digital Album",
-            description: "Álbum completo 'Horizons' em formato digital. Inclui 10 faixas originais.",
-            descriptionEn: "Complete 'Horizons' album in digital format. Includes 10 original tracks.",
-            price: 999, // €9.99
+            name: "In a Better Place - CD Físico",
+            nameEn: "In a Better Place – Physical CD",
+            description: "O aclamado álbum de 2022 dos Snowman agora disponível em formato físico. Um mergulho emocional no universo do rock progressivo português, com temas que exploram perda, esperança e transformação. Inclui arte gráfica exclusiva.",
+            descriptionEn: "Snowman's acclaimed 2022 album is now available in physical format. An emotional journey through Portuguese progressive rock, exploring themes of loss, hope, and transformation. Includes exclusive artwork.",
+            price: 1299,
+            type: "physical",
+            categoryId: discografiaId,
+            images: ["/objects/uploads/af23b4e4-6999-440a-9e6f-33cd69457806"],
+            stock: 4,
+            isActive: 1,
+            featured: 1,
+          },
+          {
+            name: "Transient Reality – CD Físico",
+            nameEn: "Transient Reality – Physical CD",
+            description: `"Transient Reality" mergulha no universo complexo da saúde mental com empatia e sensibilidade musical. Cada faixa é uma reflexão emocional sobre a fragilidade humana e os desafios psicológicos do nosso tempo. Agora disponível em formato físico, com arte gráfica exclusiva.`,
+            descriptionEn: `"Transient Reality" delves into the complex world of mental health with empathy and musical sensitivity. Each track is a deep emotional reflection on human fragility and psychological struggles. Now available in physical format, including exclusive artwork.`,
+            price: 499,
+            type: "physical",
+            categoryId: discografiaId,
+            images: ["/objects/uploads/e123ee54-d591-46e9-b7af-4b4d18139d36"],
+            stock: 23,
+            isActive: 1,
+            featured: 1,
+          },
+          {
+            name: "Hand in Hand (Toda a Palavra é Corpo)",
+            nameEn: "Hand in Hand (Toda a Palavra é Corpo)",
+            description: `Snowman regressa com "Hand in Hand (Toda a Palavra é Corpo)", uma fusão assombrosamente poética de rock progressivo e palavra falada. Com letras que tocam a alma de Pedro Miguel Fernandes e a voz evocativa de Inês Antunes (falafogo), o tema oferece uma viagem emocional pela linguagem, intimidade e identidade — onde cada palavra se torna corpo e cada som carrega peso.\nConstruída com texturas atmosféricas e ambição cinematográfica, a faixa desenrola-se em camadas, revelando novas profundidades emocionais a cada escuta. Produzida, misturada e masterizada por André Eusébio na Lemon Drops Media, a sonoridade é nítida, imersiva e sem concessões.`,
+            descriptionEn: `Snowman returns with "Hand in Hand (Toda a Palavra é Corpo)," a hauntingly poetic fusion of progressive rock and spoken word. With soul-stirring lyrics by Pedro Miguel Fernandes and the evocative voice of Inês Antunes (falafogo), the track delivers an emotional journey through language, intimacy, and identity — where every word becomes body, and every sound carries weight.\n\nCrafted with atmospheric textures and cinematic ambition, the track unfolds in layers, revealing new emotional depths with every listen. Produced, mixed, and mastered by André Eusébio at Lemon Drops Media, the sound is crisp, immersive, and uncompromising.`,
+            price: 99,
             type: "digital",
             categoryId: discografiaId,
-            images: ["https://images.unsplash.com/photo-1619983081563-430f63602796?w=800&q=80"],
+            images: ["/objects/uploads/ef621867-2ce8-429e-b4a8-880f284e3e3f"],
             stock: 0,
-            downloadUrl: "https://example.com/download/horizons",
-            isActive: 1,
-            featured: 1,
-          },
-          {
-            name: "Horizons - CD Físico",
-            nameEn: "Horizons - Physical CD",
-            description: "CD físico do álbum 'Horizons' com encarte deluxe de 16 páginas.",
-            descriptionEn: "Physical CD of 'Horizons' album with 16-page deluxe booklet.",
-            price: 1499, // €14.99
-            type: "physical",
-            categoryId: discografiaId,
-            images: ["https://images.unsplash.com/photo-1619983081563-430f63602796?w=800&q=80"],
-            stock: 50,
-            downloadUrl: null,
-            isActive: 1,
-            featured: 1,
-          },
-          {
-            name: "Horizons - Vinil Limitado",
-            nameEn: "Horizons - Limited Vinyl",
-            description: "Edição limitada em vinil de 180g. Apenas 300 cópias numeradas.",
-            descriptionEn: "Limited edition 180g vinyl. Only 300 numbered copies.",
-            price: 2999, // €29.99
-            type: "physical",
-            categoryId: discografiaId,
-            images: ["https://images.unsplash.com/photo-1619983081563-430f63602796?w=800&q=80"],
-            stock: 25,
-            downloadUrl: null,
-            isActive: 1,
-            featured: 1,
-          },
-          {
-            name: "T-Shirt Oficial Snowman",
-            nameEn: "Official Snowman T-Shirt",
-            description: "Camiseta 100% algodão com logo da banda. Disponível em várias cores.",
-            descriptionEn: "100% cotton t-shirt with band logo. Available in multiple colors.",
-            price: 1999, // €19.99
-            type: "physical",
-            categoryId: merchId,
-            images: ["https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800&q=80"],
-            stock: 100,
-            downloadUrl: null,
+            downloadUrl: "https://example.com/test-album.zip",
+            digitalFileUrl: "/objects/uploads/8344da15-7b32-4694-9517-0c241d0870e1",
             isActive: 1,
             featured: 0,
           },
           {
-            name: "Poster Tour 2024",
-            nameEn: "2024 Tour Poster",
-            description: "Poster oficial da Tour Europeia 2024. Tamanho A2 (42x59cm).",
-            descriptionEn: "Official 2024 European Tour poster. A2 size (42x59cm).",
-            price: 899, // €8.99
-            type: "physical",
-            categoryId: merchId,
-            images: ["https://images.unsplash.com/photo-1611171711912-e0e5a28d1d49?w=800&q=80"],
-            stock: 75,
-            downloadUrl: null,
+            name: "Another Cigarette",
+            nameEn: "Another Cigarette",
+            description: `Snowman revelam "Another Cigarette", um single cru e intimista sobre fuga, vício e auto-reflexão. Com letras melancólicas e texturas cinematográficas, o tema mergulha profundamente nas lutas de uma alma perdida em busca de redenção — onde cada nota é um passo pela escuridão e cada palavra um grito por clareza.\n\nInterpretado por Snowman. Música e letra de Pedro Miguel Fernandes. Produzido por André Eusébio @ Lemon Drops Media. Vídeo de Daniel Pêgo. Agradecimentos especiais ao Skadi Bar.`,
+            descriptionEn: `Snowman unveil "Another Cigarette", a raw and intimate single about escape, addiction, and self-reflection. With melancholic lyrics and cinematic textures, the track dives deep into the struggles of a lost soul seeking redemption — where every note is a step through darkness, and every word a cry for clarity.\n\nPerformed by Snowman. Music and Lyrics by Pedro Miguel Fernandes. Produced by André Eusébio @ Lemon Drops Media. Video by Daniel Pêgo. Special Thanks to Skadi Bar.`,
+            price: 99,
+            type: "digital",
+            categoryId: discografiaId,
+            images: ["/objects/uploads/0beecaa0-840a-4459-b84a-81204f97047a"],
+            stock: 0,
+            downloadUrl: "https://example.com/test-album.zip",
+            digitalFileUrl: "/objects/uploads/d68bf6b3-bdf1-4bd8-8788-6fb016c98c16",
             isActive: 1,
-            featured: 0,
+            featured: 1,
           },
         ]);
       }
@@ -1135,6 +1117,31 @@ export class DbStorage implements IStorage {
         },
       ]);
     }
+
+    if (needsReseed) {
+      await this.setSeedVersion(SEED_VERSION);
+      console.log(`Database reseeded to version ${SEED_VERSION}`);
+    }
+  }
+
+  private async checkSeedVersion(targetVersion: number): Promise<boolean> {
+    try {
+      await db.execute(sql`CREATE TABLE IF NOT EXISTS seed_meta (key TEXT PRIMARY KEY, value TEXT)`);
+      const result = await db.execute(sql`SELECT value FROM seed_meta WHERE key = 'version'`);
+      const rows = result.rows as any[];
+      if (!rows || rows.length === 0) return true;
+      const currentVersion = parseInt(rows[0].value || '0');
+      return currentVersion < targetVersion;
+    } catch {
+      return true;
+    }
+  }
+
+  private async setSeedVersion(version: number): Promise<void> {
+    await db.execute(sql`
+      INSERT INTO seed_meta (key, value) VALUES ('version', ${String(version)})
+      ON CONFLICT (key) DO UPDATE SET value = ${String(version)};
+    `);
   }
 
   async getAllUsers(): Promise<User[]> {
