@@ -1,7 +1,6 @@
 // Service Worker for PWA offline support
-const CACHE_NAME = 'snowman-v3';
+const CACHE_NAME = 'snowman-v4';
 const urlsToCache = [
-  '/',
   '/manifest.json',
 ];
 
@@ -32,12 +31,10 @@ self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // Never intercept non-GET requests (POST/PATCH/DELETE for mutations)
   if (request.method !== 'GET') {
     return;
   }
 
-  // Never cache API calls or object storage files - always fetch fresh
   if (
     url.pathname.startsWith('/api/') ||
     url.pathname.startsWith('/objects/') ||
@@ -46,13 +43,33 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Never cache admin pages - always fetch fresh
   if (url.pathname.startsWith('/admin')) {
     return;
   }
 
-  // Only cache same-origin GET requests for static assets
   if (url.origin !== self.location.origin) {
+    return;
+  }
+
+  const acceptHeader = request.headers.get('accept') || '';
+  const isHtmlRequest =
+    request.mode === 'navigate' ||
+    acceptHeader.includes('text/html');
+
+  if (isHtmlRequest) {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          if (response && response.status === 200 && response.type === 'basic') {
+            const responseToCache = response.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(request, responseToCache);
+            });
+          }
+          return response;
+        })
+        .catch(() => caches.match(request).then((cached) => cached || caches.match('/')))
+    );
     return;
   }
 
@@ -77,7 +94,6 @@ self.addEventListener('fetch', (event) => {
   );
 });
 
-// Listen for messages from the client to clear cache or skip waiting
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
