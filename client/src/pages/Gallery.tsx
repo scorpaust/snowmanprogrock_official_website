@@ -18,6 +18,13 @@ const seoByLang: Record<string, { title: string; description: string }> = {
   de: { title: "Galerie", description: "Foto- und Videogalerie von Snowman. Konzertmomente, Hinter den Kulissen und Progressive-Rock-Musikvideos." },
 };
 
+function thumbUrl(url: string, width: number): string {
+  if (url.startsWith("/objects/")) {
+    return `${url}?w=${width}`;
+  }
+  return url;
+}
+
 function getCaption(item: Gallery, language: string): string {
   const captionMap: Record<string, string | null | undefined> = {
     pt: item.caption,
@@ -94,7 +101,7 @@ export default function GalleryPage({ language }: GalleryProps) {
                     data-testid={`img-photo-${photo.id}`}
                   >
                     <img
-                      src={photo.url}
+                      src={thumbUrl(photo.url, 800)}
                       alt={getCaption(photo, language)}
                       loading="lazy"
                       className="w-full h-auto object-cover"
@@ -129,7 +136,7 @@ export default function GalleryPage({ language }: GalleryProps) {
                     data-testid={`video-${video.id}`}
                   >
                     <img
-                      src={video.thumbnail || video.url}
+                      src={thumbUrl(video.thumbnail || video.url, 800)}
                       alt={getCaption(video, language)}
                       loading="lazy"
                       className="w-full h-full object-cover"
@@ -174,7 +181,7 @@ export default function GalleryPage({ language }: GalleryProps) {
               <div className="w-full">
                 {selectedMedia.type === 'photo' ? (
                   <img
-                    src={selectedMedia.url}
+                    src={thumbUrl(selectedMedia.url, 1600)}
                     alt={getCaption(selectedMedia, language)}
                     className="w-full h-auto max-h-[90vh] object-contain"
                   />

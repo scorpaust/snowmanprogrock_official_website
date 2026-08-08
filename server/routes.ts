@@ -58,7 +58,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const objectStorageService = new ObjectStorageService();
     try {
       const objectFile = await objectStorageService.getObjectEntityFile(req.path);
-      objectStorageService.downloadObject(objectFile, res);
+      // Only canonical widths are allowed, to bound CPU usage and cache variants
+      const ALLOWED_WIDTHS = [400, 800, 1600];
+      const wParam = parseInt(String(req.query.w || ""), 10);
+      const resizeWidth = ALLOWED_WIDTHS.includes(wParam) ? wParam : undefined;
+      objectStorageService.downloadObject(objectFile, res, 3600, resizeWidth);
     } catch (error) {
       console.error("Error serving object:", error);
       if (error instanceof ObjectNotFoundError) {

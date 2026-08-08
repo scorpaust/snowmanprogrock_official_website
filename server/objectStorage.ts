@@ -2,6 +2,8 @@
 // Based on javascript_object_storage integration blueprint
 import { Storage, File } from "@google-cloud/storage";
 import { Response } from "express";
+import sharp from "sharp";
+import { pipeline } from "stream/promises";
 import { randomUUID } from "crypto";
 import {
   ObjectAclPolicy,
@@ -89,14 +91,54 @@ export class ObjectStorageService {
     return null;
   }
 
-  async downloadObject(file: File, res: Response, cacheTtlSec: number = 3600) {
+  async downloadObject(
+    file: File,
+    res: Response,
+    cacheTtlSec: number = 3600,
+    resizeWidth?: number,
+  ) {
     try {
       const [metadata] = await file.getMetadata();
       const aclPolicy = await getObjectAclPolicy(file);
       const isPublic = aclPolicy?.visibility === "public";
-      
+
+      const contentType = metadata.contentType || "application/octet-stream";
+      const mimeBase = String(contentType).split(";")[0].trim().toLowerCase();
+      const isResizableImage =
+        /^image\/(jpeg|png|webp|avif|tiff|gif)$/.test(mimeBase);
+
+      // Serve a resized/compressed version for image requests with ?w=
+      if (resizeWidth && isResizableImage) {
+        res.set({
+          "Content-Type": "image/jpeg",
+          "Cache-Control": `${
+            isPublic ? "public" : "private"
+          }, max-age=${Math.max(cacheTtlSec, 86400)}`,
+        });
+
+        const transformer = sharp({ limitInputPixels: 80_000_000 })
+          .rotate() // respect EXIF orientation
+          .resize({ width: resizeWidth, withoutEnlargement: true })
+          .jpeg({ quality: 80, mozjpeg: true });
+
+        const stream = file.createReadStream();
+        try {
+          await pipeline(stream, transformer, res);
+        } catch (err) {
+          console.error("Image resize pipeline error:", err);
+          stream.destroy();
+          transformer.destroy();
+          if (!res.headersSent) {
+            res.status(500).json({ error: "Error processing image" });
+          } else {
+            res.destroy();
+          }
+        }
+        return;
+      }
+
       res.set({
-        "Content-Type": metadata.contentType || "application/octet-stream",
+        "Content-Type": contentType,
         "Content-Length": metadata.size,
         "Cache-Control": `${
           isPublic ? "public" : "private"
