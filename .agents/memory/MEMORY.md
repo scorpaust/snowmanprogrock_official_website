@@ -1,0 +1,1 @@
+- [Image serving & resizing](image-serving.md) — /objects images must use ?w= variants (400/800/1600); files >25MB or video/* redirect to signed GCS URL (deployment proxy 500s on >~32MB responses).

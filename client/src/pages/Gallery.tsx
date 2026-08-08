@@ -135,12 +135,22 @@ export default function GalleryPage({ language }: GalleryProps) {
                     onClick={() => setSelectedMedia(video)}
                     data-testid={`video-${video.id}`}
                   >
-                    <img
-                      src={thumbUrl(video.thumbnail || video.url, 800)}
-                      alt={getCaption(video, language)}
-                      loading="lazy"
-                      className="w-full h-full object-cover"
-                    />
+                    {video.thumbnail ? (
+                      <img
+                        src={thumbUrl(video.thumbnail, 800)}
+                        alt={getCaption(video, language)}
+                        loading="lazy"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <video
+                        src={video.url}
+                        preload="metadata"
+                        muted
+                        playsInline
+                        className="w-full h-full object-cover"
+                      />
+                    )}
                     <div className="absolute inset-0 bg-black/40 flex items-center justify-center group-hover:bg-black/60 transition-colors">
                       <div className="bg-primary/90 rounded-full p-4">
                         <Play className="h-8 w-8 text-white fill-white" />

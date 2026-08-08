@@ -328,6 +328,7 @@ export default function GalleryManagement() {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead>Pré-visualização</TableHead>
                   <TableHead>Tipo</TableHead>
                   <TableHead>URL</TableHead>
                   <TableHead>Legenda (PT)</TableHead>
@@ -338,6 +339,29 @@ export default function GalleryManagement() {
                 {galleryList && galleryList.length > 0 ? (
                   galleryList.map((item) => (
                     <TableRow key={item.id} data-testid={`row-gallery-${item.id}`}>
+                      <TableCell>
+                        <div className="w-16 h-16 rounded-md overflow-hidden bg-muted flex items-center justify-center">
+                          {item.type === "photo" ? (
+                            <img
+                              src={item.url.startsWith("/objects/") ? `${item.url}?w=400` : item.url}
+                              alt={item.caption || "Foto"}
+                              loading="lazy"
+                              className="w-full h-full object-cover"
+                            />
+                          ) : item.thumbnail ? (
+                            <img
+                              src={item.thumbnail.startsWith("/objects/") ? `${item.thumbnail}?w=400` : item.thumbnail}
+                              alt={item.caption || "Vídeo"}
+                              loading="lazy"
+                              className="w-full h-full object-cover"
+                            />
+                          ) : item.url.startsWith("/objects/") ? (
+                            <video src={item.url} preload="metadata" muted playsInline className="w-full h-full object-cover" />
+                          ) : (
+                            <Video className="h-6 w-6 text-muted-foreground" />
+                          )}
+                        </div>
+                      </TableCell>
                       <TableCell>
                         <Badge variant={item.type === "photo" ? "default" : "secondary"}>
                           {item.type === "photo" ? (
@@ -373,7 +397,7 @@ export default function GalleryManagement() {
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={4} className="text-center text-muted-foreground">
+                    <TableCell colSpan={5} className="text-center text-muted-foreground">
                       Nenhum item encontrado
                     </TableCell>
                   </TableRow>

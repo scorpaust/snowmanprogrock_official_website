@@ -137,6 +137,26 @@ export class ObjectStorageService {
         return;
       }
 
+      // Large files (e.g. videos) exceed the deployment proxy's response size
+      // limit and fail with 500 in production. Redirect the browser to a
+      // short-lived signed URL so it downloads directly from object storage.
+      const sizeBytes = Number(metadata.size) || 0;
+      const LARGE_FILE_THRESHOLD = 25 * 1024 * 1024; // 25 MB
+      if (
+        !resizeWidth &&
+        (sizeBytes > LARGE_FILE_THRESHOLD || mimeBase.startsWith("video/"))
+      ) {
+        const signedUrl = await signObjectURL({
+          bucketName: file.bucket.name,
+          objectName: file.name,
+          method: "GET",
+          ttlSec: 3600,
+        });
+        res.set("Cache-Control", "private, max-age=0, no-cache");
+        res.redirect(302, signedUrl);
+        return;
+      }
+
       res.set({
         "Content-Type": contentType,
         "Content-Length": metadata.size,
