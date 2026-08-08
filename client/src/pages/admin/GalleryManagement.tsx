@@ -434,7 +434,7 @@ export default function GalleryManagement() {
                         </FormControl>
                         <ObjectUploader
                           maxNumberOfFiles={1}
-                          maxFileSize={52428800}
+                          maxFileSize={524288000}
                           onGetUploadParameters={handleGetUploadURL}
                           onComplete={handleMainUploadComplete}
                           variant="outline"
@@ -444,7 +444,7 @@ export default function GalleryManagement() {
                         </ObjectUploader>
                       </div>
                       <FormDescription>
-                        Cole um URL (YouTube, Vimeo, etc.) ou faça upload do ficheiro do PC
+                        Cole um URL (YouTube, Vimeo, etc.) ou faça upload do ficheiro do PC (máx. 500 MB)
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
